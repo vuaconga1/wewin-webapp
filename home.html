@@ -864,10 +864,32 @@
     function warmUnitGameCache(unitSlug) {
       if (!unitSlug) return;
 
+      const localKey = 'WW_CACHE_ALL_' + unitSlug;
+      // Tránh fetch nếu đang fetch hoặc đã fetch
+      if (gameDataCache['listenchoose'][unitSlug]) return;
+
+      try {
+        const localData = localStorage.getItem(localKey);
+        if (localData) {
+          const parsed = JSON.parse(localData);
+          gameDataCache['listenchoose'][unitSlug] = parsed.listenchoose || [];
+          gameDataCache['lookchoose'][unitSlug] = parsed.lookchoose || [];
+          gameDataCache['pronunciation'][unitSlug] = parsed.pronunciation || [];
+        }
+      } catch(e) {}
+
       const warm = () => {
-        fetchGameDataset('listenchoose', 'getGameData', unitSlug);
-        fetchGameDataset('lookchoose', 'getGameLookChooseData', unitSlug);
-        fetchGameDataset('pronunciation', 'getPronunciationData', unitSlug);
+        fetch(SCRIPT_URL + '?api=game.all&slug=' + encodeURIComponent(unitSlug))
+          .then(res => res.json())
+          .then(response => {
+            if (response && response.success && response.data) {
+               gameDataCache['listenchoose'][unitSlug] = response.data.listenchoose || [];
+               gameDataCache['lookchoose'][unitSlug] = response.data.lookchoose || [];
+               gameDataCache['pronunciation'][unitSlug] = response.data.pronunciation || [];
+               try { localStorage.setItem(localKey, JSON.stringify(response.data)); } catch(e){}
+            }
+          })
+          .catch(console.error);
       };
 
       if ('requestIdleCallback' in window) {
