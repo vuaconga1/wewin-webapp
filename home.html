@@ -823,10 +823,30 @@
         return pendingBucket[slug];
       }
 
+      const localKey = 'WW_CACHE_' + gameKey + '_' + slug;
+      
+      try {
+        const localStr = localStorage.getItem(localKey);
+        if (localStr) {
+          const parsed = JSON.parse(localStr);
+          cacheBucket[slug] = parsed.data || [];
+          
+          // Fetch ngầm cập nhật dữ liệu mới nếu có
+          runServerMethod(methodName, slug).then(data => {
+            const normalized = Array.isArray(data) ? data : [];
+            cacheBucket[slug] = normalized;
+            try { localStorage.setItem(localKey, JSON.stringify({t: Date.now(), data: normalized})); } catch(e) {}
+          }).catch(() => {});
+
+          return Promise.resolve(parsed.data || []);
+        }
+      } catch (e) {}
+
       const request = runServerMethod(methodName, slug)
         .then(data => {
           const normalized = Array.isArray(data) ? data : [];
           cacheBucket[slug] = normalized;
+          try { localStorage.setItem(localKey, JSON.stringify({t: Date.now(), data: normalized})); } catch(e) {}
           return normalized;
         })
         .catch(error => {
@@ -2404,11 +2424,32 @@ document.addEventListener('DOMContentLoaded', function() {
   syncResponsiveSidebarState();
   window.addEventListener('resize', syncResponsiveSidebarState);
 
-  // Fetch bootstrap configuration (backgrounds & units)
+  // Thử nạp giao diện ngay lập tức từ Cache (tốc độ ánh sáng)
+  try {
+    const localBoot = localStorage.getItem('WW_BOOTSTRAP');
+    if (localBoot) {
+       const cachedRes = JSON.parse(localBoot);
+       if (cachedRes.gameBgImageUrl) {
+         GAME_BG_IMAGE_URL = cachedRes.gameBgImageUrl;
+         applyGameBackground(GAME_BG_IMAGE_URL);
+       }
+       if (cachedRes.gameMenuBackgroundMap) {
+         GAME_MENU_BG_MAP = cachedRes.gameMenuBackgroundMap;
+         applyMenuBackgrounds();
+       }
+       if (cachedRes.units) {
+         loadSidebarWithUnits(cachedRes.units || []);
+       }
+    }
+  } catch(e) {}
+
+  // Vẫn gọi server ngầm để lấy data mới nhất (cập nhật cache)
   fetch(SCRIPT_URL + '?api=app.bootstrap')
     .then(res => res.json())
     .then(function(response) {
       if (response && response.success) {
+        try { localStorage.setItem('WW_BOOTSTRAP', JSON.stringify(response)); } catch(e) {}
+        
         // Apply dynamic background image configuration
         if (response.gameBgImageUrl) {
           GAME_BG_IMAGE_URL = response.gameBgImageUrl;
