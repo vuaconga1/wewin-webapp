@@ -736,10 +736,23 @@
 
     document.addEventListener("DOMContentLoaded", async () => {
       try {
+        const localBoot = localStorage.getItem('WW_BOOTSTRAP');
+        if (localBoot) {
+            const cachedRes = JSON.parse(localBoot);
+            if (cachedRes.gameBgImageUrl) {
+                document.documentElement.style.setProperty('--game-bg-image', `url("${cachedRes.gameBgImageUrl}")`);
+            }
+        }
+      } catch(e) {}
+
+      try {
         const response = await fetch(`${SCRIPT_URL}?api=app.bootstrap`);
         const data = await response.json();
-        if (data && data.gameBgImageUrl) {
-          document.documentElement.style.setProperty('--game-bg-image', `url("${data.gameBgImageUrl}")`);
+        if (data && data.success) {
+          try { localStorage.setItem('WW_BOOTSTRAP', JSON.stringify(data)); } catch(e) {}
+          if (data.gameBgImageUrl) {
+            document.documentElement.style.setProperty('--game-bg-image', `url("${data.gameBgImageUrl}")`);
+          }
         }
       } catch (error) {
         console.error('Error fetching bootstrap data:', error);
