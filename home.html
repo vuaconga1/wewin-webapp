@@ -2417,6 +2417,9 @@ function logout() {
   window.top.location.href = 'index.html';
 }
 
+// [1] Khởi chạy fetch ngay lập tức khi browser bắt đầu đọc JS (Không chờ tới lúc DOM load xong)
+const bootstrapPromise = fetch(SCRIPT_URL + '?api=app.bootstrap').then(res => res.json()).catch(() => null);
+
 document.addEventListener('DOMContentLoaded', function() {
   applyGameBackground(GAME_BG_IMAGE_URL);
   applyMenuBackgrounds();
@@ -2424,7 +2427,8 @@ document.addEventListener('DOMContentLoaded', function() {
   syncResponsiveSidebarState();
   window.addEventListener('resize', syncResponsiveSidebarState);
 
-  // Thử nạp giao diện ngay lập tức từ Cache (tốc độ ánh sáng)
+  // Thử nạp giao diện từ Cache nếu có
+  let hasCache = false;
   try {
     const localBoot = localStorage.getItem('WW_BOOTSTRAP');
     if (localBoot) {
@@ -2439,19 +2443,17 @@ document.addEventListener('DOMContentLoaded', function() {
        }
        if (cachedRes.units) {
          loadSidebarWithUnits(cachedRes.units || []);
+         hasCache = true;
        }
     }
   } catch(e) {}
 
-  // Vẫn gọi server ngầm để lấy data mới nhất (cập nhật cache)
-  fetch(SCRIPT_URL + '?api=app.bootstrap')
-    .then(res => res.json())
-    .then(function(response) {
+  // Lấy dữ liệu từ request đã bắn từ sớm
+  bootstrapPromise.then(function(response) {
       if (response && response.success) {
         try { localStorage.setItem('WW_BOOTSTRAP', JSON.stringify(response)); } catch(e) {}
         
-        // Apply dynamic background image configuration
-        if (response.gameBgImageUrl) {
+        if (response.gameBgImageUrl && GAME_BG_IMAGE_URL !== response.gameBgImageUrl) {
           GAME_BG_IMAGE_URL = response.gameBgImageUrl;
           applyGameBackground(GAME_BG_IMAGE_URL);
         }
@@ -2459,11 +2461,20 @@ document.addEventListener('DOMContentLoaded', function() {
           GAME_MENU_BG_MAP = response.gameMenuBackgroundMap;
           applyMenuBackgrounds();
         }
-        // Load sidebar units
-        loadSidebarWithUnits(response.units || []);
+        
+        // Nếu lần đầu (chưa có cache), chạy load lại sidebar từ server
+        if (!hasCache) {
+           loadSidebarWithUnits(response.units || []);
+        } else {
+           // Nếu đã có cache nhưng số lượng Unit bị thay đổi (giáo viên thêm bài), vẽ lại để cập nhật
+           const currentUnitsLength = document.querySelectorAll('#sidebar-unit-list li').length;
+           const newUnitsLength = (response.units || []).length;
+           if (currentUnitsLength !== newUnitsLength) {
+             loadSidebarWithUnits(response.units || []);
+           }
+        }
       }
-    })
-    .catch(console.error);
+  });
 });
   </script>
 
