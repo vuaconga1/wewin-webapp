@@ -1,0 +1,845 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>Đăng nhập - WeWIN</title>
+  <meta name="description" content="Đăng nhập vào WeWIN - Nền tảng học tiếng Anh qua trò chơi tương tác dành cho trẻ em.">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --primary: #1057C1;
+      --primary-dark: #0E4BA9;
+      --primary-light: #3b82f6;
+      --accent: #f59e0b;
+      --accent2: #10b981;
+      --text-dark: #1e3a8a;
+      --text-muted: #64748b;
+      --bg-page: #eff6ff; /* blue-50 */
+      --card-bg: #ffffff;
+      --radius-xl: 36px;
+      --radius-lg: 24px;
+      --radius-md: 16px;
+      --shadow-card: 0 25px 50px -12px rgba(16, 87, 193, 0.25);
+      --shadow-btn: 0 10px 25px -5px rgba(245, 158, 11, 0.5);
+      --game-bg-image: linear-gradient(180deg, rgba(229, 255, 214, 0.98), rgba(200, 245, 179, 0.96));
+    }
+
+    html {
+      height: 100%;
+    }
+
+    body {
+      font-family: 'Nunito', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      position: relative;
+      overflow-x: hidden;
+      isolation: isolate;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background-image: var(--game-bg-image);
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      pointer-events: none;
+    }
+
+    /* Floating shapes */
+    .shape {
+      position: fixed;
+      pointer-events: none;
+      z-index: 0;
+      animation: floatShape 6s ease-in-out infinite alternate;
+      filter: drop-shadow(0 10px 15px rgba(0,0,0,0.1));
+    }
+
+    .shape-1 { font-size: clamp(40px, 6vw, 80px); top: 10%; right: 10%; animation-delay: 0s; }
+    .shape-2 { font-size: clamp(30px, 5vw, 60px); bottom: 15%; left: 8%; animation-delay: 2s; }
+    .shape-3 { font-size: clamp(35px, 5.5vw, 70px); top: 50%; right: 5%; animation-delay: 4s; }
+    .shape-4 { font-size: clamp(30px, 5vw, 60px); top: 15%; left: 15%; animation-delay: 1s; }
+    
+    /* Clouds bg decoration */
+    .cloud {
+      position: fixed;
+      background: white;
+      border-radius: 100px;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.05);
+      z-index: 0;
+      animation: drift 40s linear infinite;
+      opacity: 0.8;
+      pointer-events: none;
+    }
+    .cloud::before, .cloud::after {
+      content: '';
+      position: absolute;
+      background: white;
+      border-radius: 50%;
+    }
+    .cloud-1 {
+      width: 120px; height: 40px; top: 20%; left: -150px;
+      animation-duration: 45s;
+    }
+    .cloud-1::before { width: 50px; height: 50px; top: -25px; left: 15px; }
+    .cloud-1::after { width: 70px; height: 70px; top: -35px; right: 15px; }
+    
+    .cloud-2 {
+      width: 180px; height: 60px; top: 60%; right: -200px;
+      animation-duration: 35s; animation-direction: reverse;
+      transform: scale(0.8);
+    }
+    .cloud-2::before { width: 70px; height: 70px; top: -35px; left: 20px; }
+    .cloud-2::after { width: 100px; height: 100px; top: -50px; right: 20px; }
+
+    @keyframes floatShape {
+      0%   { transform: translateY(0px) rotate(0deg) scale(1); }
+      100% { transform: translateY(-30px) rotate(15deg) scale(1.1); }
+    }
+    @keyframes drift {
+      from { transform: translateX(0vw); }
+      to { transform: translateX(120vw); }
+    }
+
+    /* Main login wrapper */
+    .login-wrapper {
+      position: relative;
+      z-index: 10;
+      width: 100%;
+      max-width: 1280px;
+      display: flex;
+      background: var(--card-bg);
+      border-radius: var(--radius-xl);
+      box-shadow: var(--shadow-card);
+      overflow: hidden;
+      min-height: 680px;
+      border: 8px solid rgba(255, 255, 255, 0.8);
+    }
+
+    /* Left panel */
+    .left-panel {
+      display: none;
+      flex: 0 0 50%;
+      background: linear-gradient(145deg, #1057C1 0%, #0E4BA9 50%, #3b82f6 100%);
+      padding: 64px 50px;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .left-panel::before {
+      content: '';
+      position: absolute;
+      top: -100px;
+      right: -100px;
+      width: 350px;
+      height: 350px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 50%;
+    }
+
+    .left-panel::after {
+      content: '';
+      position: absolute;
+      bottom: -80px;
+      left: -80px;
+      width: 250px;
+      height: 250px;
+      background: rgba(251, 191, 36, 0.15);
+      border-radius: 50%;
+    }
+
+    .left-panel-inner {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .left-logo {
+      width: 80%;
+      max-width: 100%;
+      height: auto;
+      display: block;
+      object-fit: contain;
+      filter: brightness(0) invert(1);
+      margin: 0 auto 48px;
+    }
+
+    .left-title {
+      font-size: clamp(32px, 4vw, 48px);
+      font-weight: 900;
+      color: #ffffff;
+      line-height: 1.25;
+      margin-bottom: 16px;
+      letter-spacing: -0.5px;
+      text-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .left-subtitle {
+      font-size: clamp(16px, 1.8vw, 20px);
+      color: rgba(255,255,255,0.85);
+      line-height: 1.6;
+      margin-bottom: 40px;
+    }
+
+    .feature-list {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .feature-item {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      color: #ffffff;
+      font-size: 18px;
+      font-weight: 700;
+    }
+
+    .feature-icon {
+      width: 56px;
+      height: 56px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      flex-shrink: 0;
+      border: 2px solid rgba(255,255,255,0.3);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    .feature-item:hover .feature-icon {
+      transform: scale(1.15) rotate(5deg);
+      background: rgba(255,255,255,0.3);
+    }
+
+    .left-footer-brand {
+      position: relative;
+      z-index: 2;
+      font-size: 14px;
+      color: rgba(255,255,255,0.6);
+      font-weight: 700;
+    }
+
+    /* Right panel */
+    .right-panel {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: clamp(40px, 6vw, 70px) clamp(30px, 6vw, 60px);
+    }
+
+    .right-panel-inner {
+      width: 100%;
+      max-width: 480px; /* Made form section wider */
+    }
+
+    /* Logo on mobile */
+    .mobile-logo-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 32px;
+    }
+
+    .mobile-logo {
+      height: 72px;
+      width: auto;
+      max-width: 220px;
+      object-fit: contain;
+    }
+
+    /* Form Header */
+    .form-header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .form-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: #fef08a; /* yellow-200 */
+      color: #b45309; /* amber-700 */
+      font-size: 15px;
+      font-weight: 900;
+      padding: 10px 20px;
+      border-radius: 999px;
+      margin-bottom: 20px;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      box-shadow: 0 4px 10px rgba(253, 224, 71, 0.4);
+    }
+
+    .form-title {
+      font-size: clamp(32px, 4.5vw, 44px);
+      font-weight: 900;
+      color: var(--primary);
+      line-height: 1.2;
+      margin-bottom: 12px;
+      text-shadow: 2px 2px 0px rgba(16, 87, 193, 0.1);
+    }
+
+    .form-subtitle {
+      font-size: 18px;
+      color: var(--text-muted);
+      font-weight: 700;
+    }
+
+    /* Form fields */
+    .field-group {
+      display: flex;
+      flex-direction: column;
+      gap: 26px;
+      margin-bottom: 36px;
+    }
+
+    .field-label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 18px;
+      font-weight: 800;
+      color: var(--text-dark);
+      margin-bottom: 12px;
+    }
+    
+    .field-label-icon {
+      font-size: 22px;
+    }
+
+    .field-wrap {
+      position: relative;
+    }
+
+    .field-input {
+      width: 100%;
+      padding: 20px 22px;
+      border: 3px solid #e2e8f0;
+      border-radius: var(--radius-md);
+      font-size: 18px;
+      font-family: 'Nunito', sans-serif;
+      font-weight: 700;
+      color: var(--text-dark);
+      background: #f8fafc;
+      transition: all 0.2s;
+      outline: none;
+    }
+
+    .field-input::placeholder {
+      color: #cbd5e1;
+      font-weight: 600;
+    }
+
+    .field-input:focus {
+      border-color: var(--primary-light);
+      background: #ffffff;
+      box-shadow: 0 0 0 5px rgba(59, 130, 246, 0.15);
+      transform: translateY(-2px);
+    }
+
+    .field-input:hover:not(:focus) {
+      border-color: #cbd5e1;
+      background: #f1f5f9;
+    }
+
+    /* Toggle password */
+    .btn-toggle-pass {
+      position: absolute;
+      right: 20px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 24px;
+      padding: 6px;
+      color: #94a3b8;
+      transition: color 0.2s, transform 0.2s;
+      display: flex;
+      align-items: center;
+      z-index: 1;
+    }
+
+    .btn-toggle-pass:hover {
+      color: var(--primary);
+      transform: translateY(-50%) scale(1.1);
+    }
+
+    /* Error message */
+    .error-msg {
+      display: none;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 20px;
+      background: #fef2f2;
+      border: 3px solid #fca5a5;
+      color: #dc2626;
+      font-size: 16px;
+      font-weight: 800;
+      border-radius: var(--radius-md);
+      margin-bottom: 24px;
+      animation: shake 0.4s ease-in-out;
+    }
+
+    .error-msg.visible {
+      display: flex;
+    }
+
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      25% { transform: translateX(-6px); }
+      75% { transform: translateX(6px); }
+    }
+
+    /* Login button */
+    .btn-login {
+      width: 100%;
+      padding: 20px;
+      border: 4px solid #d97706; /* amber-600 */
+      border-radius: 999px; /* Pill shape for playful look */
+      font-family: 'Nunito', sans-serif;
+      font-size: 24px;
+      font-weight: 900;
+      color: #ffffff;
+      background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); /* amber gradient */
+      box-shadow: 0 8px 0 #d97706, 0 15px 25px rgba(245, 158, 11, 0.4);
+      cursor: pointer;
+      transition: all 0.15s cubic-bezier(0.34, 1.56, 0.64, 1);
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-top: 10px;
+    }
+
+    .btn-login:hover {
+      transform: translateY(2px);
+      box-shadow: 0 6px 0 #d97706, 0 10px 20px rgba(245, 158, 11, 0.4);
+      background: linear-gradient(135deg, #fcd34d 0%, #fbbf24 100%);
+    }
+
+    .btn-login:active {
+      transform: translateY(8px);
+      box-shadow: 0 0 0 #d97706, 0 0px 0px rgba(245, 158, 11, 0.4);
+    }
+
+    .btn-login:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+      border-color: transparent;
+      background: #cbd5e1;
+      color: #64748b;
+    }
+
+    .btn-inner {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+    }
+
+    /* Spinner */
+    .spinner {
+      display: none;
+      width: 26px;
+      height: 26px;
+      border: 4px solid rgba(255,255,255,0.4);
+      border-top-color: #ffffff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    .spinner.visible {
+      display: block;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    /* Footer */
+    .form-footer {
+      margin-top: 36px;
+      text-align: center;
+      font-size: 16px;
+      color: #94a3b8;
+      font-weight: 700;
+    }
+
+    .form-footer a {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 800;
+    }
+
+    .form-footer a:hover {
+      text-decoration: underline;
+      color: var(--primary-light);
+    }
+
+    /* Divider dots */
+    .dots-divider {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      justify-content: center;
+      margin: 32px 0;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      background: #cbd5e1;
+      border-radius: 50%;
+    }
+
+    .dot.active {
+      background: var(--accent);
+      width: 28px;
+      border-radius: 5px;
+    }
+
+    /* =====================
+       RESPONSIVE BREAKPOINTS
+    ======================== */
+
+    /* Tablets & up: show left panel */
+    @media (min-width: 860px) {
+      .left-panel {
+        display: flex;
+      }
+
+      .mobile-logo-wrap {
+        display: none;
+      }
+
+      .right-panel {
+        padding: clamp(40px, 5vw, 70px) clamp(30px, 5vw, 60px);
+      }
+    }
+
+    /* Large screens */
+    @media (min-width: 1280px) {
+      .login-wrapper {
+        min-height: 760px;
+      }
+    }
+
+    /* Small phones */
+    @media (max-width: 400px) {
+      body {
+        padding: 12px;
+      }
+
+      .right-panel {
+        padding: 32px 24px;
+      }
+
+      .form-title {
+        font-size: 26px;
+      }
+
+      .field-input {
+        font-size: 16px;
+        padding: 16px 18px;
+      }
+      
+      .btn-login {
+        font-size: 20px;
+        padding: 16px;
+      }
+    }
+
+  </style>
+</head>
+
+<body>
+
+  <!-- Floating scenery -->
+  <div class="cloud cloud-1" aria-hidden="true"></div>
+  <div class="cloud cloud-2" aria-hidden="true"></div>
+
+  <!-- Decorative floating emojis for kids -->
+  <span class="shape shape-1" aria-hidden="true">⭐</span>
+  <span class="shape shape-2" aria-hidden="true">🚀</span>
+  <span class="shape shape-3" aria-hidden="true">🎈</span>
+  <span class="shape shape-4" aria-hidden="true">✨</span>
+
+  <!-- Main card -->
+  <main class="login-wrapper" role="main">
+
+    <!-- LEFT PANEL (desktop) -->
+    <div class="left-panel" aria-hidden="true">
+      <div class="left-panel-inner">
+        <img
+          src="https://wewin.edu.vn/wp-content/uploads/2023/07/Artboard-1-copy%401x-e1690017564880-1536x374.png"
+          class="left-logo"
+          alt="WeWIN Logo"
+        >
+        <h1 class="left-title">Học Vui Sáng Tạo</h1>
+        <p class="left-subtitle">Cùng nhí khám phá thế giới tri thức với WeWIN nhé!</p>
+
+        <ul class="feature-list" role="list">
+          <li class="feature-item">
+            <span class="feature-icon">📚</span>
+            <span>Kho bài học siêu thú vị</span>
+          </li>
+          <li class="feature-item">
+            <span class="feature-icon">🎯</span>
+            <span>Chinh phục thử thách mỗi ngày</span>
+          </li>
+          <li class="feature-item">
+            <span class="feature-icon">🎮</span>
+            <span>Vừa học vừa chơi cực đã</span>
+          </li>
+          <li class="feature-item">
+            <span class="feature-icon">🏆</span>
+            <span>Rinh quà tặng siêu to</span>
+          </li>
+        </ul>
+      </div>
+
+      <p class="left-footer-brand">© 2025 WeWIN Education • Cùng Bé Lớn Khôn</p>
+    </div>
+
+    <!-- RIGHT PANEL (form) -->
+    <div class="right-panel">
+      <div class="right-panel-inner">
+
+        <!-- Mobile logo -->
+        <div class="mobile-logo-wrap">
+          <img
+            src="https://wewin.edu.vn/wp-content/uploads/2023/07/Artboard-1-copy%401x-e1690017564880-1536x374.png"
+            class="mobile-logo"
+            alt="WeWIN Logo"
+          >
+        </div>
+
+        <!-- Form header -->
+        <div class="form-header">
+          <h2 class="form-title">Đăng nhập</h2>
+          <p class="form-subtitle">Nhập thông tin tài khoản để chơi ngay!</p>
+        </div>
+
+        <!-- Form -->
+        <form id="login-form" onsubmit="handleLoginSubmit(event)" novalidate>
+          <div class="field-group">
+
+            <!-- Email -->
+            <div>
+              <label class="field-label" for="email">
+                <span class="field-label-icon" aria-hidden="true">✉️</span>
+                Email của bé
+              </label>
+              <div class="field-wrap">
+                <input
+                  id="email"
+                  type="email"
+                  placeholder="name@wewin.edu.vn"
+                  class="field-input"
+                  autocomplete="email"
+                  inputmode="email"
+                  required
+                >
+              </div>
+            </div>
+
+            <!-- Password -->
+            <div>
+              <label class="field-label" for="password">
+                <span class="field-label-icon" aria-hidden="true">🔑</span>
+                Mật khẩu
+              </label>
+              <div class="field-wrap">
+                <input
+                  id="password"
+                  type="password"
+                  placeholder="••••••••"
+                  class="field-input"
+                  autocomplete="current-password"
+                  required
+                >
+                <button
+                  type="button"
+                  class="btn-toggle-pass"
+                  onclick="togglePasswordVisibility()"
+                  aria-label="Hiện/Ẩn mật khẩu"
+                  id="toggle-pass-btn"
+                >
+                  👁️
+                </button>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Error -->
+          <div id="error-msg" class="error-msg" role="alert" aria-live="polite">
+            <span style="font-size: 24px;">🫣</span>
+            <span id="error-text"></span>
+          </div>
+
+          <!-- Submit button -->
+          <button type="submit" id="login-btn" class="btn-login">
+            <span class="btn-inner">
+              <span class="spinner" id="login-spinner" aria-hidden="true"></span>
+              <span id="btn-text">VÀO GAME</span>
+            </span>
+          </button>
+        </form>
+
+        <!-- Dots indicator -->
+        <div class="dots-divider" aria-hidden="true">
+          <div class="dot"></div>
+          <div class="dot active"></div>
+          <div class="dot"></div>
+        </div>
+
+      </div>
+    </div>
+
+  </main>
+
+  <div id="app-config" data-game-bg-url="" hidden></div>
+
+  <script>
+    // Link để gọi Backend API từ file code.gs
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyD2G7ROY58fHoKM6aPlZ9V9SqZ4g61Gf6-hS1kj2pf1uBNwRRw3A_x4We3av3ojyK_/exec';
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      try {
+        const response = await fetch(`${SCRIPT_URL}?api=app.bootstrap`);
+        const data = await response.json();
+        if (data && data.gameBgImageUrl) {
+          document.documentElement.style.setProperty('--game-bg-image', `url("${data.gameBgImageUrl}")`);
+        }
+      } catch (error) {
+        console.error('Error fetching bootstrap data:', error);
+      }
+    });
+
+    /** ===========================
+     *  Password visibility toggle
+     * =========================== */
+    function togglePasswordVisibility() {
+      const input = document.getElementById('password');
+      const btn = document.getElementById('toggle-pass-btn');
+      if (input.type === 'password') {
+        input.type = 'text';
+        btn.textContent = '🙈';
+        btn.setAttribute('aria-label', 'Ẩn mật khẩu');
+      } else {
+        input.type = 'password';
+        btn.textContent = '👁️';
+        btn.setAttribute('aria-label', 'Hiện mật khẩu');
+      }
+    }
+
+    /** ===========================
+     *  Show / hide error message
+     * =========================== */
+    function showError(msg) {
+      const container = document.getElementById('error-msg');
+      const text = document.getElementById('error-text');
+      text.textContent = msg;
+      container.classList.add('visible');
+    }
+
+    function hideError() {
+      document.getElementById('error-msg').classList.remove('visible');
+    }
+
+    /** ===========================
+     *  Set loading state on button
+     * =========================== */
+    function setLoading(isLoading) {
+      const btn = document.getElementById('login-btn');
+      const spinner = document.getElementById('login-spinner');
+      const btnText = document.getElementById('btn-text');
+
+      btn.disabled = isLoading;
+      if (isLoading) {
+        spinner.classList.add('visible');
+        btnText.textContent = 'ĐANG VÀO...';
+      } else {
+        spinner.classList.remove('visible');
+        btnText.textContent = 'VÀO GAME! 🚀';
+      }
+    }
+
+    /** ===========================
+     *  Form submit handler
+     * =========================== */
+    function handleLoginSubmit(event) {
+      event.preventDefault();
+      handleLogin();
+    }
+
+    function handleLogin() {
+      const email = document.getElementById('email').value.trim();
+      const pass  = document.getElementById('password').value;
+
+      hideError();
+
+      if (!email || !pass) {
+        showError('Bé nhớ điền đủ email và mật khẩu nhé!');
+        return;
+      }
+
+      setLoading(true);
+
+      const requestUrl = SCRIPT_URL + '?api=auth.login&email=' + encodeURIComponent(email) + '&password=' + encodeURIComponent(pass);
+
+      fetch(requestUrl)
+        .then(res => res.json())
+        .then(function(response) {
+          if (response.success) {
+            window.top.location.href = 'Index.html';
+          } else {
+            showError(response.message || 'Đăng nhập chưa được. Bé thử lại nhé!');
+            setLoading(false);
+          }
+        })
+        .catch(function(error) {
+          showError('Có lỗi xảy ra rồi. Bé thử lại lát nữa nhé!');
+          setLoading(false);
+        });
+    }
+
+    /** ===========================
+     *  Input: hide error on typing
+     * =========================== */
+    document.getElementById('email').addEventListener('input', hideError);
+    document.getElementById('password').addEventListener('input', hideError);
+  </script>
+
+</body>
+</html>

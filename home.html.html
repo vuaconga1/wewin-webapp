@@ -1,0 +1,2411 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="WeWIN - Nền tảng học tiếng Anh qua trò chơi tương tác dành cho trẻ em. Học vui, sáng tạo cùng WeWIN!">
+  <title>WeWIN - Matching Game</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="preconnect" href="https://cdn.tailwindcss.com" crossorigin>
+  <link rel="preconnect" href="https://drive.google.com">
+  <script src="https://cdn.tailwindcss.com" defer></script>
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;600;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --game-bg-image: linear-gradient(180deg, rgba(229, 255, 214, 0.98), rgba(200, 245, 179, 0.96));
+    }
+
+    @keyframes float-up {
+      0% {
+        transform: translateY(0) scale(1) rotate(0deg);
+        opacity: 1;
+        text-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+      }
+      50% {
+        transform: translateY(-50px) scale(1.4) rotate(-3deg);
+        opacity: 0.8;
+      }
+      100% {
+        transform: translateY(-100px) scale(1.6) rotate(3deg);
+        opacity: 0;
+        text-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+      }
+    }
+
+    .animate-float-up {
+      animation: float-up 1.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+    }
+
+    body {
+      font-family: 'Lexend', sans-serif;
+      overflow-x: hidden;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    .sidebar-item:hover {
+      transform: scale(1.02);
+      background-color: rgba(255, 255, 255, 0.5);
+    }
+
+    .game-card {
+      transition: all 0.3s ease;
+    }
+
+    .game-card:hover {
+      border-color: #3b82f6;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    }
+
+    .active-unit {
+      background-color: white !important;
+      box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+      font-weight: 800;
+      color: #1e40af !important;
+      border-color: white !important;
+    }
+
+    /* Hiệu ứng rung khi sai */
+    @keyframes shake {
+
+      0%,
+      100% {
+        transform: translateX(0);
+      }
+
+      25% {
+        transform: translateX(-5px);
+      }
+
+      75% {
+        transform: translateX(5px);
+      }
+    }
+
+    .animate-shake {
+      animation: shake 0.3s ease-in-out;
+    }
+
+    .game-bg-frame {
+      position: relative;
+      isolation: isolate;
+      overflow: hidden;
+    }
+
+    .game-bg-frame::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      background-image: var(--game-bg-image);
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      pointer-events: none;
+    }
+
+    .game-bg-frame > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    .app-shell {
+      min-height: calc(100vh - 5rem);
+    }
+
+    .app-sidebar {
+      width: min(88vw, 20rem);
+      transition: width 0.28s ease, transform 0.28s ease, box-shadow 0.28s ease;
+      will-change: width, transform;
+    }
+
+    .sidebar-brand-copy,
+    .sidebar-toggle-label,
+    .sidebar-footer-text {
+      overflow: hidden;
+      white-space: nowrap;
+      transition: opacity 0.2s ease, max-width 0.2s ease, transform 0.2s ease;
+    }
+
+    .sidebar-unit-label {
+      overflow: hidden;
+      line-clamp: 2;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      transition: opacity 0.2s ease, max-width 0.2s ease, transform 0.2s ease;
+    }
+
+    .sidebar-menu {
+      scrollbar-width: thin;
+      scrollbar-color: rgba(59, 130, 246, 0.45) rgba(255, 255, 255, 0.25);
+    }
+
+    .sidebar-menu::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .sidebar-menu::-webkit-scrollbar-thumb {
+      background: rgba(59, 130, 246, 0.35);
+      border-radius: 9999px;
+    }
+
+    .sidebar-menu::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    @media (min-width: 768px) {
+      .app-sidebar {
+        width: 18rem;
+      }
+
+      .app-sidebar.sidebar-collapsed {
+        width: 5.75rem;
+      }
+
+      .app-sidebar.sidebar-collapsed .sidebar-brand-copy,
+      .app-sidebar.sidebar-collapsed .sidebar-unit-label,
+      .app-sidebar.sidebar-collapsed .sidebar-toggle-label,
+      .app-sidebar.sidebar-collapsed .sidebar-footer-text {
+        opacity: 0;
+        max-width: 0;
+        transform: translateX(-8px);
+        pointer-events: none;
+      }
+
+      .app-sidebar.sidebar-collapsed .sidebar-toggle-icon {
+        transform: rotate(180deg);
+      }
+
+      .app-sidebar.sidebar-collapsed .sidebar-item {
+        justify-content: center;
+      }
+    }
+
+    @media (max-width: 767px) {
+      .app-sidebar {
+        width: min(88vw, 20rem);
+      }
+    }
+
+    .game-success-badge {
+      max-width: min(90%, 36rem);
+      padding: 1rem 2.35rem;
+      border-radius: 9999px;
+      border: 4px solid rgba(255, 255, 255, 0.85);
+      background: linear-gradient(135deg, #38bdf8 0%, #22c55e 56%, #facc15 100%);
+      color: #ffffff;
+      font-weight: 800;
+      font-size: clamp(1.45rem, 2.7vw, 2.45rem);
+      line-height: 1.1;
+      text-align: center;
+      box-shadow: 0 18px 40px -12px rgba(14, 165, 233, 0.48);
+      text-shadow: 0 2px 10px rgba(15, 23, 42, 0.18);
+      animation: gameSuccessFloat 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+      will-change: transform, opacity;
+    }
+
+    @keyframes gameSuccessFloat {
+      0% {
+        opacity: 0;
+        transform: translateY(38px) scale(0.9);
+      }
+
+      70% {
+        opacity: 1;
+        transform: translateY(0) scale(1.03);
+      }
+
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .game-option-tone-1 {
+      background: linear-gradient(135deg, #e0f2fe 0%, #eff6ff 46%, #c7d2fe 100%);
+    }
+
+    .game-option-tone-2 {
+      background: linear-gradient(135deg, #fef3c7 0%, #fff7ed 46%, #fed7aa 100%);
+    }
+
+    .game-option-tone-3 {
+      background: linear-gradient(135deg, #dcfce7 0%, #f0fdf4 46%, #bbf7d0 100%);
+    }
+
+    .game-option-tone-4 {
+      background: linear-gradient(135deg, #fce7f3 0%, #fff1f2 46%, #f9a8d4 100%);
+    }
+
+    /* ============================================ */
+    /*  CATCHING GAME - PREMIUM UI                 */
+    /* ============================================ */
+
+    /* Sky gradient background for game area */
+    .catch-sky-bg {
+      background: linear-gradient(180deg, 
+        #87CEEB 0%, 
+        #B0E0FF 30%, 
+        #D4F1FF 55%,
+        #E8F8FF 70%,
+        #c8e6c9 82%,
+        #a5d6a7 90%,
+        #81c784 100%);
+    }
+
+    .catch-basket-glow {
+      filter: drop-shadow(0 4px 12px rgba(249,115,22,0.25));
+    }
+
+    /* Basket bounce on catch */
+    @keyframes basketBounceIcon {
+      0% { transform: translateY(0) scale(1); }
+      30% { transform: translateY(-6px) scale(1.15); }
+      60% { transform: translateY(2px) scale(0.95); }
+      100% { transform: translateY(0) scale(1); }
+    }
+
+    .catch-basket-icon {
+      display: block;
+      transform-origin: center bottom;
+      will-change: transform;
+    }
+
+    .catch-basket-bounce .catch-basket-icon {
+      animation: basketBounceIcon 0.4s ease-out;
+    }
+
+    /* Score pop animation */
+    @keyframes scorePop {
+      0% { transform: scale(1); }
+      40% { transform: scale(1.3); color: #f59e0b; }
+      100% { transform: scale(1); }
+    }
+
+    .catch-score-pop {
+      animation: scorePop 0.4s ease-out;
+    }
+
+    /* Timer warning pulse removed to improve performance on low-end devices */
+
+    /* Sparkle effect on catch */
+    @keyframes sparkle {
+      0% { transform: scale(0) rotate(0deg); opacity: 1; }
+      50% { transform: scale(1.2) rotate(180deg); opacity: 0.8; }
+      100% { transform: scale(0) rotate(360deg); opacity: 0; }
+    }
+
+    .catch-sparkle {
+      position: absolute;
+      pointer-events: none;
+      z-index: 60;
+      animation: sparkle 0.6s ease-out forwards;
+    }
+
+    .catch-falling-item {
+      background: transparent;
+      border: none;
+      box-shadow: none;
+      padding: 0;
+      will-change: transform;
+      contain: layout paint;
+      overflow: visible;
+    }
+
+    .catch-falling-item img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.1));
+    }
+
+    /* Stats card glass effect */
+    .catch-stat-card {
+      background: rgba(255,255,255,0.82);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border: 2px solid rgba(255,255,255,0.6);
+      border-radius: 20px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.8);
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .catch-stat-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.8);
+    }
+
+    /* Ground grass effect */
+    .catch-ground {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 12%;
+      background: linear-gradient(180deg, #66bb6a 0%, #4caf50 40%, #388e3c 100%);
+      z-index: 2;
+      border-top: 3px solid #43a047;
+    }
+
+    .catch-ground::before {
+      content: '';
+      position: absolute;
+      top: -8px;
+      left: 0;
+      right: 0;
+      height: 16px;
+      background: repeating-linear-gradient(90deg, 
+        transparent 0px, transparent 12px, 
+        #66bb6a 12px, #66bb6a 14px);
+      opacity: 0.5;
+    }
+
+    /* Sun decoration */
+    @keyframes sunPulse {
+      0%, 100% { box-shadow: 0 0 40px 15px rgba(255,235,59,0.3), 0 0 80px 30px rgba(255,235,59,0.1); }
+      50% { box-shadow: 0 0 50px 20px rgba(255,235,59,0.4), 0 0 100px 40px rgba(255,235,59,0.15); }
+    }
+
+    .catch-sun {
+      position: absolute;
+      top: 6%;
+      right: 8%;
+      width: 50px;
+      height: 50px;
+      background: radial-gradient(circle, #fff176 30%, #ffee58 60%, #fdd835 100%);
+      border-radius: 50%;
+      z-index: 1;
+      animation: sunPulse 3s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    /* Start overlay improved */
+    .catch-start-btn {
+      background: linear-gradient(135deg, #ff9800 0%, #f57c00 50%, #ef6c00 100%);
+      color: white;
+      font-weight: 900;
+      font-size: clamp(1.4rem, 3.5vw, 2.2rem);
+      padding: 1rem 2.5rem;
+      border-radius: 9999px;
+      border: 4px solid rgba(255,255,255,0.7);
+      box-shadow: 0 12px 32px rgba(245,124,0,0.45), 0 4px 12px rgba(0,0,0,0.1);
+      outline: 5px solid rgba(255,152,0,0.3);
+      outline-offset: 4px;
+      cursor: pointer;
+      transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    }
+
+    .catch-start-btn:hover {
+      transform: scale(1.08) translateY(-4px);
+      box-shadow: 0 18px 40px rgba(245,124,0,0.5), 0 6px 16px rgba(0,0,0,0.12);
+    }
+
+    .catch-start-btn:active {
+      transform: scale(0.96);
+    }
+
+    @keyframes startBtnPulse {
+      0%, 100% { outline-color: rgba(255,152,0,0.3); }
+      50% { outline-color: rgba(255,152,0,0.6); }
+    }
+
+    .catch-start-btn {
+      animation: startBtnPulse 2s ease-in-out infinite;
+    }
+
+    /* Responsive catch game adjustments */
+    @media (max-width: 480px) {
+      .catch-stat-card { padding: 0.5rem 0.25rem; border-radius: 14px; }
+      .catch-stat-label { font-size: 0.6rem; }
+      .catch-stat-value { font-size: 1.1rem; }
+      .catch-stat-icon { font-size: 1.1rem; }
+      .catch-sun { width: 35px; height: 35px; top: 4%; right: 5%; }
+      .catch-ground { height: 10%; }
+    }
+
+    @media (min-width: 481px) and (max-width: 767px) {
+      .catch-stat-card { padding: 0.65rem 0.5rem; }
+      .catch-stat-label { font-size: 0.7rem; }
+      .catch-stat-value { font-size: 1.3rem; }
+    }
+
+    @media (min-width: 768px) {
+      .catch-stat-card { padding: 0.85rem 1rem; }
+      .catch-stat-label { font-size: 0.75rem; }
+      .catch-stat-value { font-size: 1.5rem; }
+    }
+
+    @media (min-width: 1024px) {
+      .catch-stat-card { padding: 1rem 1.25rem; border-radius: 24px; }
+      .catch-stat-value { font-size: 1.75rem; }
+    }
+  </style>
+</head>
+
+<body class="bg-pink-50 text-gray-900 flex flex-col min-h-screen">
+
+  <nav
+    class="fixed top-0 left-0 right-0 z-50 h-20 bg-gradient-to-r from-[#1057C1] via-[#0E4BA9] to-[#1057C1] flex items-center px-4 sm:px-6 shadow-lg">
+      <div class="flex items-center justify-between w-full max-w-8xl mx-auto gap-3">
+      <div class="flex items-center gap-3 min-w-0">
+        <button type="button" onclick="toggleSidebarDrawer()" aria-label="Mở menu unit"
+          class="md:hidden inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-white/15 text-white text-2xl font-black shadow-sm transition active:scale-95">
+          ☰
+        </button>
+        <img src="https://wewin.edu.vn/wp-content/uploads/2023/07/Artboard-1-copy%401x-e1690017564880-1536x374.png" alt="Logo" class="h-10 sm:h-12 w-auto object-contain" width="160" height="40" fetchpriority="high">
+      </div>
+      <button type="button" onclick="logout()" class="bg-amber-400 text-blue-900 px-4 md:px-6 py-2 rounded-xl font-bold shadow-md text-sm md:text-base whitespace-nowrap">Đăng xuất</button>
+    </div>
+  </nav>
+
+  <div id="sidebar-backdrop" class="fixed inset-0 z-40 hidden bg-slate-900/35 backdrop-blur-[2px] md:hidden" onclick="closeSidebarDrawer()" aria-hidden="true"></div>
+
+  <div class="flex flex-1 pt-20 min-h-[calc(100vh-5rem)] overflow-x-hidden app-shell">
+    <aside id="unit-sidebar"
+      class="app-sidebar fixed top-0 left-0 z-[60] flex flex-col h-screen bg-pink-50 border-r border-pink-200 p-4 shadow-2xl -translate-x-full transition-transform duration-300 ease-out md:sticky md:top-20 md:z-40 md:h-[calc(100vh-5rem)] md:translate-x-0 md:shadow-none">
+      <div class="flex items-start justify-between gap-3 pb-4 border-b border-pink-200 mb-4">
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="p-2 bg-white rounded-xl shadow-sm shrink-0">📚</div>
+          <div class="sidebar-brand-copy min-w-0">
+            <p class="text-sm font-extrabold text-blue-800">Kids Book</p>
+            <p class="text-[10px] text-blue-600">Chọn Unit để chuyển nhanh</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <button type="button" onclick="closeSidebarDrawer()" aria-label="Đóng menu unit"
+            class="md:hidden inline-flex h-10 w-10 items-center justify-center rounded-xl bg-white text-blue-700 shadow-sm transition active:scale-95">
+            ✕
+          </button>
+        </div>
+      </div>
+
+      <nav id="sidebar-menu" class="sidebar-menu flex-1 space-y-2 overflow-y-auto pr-1">
+        <div class="p-4 text-center text-blue-400 text-xs italic animate-pulse">
+          Đang tải danh sách...
+        </div>
+      </nav>
+
+      <button id="sidebar-toggle-footer" type="button" onclick="toggleSidebarCollapse()"
+        class="mt-4 hidden md:flex w-full items-center justify-center gap-2 py-2 bg-blue-100 text-blue-800 rounded-xl text-xs font-bold shadow-sm transition hover:bg-blue-200 active:scale-95">
+        <span class="sidebar-footer-text">Thu gọn / mở rộng</span>
+      </button>
+    </aside>
+
+    <main class="flex-1 min-w-0 bg-gradient-to-b from-blue-50 to-blue-100 p-4 sm:p-6 md:p-10 game-bg-frame">
+      <div class="flex justify-center mb-8">
+        <nav
+          class="inline-flex items-center gap-2 px-5 py-2 bg-white/80 backdrop-blur rounded-2xl border border-gray-200 shadow-sm text-sm font-semibold">
+          <span id="breadcrumb-unit" class="text-blue-600 uppercase">📖 Loading...</span>
+        </nav>
+      </div>
+
+      <div id="menu-game-view" class="block animate-fade-in">
+        <div class="text-center mb-10">
+          <h1 id="main-title" class="text-4xl md:text-5xl font-extrabold text-blue-900 mb-4 uppercase">UNIT NAME</h1>
+          <p class="text-gray-600 font-medium">Chọn một trò chơi để bắt đầu khám phá!</p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-8 md:gap-10 max-w-6xl mx-auto px-4 lg:px-8">
+          <button onclick="startCatchGame()" data-menu-key="catching" aria-label="Catch Vocabulary" class="menu-game-card game-card group relative bg-white rounded-[24px] sm:rounded-[36px] shadow-xl border-4 border-transparent hover:border-amber-400 transition-all text-center aspect-[21/9] w-full overflow-hidden">
+            <span class="sr-only">Catch Vocabulary</span>
+          </button>
+          <button onclick="startListenChoose()" data-menu-key="listenchoose" aria-label="Listen and Choose" class="menu-game-card game-card group bg-white rounded-[24px] sm:rounded-[36px] shadow-xl border-4 border-transparent hover:border-blue-400 transition-all text-center aspect-[21/9] w-full overflow-hidden">
+            <span class="sr-only">Listen & Choose</span>
+          </button>
+          <button onclick="startLookChoose()" data-menu-key="lookchoose" aria-label="Look and Choose" class="menu-game-card game-card group bg-white rounded-[24px] sm:rounded-[36px] shadow-xl border-4 border-transparent hover:border-purple-400 transition-all text-center aspect-[21/9] w-full overflow-hidden">
+            <span class="sr-only">Look & Choose</span>
+          </button>
+          <button onclick="startPronunciationGame()" data-menu-key="pronunciation" aria-label="Pronunciation" class="menu-game-card game-card group bg-white rounded-[24px] sm:rounded-[36px] shadow-xl border-4 border-transparent hover:border-green-400 transition-all text-center aspect-[21/9] w-full overflow-hidden">
+            <span class="sr-only">Pronunciation</span>
+          </button>
+        </div>  
+      </div>
+      <div id="pronunciation-game-view" class="hidden animate-slide-up w-full">
+        <div class="w-full mx-auto px-2 sm:px-4">
+          <button onclick="backToMenu()" class="mb-4 sm:mb-6 flex items-center gap-2 text-blue-600 font-bold text-lg sm:text-xl hover:underline">
+            ← Quay lại Menu Game
+        </button>
+
+          <section class="bg-white/95 rounded-[36px] sm:rounded-[48px] md:rounded-[60px] border border-blue-100 shadow-2xl overflow-hidden w-full flex flex-col relative game-section">
+            
+            <!-- Stats Header -->
+            <div class="grid grid-cols-3 gap-2 sm:gap-4 p-4 sm:p-6 md:p-8 bg-gradient-to-b from-blue-50/50 to-transparent text-center font-black text-sm sm:text-lg md:text-xl">
+              <div class="bg-white/80 backdrop-blur border border-blue-100 py-3 sm:py-4 rounded-2xl text-blue-700 shadow-sm">⭐ <span id="speech-score" class="text-xl sm:text-2xl drop-shadow-sm">0</span></div>
+              <div class="bg-white/80 backdrop-blur border border-purple-100 py-3 sm:py-4 rounded-2xl text-purple-700 shadow-sm">📚 <span id="speech-progress" class="text-xl sm:text-2xl drop-shadow-sm">1/8</span></div>
+              <div class="bg-white/80 backdrop-blur border border-green-100 py-3 sm:py-4 rounded-2xl text-green-700 shadow-sm">✅ <span id="speech-correct-count" class="text-xl sm:text-2xl drop-shadow-sm">0</span></div>
+            </div>
+
+            <!-- Main Content Area -->
+            <div class="flex-1 p-4 sm:p-6 md:p-8 text-center flex flex-col justify-center items-center relative overflow-hidden min-h-[30vh] sm:min-h-[40vh]">
+              <!-- Animated blobs behind the image -->
+              <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-50 z-0">
+                <div class="absolute w-40 h-40 sm:w-64 sm:h-64 bg-blue-300 rounded-full mix-blend-multiply filter blur-[40px] animate-pulse"></div>
+                <div class="absolute w-40 h-40 sm:w-64 sm:h-64 bg-purple-300 rounded-full mix-blend-multiply filter blur-[40px] animate-pulse" style="animation-delay: 2s; transform: translateX(30px);"></div>
+              </div>
+              
+              <div class="relative z-10 mb-6 sm:mb-8 md:mb-10 group">
+                <div class="absolute inset-0 bg-blue-100/50 rounded-[32px] sm:rounded-[44px] transform rotate-3 scale-105 transition-transform group-hover:rotate-6"></div>
+                <img id="speech-img" src="" class="relative w-48 h-48 sm:w-64 sm:h-64 md:w-72 md:h-72 object-contain bg-white rounded-[32px] sm:rounded-[44px] p-4 sm:p-6 md:p-8 shadow-[0_20px_50px_rgba(59,130,246,0.15)] border-4 border-white transition-transform hover:-translate-y-2">
+              </div>
+              
+              <h2 id="speech-en" class="relative z-10 text-4xl sm:text-5xl md:text-7xl font-black mb-4 sm:mb-6 tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-blue-700 to-indigo-600 drop-shadow-sm uppercase">Teacher</h2>
+              
+              <div class="relative z-10 px-8 sm:px-10 py-3 bg-white/70 backdrop-blur-md rounded-full text-lg md:text-2xl font-bold border-2 border-indigo-50 shadow-inner text-gray-600 inline-block">
+                <span id="speech-vi">Giáo viên</span>
+              </div>
+            </div>
+
+            <!-- Controls Area -->
+            <div class="p-4 sm:p-6 md:p-8 flex flex-wrap justify-center items-center gap-3 sm:gap-6 bg-gradient-to-t from-gray-50 to-white relative z-20">
+              <button onclick="listenSample()" class="flex items-center justify-center gap-2 sm:gap-3 px-6 sm:px-8 py-3 sm:py-4 bg-white text-blue-600 rounded-[24px] text-lg sm:text-xl font-black border-4 border-blue-100 shadow-md hover:bg-blue-50 hover:border-blue-300 transition-all active:scale-95 group">
+                    <span class="text-2xl sm:text-3xl group-hover:scale-110 transition-transform">🔊</span> Nghe
+                </button>
+              <button id="btn-record" onclick="startRecording()" class="flex items-center justify-center gap-3 sm:gap-4 px-8 sm:px-12 py-4 sm:py-5 bg-gradient-to-r from-red-500 to-rose-500 text-white rounded-[28px] sm:rounded-[32px] text-xl sm:text-2xl font-black shadow-[0_15px_30px_rgba(225,29,72,0.3)] hover:-translate-y-1 hover:shadow-xl transition-all animate-pulse active:scale-95 group">
+                    <span class="text-3xl sm:text-4xl group-hover:scale-110 transition-transform">🎤</span> Ghi âm
+                </button>
+              <button onclick="nextSpeechQuestion()" class="flex items-center justify-center gap-2 sm:gap-3 px-6 sm:px-8 py-3 sm:py-4 bg-white text-green-600 rounded-[24px] text-lg sm:text-xl font-black border-4 border-green-100 shadow-md hover:bg-green-50 hover:border-green-300 transition-all active:scale-95 group">
+                    Tới ➜
+                </button>
+            </div>
+
+            <!-- Microphone Permission -->
+            <div id="speech-mic-panel" class="mx-4 sm:mx-6 md:mx-8 mb-4 sm:mb-6 rounded-[28px] border-2 border-amber-200 bg-amber-50/95 px-4 py-4 sm:px-6 sm:py-5 shadow-lg hidden">
+              <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div class="text-left">
+                  <p id="speech-mic-title" class="text-amber-900 font-black text-lg sm:text-xl">Cần quyền micro để chơi game phát âm</p>
+                  <p id="speech-mic-detail" class="text-amber-800 text-sm sm:text-base font-semibold">Bấm Cấp quyền micro để trình duyệt cho phép dùng micro. Sau đó đọc to để kiểm tra xem máy có nghe được không.</p>
+                </div>
+                <button id="btn-enable-mic" onclick="requestPronunciationMicrophoneAccess()" class="self-start sm:self-center px-5 py-3 rounded-[20px] bg-amber-500 text-white font-black text-base sm:text-lg shadow-lg hover:bg-amber-600 transition-all active:scale-95">
+                  Cấp quyền micro
+                </button>
+              </div>
+            </div>
+
+            <!-- Feedback Status -->
+            <div id="speech-status" role="status" aria-live="polite" class="px-4 py-5 sm:py-6 bg-gradient-to-r from-blue-100 via-indigo-50 to-blue-100 text-blue-800 text-center font-black text-lg sm:text-xl md:text-2xl border-t border-blue-100 relative z-20 shadow-inner">
+              Lắng nghe thật kỹ và đọc to nhé! 👂
+            </div>
+          </section>
+        </div>
+      </div>
+      <div id="catch-game-view" class="hidden animate-slide-up w-full h-full">
+        <div class="w-full mx-auto px-2 sm:px-4 h-full flex flex-col">
+          <button onclick="backToMenu()" class="mb-3 sm:mb-4 flex items-center gap-2 text-blue-600 font-bold text-sm sm:text-base hover:underline transition-colors hover:text-blue-800 group">
+            <span class="inline-block group-hover:-translate-x-1 transition-transform">←</span> Quay lại Menu Game
+          </button>
+
+          <section class="bg-white/90 backdrop-blur-sm rounded-[20px] sm:rounded-[28px] md:rounded-[36px] border-2 border-orange-100/80 shadow-[0_8px_40px_rgba(249,115,22,0.1),0_2px_8px_rgba(0,0,0,0.05)] p-2.5 sm:p-4 md:p-5 text-center game-section relative flex flex-col overflow-hidden min-h-[calc(100vh-12rem)] sm:min-h-[calc(100vh-14rem)]">
+            
+            <!-- Stats Header - Glassmorphism -->
+            <div id="catch-stats" class="grid grid-cols-2 gap-2 sm:gap-3 md:gap-4 mb-2 sm:mb-3 shrink-0 z-10 w-full">
+              <div class="catch-stat-card flex flex-col items-center justify-center gap-0.5">
+                <span class="catch-stat-icon text-xl sm:text-2xl">⭐</span>
+                <span id="catch-score" class="catch-stat-value font-black text-amber-600 tabular-nums">0</span>
+                <span class="catch-stat-label text-xs font-bold text-amber-800/60 uppercase tracking-wider">Điểm</span>
+              </div>
+              <div id="catch-timer-card" class="catch-stat-card flex flex-col items-center justify-center gap-0.5">
+                <span class="catch-stat-icon text-xl sm:text-2xl">⏱️</span>
+                <div class="flex items-baseline gap-0.5">
+                  <span id="catch-timer" class="catch-stat-value font-black text-sky-600 tabular-nums">60</span>
+                  <span class="text-xs font-bold text-sky-500">s</span>
+                </div>
+                <span class="catch-stat-label text-xs font-bold text-sky-800/60 uppercase tracking-wider">Thời gian</span>
+              </div>
+            </div>
+
+            <!-- Loading State -->
+            <div id="catch-loading" class="flex-1 flex flex-col items-center justify-center gap-4 py-12 sm:py-16">
+              <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full border-4 border-orange-200 border-t-orange-500 animate-spin"></div>
+              <p class="text-orange-500 font-bold text-base sm:text-lg">Đang chuẩn bị màn chơi...</p>
+            </div>
+
+            <!-- Game Area -->
+            <div id="catch-game-area" class="hidden relative flex-1 w-full catch-sky-bg rounded-[14px] sm:rounded-[20px] md:rounded-[24px] border-2 border-sky-200/60 overflow-hidden cursor-crosshair touch-none shadow-inner" style="min-height: max(45vh, 280px);">
+              
+              <!-- Sun -->
+              <div class="catch-sun"></div>
+
+              <!-- Ground / Grass -->
+              <div class="catch-ground"></div>
+
+              <!-- Overlay Start Game -->
+              <div id="catch-start-overlay" class="absolute inset-0 bg-gradient-to-b from-white/60 via-white/40 to-green-50/50 backdrop-blur-[3px] z-[100] flex flex-col items-center justify-center gap-4 sm:gap-6">
+                <div class="text-4xl sm:text-5xl md:text-6xl mb-2 animate-bounce">🧺</div>
+                <button onclick="runCatchGame()" class="catch-start-btn">
+                  <span class="text-2xl sm:text-3xl">▶</span> BẮT ĐẦU
+                </button>
+                <p class="text-sm sm:text-base text-gray-500 font-semibold mt-1">Di chuột / kéo tay để hứng từ vựng!</p>
+              </div>
+
+              <!-- Basket -->
+              <div id="catch-basket" class="absolute bottom-[12%] left-0 w-20 h-20 sm:w-28 sm:h-28 md:w-36 md:h-36 select-none flex items-center justify-center catch-basket-glow" style="touch-action: none; pointer-events: none; z-index: 50;">
+                <span class="catch-basket-icon text-5xl sm:text-7xl md:text-8xl leading-none" style="pointer-events: none;">🧺</span>
+              </div>
+              
+            </div>
+          </section>
+        </div>
+      </div>
+      <div id="game-play-view" class="hidden animate-slide-up">
+        <div class="w-full mx-auto px-2 sm:px-4">
+          <button onclick="backToMenu()" class="mb-4 sm:mb-6 flex items-center gap-2 text-blue-600 font-bold text-sm sm:text-base hover:underline">
+                ← Quay lại Menu Game
+            </button>
+
+          <section class="bg-white/95 rounded-[28px] sm:rounded-[36px] md:rounded-[40px] border border-blue-100 shadow-2xl p-4 sm:p-6 md:p-8 text-center game-section relative">
+            <div id="game-stats" class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-4 sm:mb-6 text-center font-black text-lg sm:text-xl">
+              <div class="bg-blue-50 py-4 rounded-3xl text-blue-700 shadow-sm">⭐ Điểm: <span id="game-score">0</span></div>
+              <div class="bg-purple-50 py-4 rounded-3xl text-purple-700 shadow-sm">📚 Từ: <span id="game-progress">1/1</span></div>
+              <div class="bg-green-50 py-4 rounded-3xl text-green-700 shadow-sm">✅ Đúng: <span id="game-correct-count">0</span></div>
+            </div>
+
+            <div id="game-loading" class="py-16 sm:py-20 text-blue-500 font-bold text-lg sm:text-xl animate-pulse">Đang chuẩn bị câu hỏi...</div>
+
+            <div id="game-content" class="hidden">
+              <h2 class="text-xl sm:text-2xl font-bold text-gray-800 mb-6 sm:mb-8">Nghe và chọn hình đúng</h2>
+
+              <button onclick="playTargetAudio()" class="w-24 h-24 sm:w-32 sm:h-32 bg-blue-500 hover:bg-blue-600 text-white rounded-full shadow-2xl transition-transform active:scale-90 flex items-center justify-center mx-auto mb-8 sm:mb-12">
+                        <span class="text-4xl sm:text-5xl">🔊</span>
+                    </button>
+
+              <div id="options-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 max-w-2xl mx-auto">
+              </div>
+            </div>
+
+            <div id="game-feedback-layer" class="hidden absolute inset-0 z-50 flex items-center justify-center pointer-events-none px-6"></div>
+          </section>
+        </div>
+      </div>
+      <div id="game-summary-view" class="hidden animate-slide-up w-full">
+        <div class="w-full max-w-2xl mx-auto px-4 mt-8 sm:mt-12">
+          <section class="bg-white/95 rounded-[36px] sm:rounded-[48px] border border-yellow-200 shadow-2xl p-6 sm:p-10 text-center relative overflow-hidden">
+            <div class="absolute -top-20 -left-20 w-40 h-40 bg-yellow-300 rounded-full mix-blend-multiply filter blur-2xl opacity-50 animate-pulse"></div>
+            <div class="absolute -bottom-20 -right-20 w-40 h-40 bg-blue-300 rounded-full mix-blend-multiply filter blur-2xl opacity-50 animate-pulse" style="animation-delay: 2s;"></div>
+            
+            <h2 class="text-3xl sm:text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-yellow-500 mb-6 drop-shadow-sm uppercase">Chúc mừng bé!</h2>
+            <p class="text-lg sm:text-xl text-gray-600 font-bold mb-8">Bé đã hoàn thành xuất sắc trò chơi 🏆</p>
+            
+            <div class="bg-yellow-50 border-4 border-yellow-200 rounded-3xl p-6 mb-8 shadow-inner max-w-sm mx-auto">
+               <div class="text-5xl sm:text-7xl font-black text-yellow-500 mb-2 drop-shadow-md" id="summary-score">0</div>
+               <div class="text-sm sm:text-base font-bold text-yellow-700 uppercase tracking-wide">Điểm Khám Phá</div>
+            </div>
+            
+            <div class="flex justify-center gap-4 sm:gap-6 mb-10 text-sm sm:text-lg font-bold">
+              <div class="bg-green-100 text-green-700 px-4 sm:px-6 py-3 rounded-2xl shadow-sm border border-green-200 flex items-center gap-2">
+                <span class="text-xl">✅</span> <span id="summary-correct">0</span> Đúng
+              </div>
+              <div class="bg-blue-100 text-blue-700 px-4 sm:px-6 py-3 rounded-2xl shadow-sm border border-blue-200 flex items-center gap-2">
+                <span class="text-xl">🎯</span> <span id="summary-total">0</span> Câu
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <button onclick="playAgain()" class="py-4 px-6 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-[24px] text-lg sm:text-xl font-black shadow-[0_10px_20px_rgba(59,130,246,0.3)] hover:-translate-y-1 hover:shadow-xl transition-all active:scale-95 flex items-center justify-center gap-2">🔄 Chơi lại nhé</button>
+              <button onclick="backToMenu()" class="py-4 px-6 bg-white text-blue-600 border-4 border-blue-100 rounded-[24px] text-lg sm:text-xl font-black shadow-lg hover:border-blue-300 hover:bg-blue-50 transition-all active:scale-95 flex items-center justify-center gap-2">🎮 Chọn Game Khác</button>
+            </div>
+          </section>
+        </div>
+      </div>
+    </main>
+  </div>
+
+
+  <footer class="bg-gradient-to-br from-[#1057C1] to-[#1a5fb4] text-white p-8">
+    <div class="max-w-7xl mx-auto grid md:grid-cols-3 gap-8 text-center md:text-left">
+      <div>
+        <img src="https://wewin.edu.vn/wp-content/uploads/2023/07/Artboard-1-copy%401x-e1690017564880-1536x374.png" alt="Footer Logo" class="h-8 w-auto bg-white p-1 rounded mb-4 mx-auto md:mx-0 object-contain" width="120" height="32" loading="lazy">
+        <p class="text-xs text-blue-100 uppercase font-bold">WeWIN Education</p>
+        <p class="text-[10px] text-blue-200 mt-2 italic">WEWIN BỨT PHÁ TIẾNG ANH – VƯƠN TẦM THẾ GIỚI 🌏</p>
+      </div>
+      <div class="md:col-span-2 grid sm:grid-cols-2 gap-4">
+        <div class="bg-white/10 p-4 rounded-xl text-xs">
+          <p class="text-amber-300 font-bold">Địa chỉ</p>
+          <p>292B Nơ Trang Long, P.12, Bình Thạnh, TP.HCM</p>
+        </div>
+        <div class="bg-white/10 p-4 rounded-xl text-xs">
+          <p class="text-amber-300 font-bold">Điện thoại</p>
+          <p>0345 969 388</p>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <div id="app-config" data-game-bg-url="" hidden></div>
+  <div id="menu-config" data-game-menu-bg-map="" hidden></div>
+
+  <script>
+    // Link để gọi Backend API từ file code.gs
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyD2G7ROY58fHoKM6aPlZ9V9SqZ4g61Gf6-hS1kj2pf1uBNwRRw3A_x4We3av3ojyK_/exec';
+
+    const configEl = document.getElementById('app-config');
+    let GAME_BG_IMAGE_URL = configEl ? (configEl.dataset.gameBgUrl || '') : '';
+    const menuConfigEl = document.getElementById('menu-config');
+    let GAME_MENU_BG_MAP = menuConfigEl ? JSON.parse(menuConfigEl.dataset.gameMenuBgMap || '{}') : {};
+    const gameDataCache = {
+      listenchoose: Object.create(null),
+      lookchoose: Object.create(null),
+      pronunciation: Object.create(null)
+    };
+    const gameDataPending = {
+      listenchoose: Object.create(null),
+      lookchoose: Object.create(null),
+      pronunciation: Object.create(null)
+    };
+
+    function applyGameBackground(imageUrl) {
+      const value = imageUrl && imageUrl.trim() ? `url("${imageUrl.trim()}")` : 'linear-gradient(180deg, rgba(229, 255, 214, 0.98), rgba(200, 245, 179, 0.96))';
+      document.documentElement.style.setProperty('--game-bg-image', value);
+    }
+
+    function applyMenuBackgrounds() {
+      const fallbackBackgrounds = {
+        catching: 'linear-gradient(135deg, rgba(255,251,235,0.98), rgba(254,243,199,0.98))',
+        listenchoose: 'linear-gradient(135deg, rgba(255,255,255,0.98), rgba(219,234,254,0.98))',
+        lookchoose: 'linear-gradient(135deg, rgba(255,255,255,0.98), rgba(221,214,254,0.98))',
+        pronunciation: 'linear-gradient(135deg, rgba(255,255,255,0.98), rgba(220,252,231,0.98))'
+      };
+
+      document.querySelectorAll('.menu-game-card').forEach(card => {
+        const key = String(card.dataset.menuKey || '').toLowerCase();
+        const matchedImage = GAME_MENU_BG_MAP[key];
+        card.style.backgroundImage = matchedImage ? `url("${matchedImage}")` : fallbackBackgrounds[key] || 'linear-gradient(135deg, rgba(255,255,255,0.98), rgba(226,232,240,0.98))';
+        card.style.backgroundSize = matchedImage ? '100% 100%' : 'cover';
+        card.style.backgroundPosition = 'center';
+        card.style.backgroundRepeat = 'no-repeat';
+        card.style.backgroundColor = 'transparent';
+      });
+    }
+
+    function runServerMethod(methodName, slug) {
+      return new Promise((resolve, reject) => {
+        let apiParam = '';
+        if (methodName === 'getGameData') apiParam = 'game.listenchoose';
+        else if (methodName === 'getGameLookChooseData') apiParam = 'game.lookchoose';
+        else if (methodName === 'getPronunciationData') apiParam = 'game.pronunciation';
+        else apiParam = methodName;
+
+        const url = SCRIPT_URL + '?api=' + apiParam + '&slug=' + encodeURIComponent(slug || '');
+
+        fetch(url)
+          .then(res => res.json())
+          .then(function(resData) {
+              if(resData.success) {
+                  resolve(resData.data || resData.units);
+              } else {
+                  reject(resData.message);
+              }
+          })
+          .catch(err => reject(err));
+      });
+    }
+
+    function fetchGameDataset(gameKey, methodName, slug) {
+      if (!slug) return Promise.resolve([]);
+
+      const cacheBucket = gameDataCache[gameKey];
+      const pendingBucket = gameDataPending[gameKey];
+
+      if (cacheBucket && cacheBucket[slug]) {
+        return Promise.resolve(cacheBucket[slug]);
+      }
+
+      if (pendingBucket && pendingBucket[slug]) {
+        return pendingBucket[slug];
+      }
+
+      const request = runServerMethod(methodName, slug)
+        .then(data => {
+          const normalized = Array.isArray(data) ? data : [];
+          cacheBucket[slug] = normalized;
+          return normalized;
+        })
+        .catch(error => {
+          console.error(`Failed loading ${methodName} for ${slug}`, error);
+          return [];
+        })
+        .finally(() => {
+          delete pendingBucket[slug];
+        });
+
+      pendingBucket[slug] = request;
+      return request;
+    }
+
+    function warmUnitGameCache(unitSlug) {
+      if (!unitSlug) return;
+
+      const warm = () => {
+        fetchGameDataset('listenchoose', 'getGameData', unitSlug);
+        fetchGameDataset('lookchoose', 'getGameLookChooseData', unitSlug);
+        fetchGameDataset('pronunciation', 'getPronunciationData', unitSlug);
+      };
+
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(warm, { timeout: 1200 });
+      } else {
+        setTimeout(warm, 300);
+      }
+    }
+
+    function preloadImage(url) {
+      if (!url) return;
+      const image = new Image();
+      image.decoding = 'async';
+      image.src = url;
+    }
+
+    function preloadAudio(url) {
+      if (!url) return;
+      const normalizedUrl = String(url).trim();
+      if (!normalizedUrl) return;
+      if (normalizedUrl.indexOf('data:') === 0) return;
+
+      const link = document.createElement('link');
+      link.rel = 'preload';
+      link.as = 'audio';
+      link.href = normalizedUrl;
+      document.head.appendChild(link);
+    }
+
+    function preloadImageAsync(url) {
+      return new Promise(resolve => {
+        if (!url) {
+          resolve();
+          return;
+        }
+
+        const image = new Image();
+        let settled = false;
+
+        const finish = () => {
+          if (settled) return;
+          settled = true;
+          resolve();
+        };
+
+        image.decoding = 'async';
+        image.onload = finish;
+        image.onerror = finish;
+        image.src = url;
+
+        if (typeof image.decode === 'function') {
+          image.decode().then(finish).catch(finish);
+        }
+      });
+    }
+
+    function preloadCatchGameAssets(questions) {
+      const items = Array.isArray(questions) ? questions : [];
+      const imageUrls = [...new Set(items
+        .map(question => question && question.image)
+        .filter(Boolean))];
+      const audioUrls = [...new Set(items
+        .map(question => question && question.audio)
+        .filter(Boolean))];
+
+      audioUrls.forEach(preloadAudio);
+
+      if (imageUrls.length === 0) return Promise.resolve();
+
+      return Promise.all(imageUrls.map(preloadImageAsync)).then(() => undefined);
+    }
+
+    function preloadQuestionAssets(question) {
+      if (!question) return;
+
+      const urls = [];
+      if (Array.isArray(question.options)) {
+        urls.push(...question.options);
+      }
+      if (question.image) {
+        urls.push(question.image);
+      }
+
+      [...new Set(urls)].forEach(preloadImage);
+      preloadAudio(question.audio);
+    }
+
+    function scheduleQuestionPreload(question) {
+      if (!question) return;
+
+      const preload = () => preloadQuestionAssets(question);
+      if ('requestIdleCallback' in window) {
+        requestIdleCallback(preload, { timeout: 500 });
+      } else {
+        setTimeout(preload, 0);
+      }
+    }
+
+    function shuffleArrayInPlace(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
+    function cloneGameQuestions(questions) {
+      if (!Array.isArray(questions)) return [];
+
+      return questions.map(question => ({
+        ...question,
+        options: Array.isArray(question.options) ? [...question.options] : question.options
+      }));
+    }
+
+    function prepareGameQuestions(questions, shuffleOptions) {
+      const preparedQuestions = cloneGameQuestions(questions).filter(Boolean);
+      shuffleArrayInPlace(preparedQuestions);
+
+      if (shuffleOptions) {
+        preparedQuestions.forEach(question => {
+          if (Array.isArray(question.options)) {
+            shuffleArrayInPlace(question.options);
+          }
+        });
+      }
+
+      return preparedQuestions;
+    }
+
+    let catchGameInterval;
+    let catchAnimationId;
+    let catchSpawnTimeout;
+    let catchRemainingTime = 60;
+    let catchItems = [];
+    let catchBasketX = 0;
+    let catchLastFrameTime = 0;
+    let catchAreaLeft = 0;
+    let catchAreaWidth = 0;
+    let catchAreaHeight = 0;
+    let catchBasketHalfWidth = 0;
+    let catchBasketTop = 0;
+    let catchBasketBottom = 0;
+    let catchBasketLeft = 0;
+    let catchBasketRight = 0;
+    let catchGroundLimit = 0;
+    let catchPendingPointerX = null;
+    let catchPointerRafId = 0;
+    const CATCH_FRAME_MS = 1000 / 30;
+
+    function startCatchGame() {
+      currentGameType = 'catch';
+      switchView('catch-game-view');
+
+      const loadingEl = document.getElementById('catch-loading');
+      if (loadingEl) loadingEl.innerText = 'Đang tải ảnh...';
+      loadingEl && loadingEl.classList.remove('hidden');
+      document.getElementById('catch-game-area').classList.add('hidden');
+
+      stopCatchGameLoop();
+      resetCatchGameState();
+
+      fetchGameDataset('pronunciation', 'getPronunciationData', currentUnitSlug).then(function(questions) {
+        if (!questions || questions.length === 0) {
+          alert("Unit này chưa có hình ảnh!");
+          backToMenu();
+          return;
+        }
+
+        gameQuestions = questions;
+        preloadCatchGameAssets(questions).then(() => {
+          if (loadingEl) loadingEl.innerText = 'Đang chuẩn bị màn chơi...';
+          initCatchGame();
+        });
+      });
+    }
+
+    function stopCatchGameLoop() {
+      clearTimeout(catchGameInterval);
+      cancelAnimationFrame(catchAnimationId);
+      clearTimeout(catchSpawnTimeout);
+      if (catchPointerRafId) {
+        cancelAnimationFrame(catchPointerRafId);
+        catchPointerRafId = 0;
+      }
+      catchPendingPointerX = null;
+      const area = document.getElementById('catch-game-area');
+      if (area) {
+        area.removeEventListener('pointermove', handleCatchMove);
+      }
+      window.removeEventListener('resize', handleCatchResize);
+      catchLastFrameTime = 0;
+    }
+
+    function refreshCatchGameMetrics() {
+      const area = document.getElementById('catch-game-area');
+      const basket = document.getElementById('catch-basket');
+
+      if (!area || !basket) return;
+
+      const areaRect = area.getBoundingClientRect();
+      catchAreaLeft = areaRect.left;
+      catchAreaWidth = area.clientWidth;
+      catchAreaHeight = area.clientHeight;
+
+      const basketWidth = basket.offsetWidth;
+      const basketHeight = basket.offsetHeight;
+
+      catchBasketHalfWidth = basketWidth / 2;
+      catchGroundLimit = catchAreaHeight * 0.88;
+      catchBasketTop = catchGroundLimit - basketHeight;
+      catchBasketBottom = catchBasketTop + basketHeight;
+
+      catchBasketX = Math.max(
+        catchBasketHalfWidth,
+        Math.min(catchAreaWidth - catchBasketHalfWidth, catchBasketX || catchAreaWidth / 2)
+      );
+      catchBasketLeft = catchBasketX - catchBasketHalfWidth;
+      catchBasketRight = catchBasketX + catchBasketHalfWidth;
+    }
+
+    function handleCatchResize() {
+      refreshCatchGameMetrics();
+      updateBasketPosition();
+    }
+
+    function resetCatchGameState() {
+      currentGameScore = 0;
+      currentGameCorrectCount = 0;
+      catchRemainingTime = 60;
+      catchItems.forEach(item => {
+        if (item.element) item.element.remove();
+      });
+      catchItems = [];
+      document.getElementById('catch-score').innerText = '0';
+      const timerEl = document.getElementById('catch-timer');
+      timerEl.innerText = '60';
+      timerEl.classList.remove('text-red-600', 'text-amber-600');
+      timerEl.classList.add('text-sky-600');
+
+      const overlay = document.getElementById('catch-start-overlay');
+      if (overlay) overlay.classList.remove('hidden');
+    }
+
+    function initCatchGame() {
+      document.getElementById('catch-loading').classList.add('hidden');
+      const area = document.getElementById('catch-game-area');
+      area.classList.remove('hidden');
+
+      // Khôi phục overlay START
+      const overlay = document.getElementById('catch-start-overlay');
+      if (overlay) overlay.classList.remove('hidden');
+
+      // Basket setup
+      catchBasketX = area.clientWidth / 2;
+      refreshCatchGameMetrics();
+      updateBasketPosition();
+
+      area.removeEventListener('pointermove', handleCatchMove);
+      window.removeEventListener('resize', handleCatchResize);
+      window.addEventListener('resize', handleCatchResize);
+
+      // Event listeners
+      area.addEventListener('pointermove', handleCatchMove, {passive: true});
+    }
+
+    function runCatchGame() {
+      const overlay = document.getElementById('catch-start-overlay');
+      if (overlay) overlay.classList.add('hidden');
+
+      // Start Loops
+      catchLastFrameTime = 0;
+      catchAnimationId = requestAnimationFrame(catchGameLoop);
+      catchGameInterval = setTimeout(catchTimerTick, 1000);
+      spawnCatchItem();
+    }
+
+    function handleCatchMove(e) {
+      if (!catchAreaWidth || !catchBasketHalfWidth) refreshCatchGameMetrics();
+      const clientX = typeof e.clientX === 'number'
+        ? e.clientX
+        : (e.touches && e.touches[0] ? e.touches[0].clientX : 0);
+
+      catchPendingPointerX = clientX - catchAreaLeft;
+
+      if (catchPointerRafId) return;
+
+      catchPointerRafId = requestAnimationFrame(() => {
+        catchPointerRafId = 0;
+        if (catchPendingPointerX === null) return;
+        catchBasketX = catchPendingPointerX;
+        catchPendingPointerX = null;
+        updateBasketPosition();
+      });
+    }
+
+    function updateBasketPosition() {
+      const area = document.getElementById('catch-game-area');
+      const basket = document.getElementById('catch-basket');
+
+      if (!area || !basket) return;
+
+      if (!catchBasketHalfWidth || !catchAreaWidth || !catchAreaHeight) {
+        refreshCatchGameMetrics();
+      } else {
+        catchBasketX = Math.max(
+          catchBasketHalfWidth,
+          Math.min(catchAreaWidth - catchBasketHalfWidth, catchBasketX)
+        );
+        catchBasketLeft = catchBasketX - catchBasketHalfWidth;
+        catchBasketRight = catchBasketX + catchBasketHalfWidth;
+      }
+
+      basket.style.left = '0px';
+      basket.style.transform = `translate3d(${catchBasketLeft}px, 0, 0)`;
+    }
+
+    function catchTimerTick() {
+      catchRemainingTime--;
+      const timerEl = document.getElementById('catch-timer');
+      timerEl.innerText = catchRemainingTime;
+
+      // Timer color transitions
+      if (catchRemainingTime <= 10) {
+        timerEl.classList.remove('text-sky-600', 'text-amber-600');
+        timerEl.classList.add('text-red-600');
+      } else if (catchRemainingTime <= 20) {
+        timerEl.classList.remove('text-sky-600');
+        timerEl.classList.add('text-amber-600');
+      }
+
+      if (catchRemainingTime <= 0) {
+        endCatchGame();
+      } else {
+        catchGameInterval = setTimeout(catchTimerTick, 1000);
+      }
+    }
+
+    function endCatchGame() {
+      stopCatchGameLoop();
+      currentGameTotalQuestions = currentGameCorrectCount;
+      showGameSummary();
+    }
+
+    function spawnCatchItem() {
+      if (catchRemainingTime <= 0) return;
+
+      const area = document.getElementById('catch-game-area');
+      const q = gameQuestions[Math.floor(Math.random() * gameQuestions.length)];
+
+      const size = window.innerWidth < 480 ? 60 : window.innerWidth < 768 ? 80 : 110;
+      const areaWidth = catchAreaWidth || (area ? area.clientWidth : window.innerWidth);
+      const x = Math.max(8, Math.min(areaWidth - size - 8, Math.random() * areaWidth));
+
+      const el = document.createElement('div');
+      el.className = 'absolute pointer-events-none catch-falling-item';
+      el.style.width = `${size}px`;
+      el.style.height = `${size}px`;
+      el.style.left = `${x}px`;
+      el.style.top = '0px';
+      el.style.transform = `translate3d(0, ${-size}px, 0)`;
+      el.innerHTML = `<img src="${q.image}" class="w-full h-full object-contain pointer-events-none" loading="eager" decoding="async" fetchpriority="high" style="border-radius:12px;">`;
+
+      area.appendChild(el);
+
+      // Giảm tốc độ rớt xuống một tí cho các bé dễ hứng
+      const baseSpeed = window.innerHeight < 600 ? 1.5 : window.innerHeight < 800 ? 2 : 2.5;
+      catchItems.push({
+        element: el,
+        x: x,
+        y: -size, // Bắt đầu ở tọa độ âm
+        size: size,
+        speed: baseSpeed + Math.random() * 1.5,
+        data: q
+      });
+
+      // Tăng thời gian xuất hiện giữa 2 vật thể thành 1.5 - 3.5 giây
+      const nextSpawnTime = 1500 + Math.random() * 2000;
+      catchSpawnTimeout = setTimeout(spawnCatchItem, nextSpawnTime);
+    }
+
+    function catchGameLoop(timestamp = 0) {
+      const area = document.getElementById('catch-game-area');
+      const basket = document.getElementById('catch-basket');
+
+      if (!area || !basket) return;
+
+      if (!catchAreaWidth || !catchAreaHeight || !catchBasketHalfWidth) {
+        refreshCatchGameMetrics();
+      }
+
+      const frameDelta = catchLastFrameTime ? timestamp - catchLastFrameTime : CATCH_FRAME_MS;
+      if (frameDelta < CATCH_FRAME_MS) {
+        catchAnimationId = requestAnimationFrame(catchGameLoop);
+        return;
+      }
+
+      const clampedDelta = Math.min(frameDelta, 50);
+      const frameScale = clampedDelta / CATCH_FRAME_MS;
+      catchLastFrameTime = timestamp;
+
+      for (let i = catchItems.length - 1; i >= 0; i--) {
+        const item = catchItems[i];
+        item.y += item.speed * frameScale;
+        item.element.style.transform = `translate3d(0, ${item.y}px, 0)`;
+
+        // Xác nhận điểm rơi bằng tọa độ nội bộ để tránh layout thrash.
+        const itemCenterX = item.x + item.size / 2;
+        const itemCenterY = item.y + item.size / 2;
+
+        const isTouchingTop = item.y + item.size >= catchBasketTop + 10;
+        const isAboveBottom = itemCenterY < catchBasketBottom;
+        const isInsideWidth = itemCenterX > catchBasketLeft && itemCenterX < catchBasketRight;
+
+        if (isTouchingTop && isAboveBottom && isInsideWidth) {
+          handleCatchSuccess(item, i);
+          continue;
+        }
+
+        // Quá endpoint (trước mặt đất)
+        if (item.y > catchGroundLimit) {
+          item.element.style.transition = 'opacity 0.3s, transform 0.3s';
+          item.element.style.opacity = '0';
+          item.element.style.transform = 'scale(0.5)';
+          setTimeout(() => item.element.remove(), 300);
+          catchItems.splice(i, 1);
+        }
+      }
+
+      if (catchRemainingTime > 0) {
+        catchAnimationId = requestAnimationFrame(catchGameLoop);
+      }
+    }
+
+    function handleCatchSuccess(item, index) {
+      currentGameScore += 10;
+      currentGameCorrectCount++;
+      
+      const scoreEl = document.getElementById('catch-score');
+      scoreEl.innerText = currentGameScore;
+      scoreEl.classList.remove('catch-score-pop');
+      requestAnimationFrame(() => scoreEl.classList.add('catch-score-pop'));
+
+      // Basket bounce effect
+      const basket = document.getElementById('catch-basket');
+      if (basket) {
+        basket.classList.remove('catch-basket-bounce');
+        requestAnimationFrame(() => {
+          basket.classList.add('catch-basket-bounce');
+          setTimeout(() => basket.classList.remove('catch-basket-bounce'), 400);
+        });
+      }
+
+      playPreferredAudio(item.data.audio, item.data.en);
+
+      showFloatingText(item.data.en, item.x, item.y);
+      spawnSparkles(item.x + item.size / 2, item.y + item.size / 2);
+
+      item.element.style.transition = 'transform 0.2s, opacity 0.2s';
+      item.element.style.transform = `translate3d(0, ${item.y}px, 0) scale(1.3)`;
+      item.element.style.opacity = '0';
+      setTimeout(() => item.element.remove(), 200);
+      catchItems.splice(index, 1);
+    }
+
+    function spawnSparkles(cx, cy) {
+      const area = document.getElementById('catch-game-area');
+      const sparkles = ['✨', '⭐', '💫', '🌟'];
+      for (let i = 0; i < 4; i++) {
+        const sp = document.createElement('div');
+        sp.className = 'catch-sparkle';
+        sp.innerText = sparkles[i % sparkles.length];
+        sp.style.left = `${cx + (Math.random() - 0.5) * 60}px`;
+        sp.style.top = `${cy + (Math.random() - 0.5) * 60}px`;
+        sp.style.fontSize = `${16 + Math.random() * 16}px`;
+        area.appendChild(sp);
+        setTimeout(() => sp.remove(), 600);
+      }
+    }
+
+    function showFloatingText(text, x, y) {
+      const area = document.getElementById('catch-game-area');
+      const el = document.createElement('div');
+      el.className = 'absolute pointer-events-none animate-float-up z-50';
+      el.style.left = `${x}px`;
+      el.style.top = `${y}px`;
+      el.innerHTML = `
+        <div style="
+          background: linear-gradient(135deg, #ff9800, #ff5722);
+          color: white;
+          font-weight: 900;
+          font-size: clamp(0.9rem, 2.5vw, 1.4rem);
+          padding: 0.3rem 0.8rem;
+          border-radius: 9999px;
+          box-shadow: 0 4px 16px rgba(255,87,34,0.35);
+          white-space: nowrap;
+          text-shadow: 0 1px 3px rgba(0,0,0,0.2);
+          border: 2px solid rgba(255,255,255,0.5);
+        ">+10 ${text}</div>
+      `;
+      area.appendChild(el);
+      setTimeout(() => el.remove(), 1400);
+    }
+
+    let currentUnitSlug = "";
+let gameQuestions = [];
+let currentQuestionIndex = 0;
+let currentGameAudio = new Audio();
+currentGameAudio.preload = 'auto';
+currentGameAudio.playsInline = true;
+  let currentGameTotalQuestions = 0;
+  let currentGameScore = 0;
+  let currentGameCorrectCount = 0;
+  let isQuestionLocked = false;
+    let pendingGameAdvanceTimer = null;
+    let isSidebarCollapsed = false;
+    let currentGameType = "";
+  let speechRecognitionActive = false;
+  let speechRecognitionHadResponse = false;
+  let speechMicrophoneReady = false;
+  let speechMicrophonePermission = 'unknown';
+  let speechRecognitionAvailable = false;
+
+    const GAME_SUCCESS_MESSAGES = [
+      'Excellent!',
+      'Great job!',
+      'Awesome!',
+      'Well done!',
+      'Amazing!',
+      'Super!'
+    ];
+
+function getSidebarElement() {
+  return document.getElementById('unit-sidebar');
+}
+
+function getSidebarBackdropElement() {
+  return document.getElementById('sidebar-backdrop');
+}
+
+function syncSidebarCollapseUI() {
+  const sidebar = getSidebarElement();
+  if (!sidebar) return;
+
+  sidebar.classList.toggle('sidebar-collapsed', isSidebarCollapsed);
+
+  const toggleLabels = document.querySelectorAll('.sidebar-toggle-label');
+  toggleLabels.forEach(label => {
+    label.innerText = isSidebarCollapsed ? 'Mở rộng' : 'Thu gọn';
+  });
+
+  const footerLabels = document.querySelectorAll('.sidebar-footer-text');
+  footerLabels.forEach(label => {
+    label.innerText = isSidebarCollapsed ? 'Mở rộng sidebar' : 'Thu gọn / mở rộng';
+  });
+
+  const toggleIcons = document.querySelectorAll('.sidebar-toggle-icon');
+  toggleIcons.forEach(icon => {
+    icon.innerText = isSidebarCollapsed ? '⟩' : '⟨⟩';
+  });
+}
+
+function closeSidebarDrawer() {
+  const sidebar = getSidebarElement();
+  const backdrop = getSidebarBackdropElement();
+
+  if (sidebar) {
+    sidebar.classList.add('-translate-x-full');
+    sidebar.classList.remove('translate-x-0');
+  }
+
+  if (backdrop) {
+    backdrop.classList.add('hidden');
+  }
+
+  document.body.classList.remove('overflow-hidden');
+}
+
+function openSidebarDrawer() {
+  const sidebar = getSidebarElement();
+  const backdrop = getSidebarBackdropElement();
+
+  if (sidebar) {
+    sidebar.classList.remove('-translate-x-full');
+    sidebar.classList.add('translate-x-0');
+  }
+
+  if (backdrop) {
+    backdrop.classList.remove('hidden');
+  }
+
+  document.body.classList.add('overflow-hidden');
+}
+
+function toggleSidebarDrawer() {
+  if (window.innerWidth >= 768) {
+    toggleSidebarCollapse();
+    return;
+  }
+
+  const sidebar = getSidebarElement();
+  if (!sidebar) return;
+
+  const isOpen = sidebar.classList.contains('translate-x-0');
+  if (isOpen) {
+    closeSidebarDrawer();
+  } else {
+    openSidebarDrawer();
+  }
+}
+
+function toggleSidebarCollapse() {
+  isSidebarCollapsed = !isSidebarCollapsed;
+  syncSidebarCollapseUI();
+}
+
+function syncResponsiveSidebarState() {
+  if (window.innerWidth >= 768) {
+    closeSidebarDrawer();
+  } else {
+    const backdrop = getSidebarBackdropElement();
+    if (backdrop) {
+      backdrop.classList.add('hidden');
+    }
+    document.body.classList.remove('overflow-hidden');
+
+    const sidebar = getSidebarElement();
+    if (sidebar) {
+      sidebar.classList.add('-translate-x-full');
+      sidebar.classList.remove('translate-x-0');
+    }
+  }
+}
+
+// 1. Tải danh sách Sidebar
+function loadSidebarWithUnits(units) {
+        units = units || [];
+        const container = document.getElementById('sidebar-menu');
+        container.innerHTML = ''; 
+        if (units.length === 0) return;
+
+        units.forEach((unit, index) => {
+            const a = document.createElement('a');
+            a.href = "#";
+            const baseClass = "sidebar-item flex items-center gap-3 p-3 rounded-xl transition-all border border-transparent";
+            const inactiveClass = "hover:bg-white/40 text-blue-700 text-sm";
+            a.className = baseClass + " " + (index === 0 ? "active-unit" : inactiveClass);
+          a.innerHTML = `<span class="sidebar-unit-icon shrink-0">${unit.icon || '📘'}</span><span class="sidebar-unit-label line-clamp-2">${unit.name}</span>`;
+            
+            if(index === 0) updateUIForUnit(unit);
+
+            a.onclick = function() {
+                document.querySelectorAll('.sidebar-item').forEach(el => {
+                    el.classList.remove('active-unit');
+                    el.classList.add('hover:bg-white/40', 'text-blue-700', 'text-sm');
+                });
+                this.classList.add('active-unit');
+                this.classList.remove('hover:bg-white/40', 'text-blue-700', 'text-sm');
+                updateUIForUnit(unit);
+            };
+            container.appendChild(a);
+        });
+}
+
+function updateUIForUnit(unit) {
+    currentUnitSlug = unit.slug;
+    document.getElementById('breadcrumb-unit').innerText = "📖 " + unit.name;
+    document.getElementById('main-title').innerText = unit.name;
+  closeSidebarDrawer();
+    warmUnitGameCache(unit.slug);
+    backToMenu(); // Luôn quay về menu khi đổi Unit
+}
+
+// 2. Chuyển đổi màn hình
+// --- SỬA LẠI HÀM START CỦA GAME 1 ---
+function startListenChoose() {
+    currentGameType = 'listenchoose';
+    switchView('game-play-view'); // Hiện màn chơi chung
+    
+    // Khôi phục cấu trúc HTML chuẩn cho Game 1 (vì có thể bị Game 2 xóa)
+    document.getElementById('game-content').innerHTML = `
+    <h2 class="text-xl sm:text-2xl font-bold text-gray-800 mb-6 sm:mb-8">Nghe và chọn hình đúng</h2>
+    <button onclick="playTargetAudio()" class="w-20 h-20 sm:w-24 sm:h-24 bg-blue-500 hover:bg-blue-600 text-white rounded-full shadow-2xl flex items-center justify-center mx-auto mb-6 sm:mb-8">
+      <span class="text-3xl sm:text-4xl">🔊</span>
+        </button>
+  <div id="options-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 md:gap-6 max-w-4xl mx-auto"></div>
+    `;
+
+    document.getElementById('game-loading').classList.remove('hidden');
+    document.getElementById('game-content').classList.add('hidden');
+
+    fetchGameDataset('listenchoose', 'getGameData', currentUnitSlug).then(function(questions) {
+        gameQuestions = prepareGameQuestions(questions, true);
+        currentQuestionIndex = 0;
+      initializeGameStats(questions.length);
+        document.getElementById('game-loading').classList.add('hidden');
+        renderQuestion(); 
+    });
+}
+
+function backToMenu() {
+    const sidebar = getSidebarElement();
+    if (sidebar) {
+      sidebar.classList.remove('hidden');
+      syncSidebarCollapseUI();
+    }
+    if (typeof stopCatchGameLoop === 'function') {
+      stopCatchGameLoop();
+    }
+    switchView('menu-game-view');
+}
+
+function initializeGameStats(totalQuestions) {
+  currentGameTotalQuestions = totalQuestions || 0;
+  currentGameScore = 0;
+  currentGameCorrectCount = 0;
+  isQuestionLocked = false;
+  updateGameStats();
+}
+
+function updateGameStats() {
+  const scoreEl = document.getElementById('game-score');
+  const progressEl = document.getElementById('game-progress');
+  const correctEl = document.getElementById('game-correct-count');
+
+  if (scoreEl) {
+    scoreEl.innerText = currentGameScore;
+  }
+
+  if (progressEl) {
+    const total = currentGameTotalQuestions || gameQuestions.length || 0;
+    const current = total ? Math.min(currentQuestionIndex + 1, total) : 0;
+    progressEl.innerText = total ? `${current}/${total}` : '0/0';
+  }
+
+  if (correctEl) {
+    correctEl.innerText = currentGameCorrectCount;
+  }
+}
+
+function getGameSuccessText() {
+  const praiseIndex = Math.max(0, currentGameCorrectCount - 1) % GAME_SUCCESS_MESSAGES.length;
+  return GAME_SUCCESS_MESSAGES[praiseIndex];
+}
+
+function hideGameFeedback() {
+  const layer = document.getElementById('game-feedback-layer');
+  if (!layer) return;
+
+  layer.classList.add('hidden');
+  layer.innerHTML = '';
+}
+
+function clearGameTransitionTimers() {
+  if (pendingGameAdvanceTimer) {
+    clearTimeout(pendingGameAdvanceTimer);
+    pendingGameAdvanceTimer = null;
+  }
+
+  hideGameFeedback();
+  isQuestionLocked = false;
+}
+
+function showGameSuccessFeedback(text) {
+  const layer = document.getElementById('game-feedback-layer');
+  if (!layer) return;
+
+  layer.innerHTML = '';
+  const badge = document.createElement('div');
+  badge.className = 'game-success-badge';
+  badge.textContent = `✨ ${text || 'Excellent!'} ✨`;
+  layer.appendChild(badge);
+  layer.classList.remove('hidden');
+}
+
+function setOptionsDisabled(disabled) {
+  document.querySelectorAll('#options-grid button').forEach(button => {
+    button.disabled = disabled;
+  });
+}
+
+function getBestVoice(localePrefix) {
+  if (!window.speechSynthesis) return null;
+
+  const voices = window.speechSynthesis.getVoices();
+  if (voices.length === 0) return null;
+
+  const matchedVoices = voices.filter(voice =>
+    voice.lang && voice.lang.toLowerCase().startsWith(localePrefix.toLowerCase())
+  );
+
+  return matchedVoices.find(voice => /google|microsoft|samantha|zira|female|child|kid/i.test(voice.name))
+    || matchedVoices[0]
+    || voices[0]
+    || null;
+}
+
+function playChildFeedback(isCorrect) {
+  if (!('speechSynthesis' in window)) return;
+
+  window.speechSynthesis.cancel();
+  const utterance = new SpeechSynthesisUtterance(isCorrect ? 'Excellent!' : 'Oops!');
+  utterance.lang = 'en-US';
+  utterance.pitch = isCorrect ? 2 : 1.8;
+  utterance.rate = 1.08;
+  utterance.volume = 1;
+
+  const voice = getBestVoice('en');
+  if (voice) {
+    utterance.voice = voice;
+  }
+
+  window.speechSynthesis.speak(utterance);
+}
+
+function handleSuccessAction(element) {
+  if (!element) return;
+  element.classList.add('border-green-500', 'bg-green-50', 'ring-4', 'ring-green-200');
+  playChildFeedback(true);
+}
+
+function handleErrorAction(element) {
+  if (!element) return;
+  element.classList.add('animate-shake', 'border-red-500', 'bg-red-50');
+  playChildFeedback(false);
+
+  setTimeout(() => {
+    element.classList.remove('animate-shake', 'border-red-500', 'bg-red-50');
+  }, 500);
+}
+
+
+
+function advanceGameQuestion(renderNextQuestion, delay = 800) {
+  if (pendingGameAdvanceTimer) {
+    clearTimeout(pendingGameAdvanceTimer);
+  }
+
+  pendingGameAdvanceTimer = setTimeout(() => {
+    pendingGameAdvanceTimer = null;
+    currentQuestionIndex++;
+    isQuestionLocked = false;
+    hideGameFeedback();
+
+    if (currentQuestionIndex < gameQuestions.length) {
+      renderNextQuestion();
+    } else {
+      showGameSummary();
+    }
+  }, delay);
+}
+
+
+// 3. Logic Game
+
+function renderQuestion() {
+    if (gameQuestions.length === 0) {
+        alert("Unit này chưa có dữ liệu game!");
+        backToMenu();
+        return;
+    }
+  clearGameTransitionTimers();
+    const q = gameQuestions[currentQuestionIndex];
+    preloadQuestionAssets(q);
+    const grid = document.getElementById('options-grid');
+    const cardBackgrounds = ['game-option-tone-1', 'game-option-tone-2', 'game-option-tone-3', 'game-option-tone-4'];
+    grid.innerHTML = '';
+    grid.className = 'grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 md:gap-8 max-w-5xl mx-auto';
+  isQuestionLocked = false;
+  setOptionsDisabled(false);
+  document.getElementById('game-loading').classList.add('hidden');
+  document.getElementById('game-content').classList.remove('hidden');
+  updateGameStats();
+
+    q.options.forEach((imgUrl, index) => {
+        const btn = document.createElement('button');
+        btn.className = `group ${cardBackgrounds[index % cardBackgrounds.length]} p-2 sm:p-3 md:p-4 rounded-[20px] sm:rounded-[28px] border-4 border-white/90 shadow-[0_16px_40px_rgba(15,23,42,0.10)] hover:shadow-2xl hover:-translate-y-1 transition-all active:scale-95 min-h-[8rem] sm:min-h-[10rem] md:min-h-[12rem] flex items-center justify-center`;
+        btn.innerHTML = `<img src="${imgUrl}" class="w-full h-24 sm:h-32 md:h-40 object-contain rounded-2xl" loading="eager" decoding="async" fetchpriority="high">`;
+      btn.onclick = function() { checkAnswer(imgUrl, q.correct, this); };
+        grid.appendChild(btn);
+    });
+
+    scheduleQuestionPreload(gameQuestions[currentQuestionIndex + 1]);
+}
+
+
+
+    function speakTargetText(text) {
+      if (!text) return;
+
+      if (!('speechSynthesis' in window)) {
+        alert("Trình duyệt của bạn không hỗ trợ đọc tự động.");
+        return;
+      }
+
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'en-US';
+      utterance.rate = 0.9;
+      utterance.pitch = 1;
+
+      const voice = getBestVoice('en');
+      if (voice) {
+        utterance.voice = voice;
+      }
+
+      window.speechSynthesis.speak(utterance);
+    }
+
+    function stopWordPlayback() {
+      if (currentGameAudio) {
+        currentGameAudio.pause();
+        try {
+          currentGameAudio.currentTime = 0;
+        } catch (error) {
+        }
+      }
+
+      if (window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+      }
+    }
+
+    function playPreferredAudio(audioUrl, fallbackText) {
+      stopWordPlayback();
+
+      const resolvedUrl = String(audioUrl || '').trim();
+      if (!resolvedUrl) {
+        speakTargetText(fallbackText);
+        return;
+      }
+
+      const audio = currentGameAudio;
+      audio.onended = () => {
+        try {
+          audio.currentTime = 0;
+        } catch (error) {
+        }
+      };
+      audio.onerror = () => {
+        try {
+          audio.currentTime = 0;
+        } catch (error) {
+        }
+        speakTargetText(fallbackText);
+      };
+
+      audio.src = resolvedUrl;
+      audio.load();
+
+      const playResult = audio.play();
+      if (playResult && typeof playResult.catch === 'function') {
+        playResult.catch(() => {
+          try {
+            audio.currentTime = 0;
+          } catch (error) {
+          }
+          speakTargetText(fallbackText);
+        });
+      }
+    }
+
+function playTargetAudio() {
+      const question = gameQuestions[currentQuestionIndex];
+      if (!question) return;
+
+      playPreferredAudio(question.audio, question.text || question.correct);
+}
+function checkAnswer(selected, correct, element) {
+  if (isQuestionLocked) return;
+
+  isQuestionLocked = true;
+  setOptionsDisabled(true);
+  stopWordPlayback();
+
+    if (selected === correct) {
+    currentGameScore += 100;
+    currentGameCorrectCount += 1;
+    updateGameStats();
+    handleSuccessAction(element);
+    showGameSuccessFeedback(getGameSuccessText());
+    advanceGameQuestion(renderQuestion, 1000);
+
+    } else {
+    handleErrorAction(element);
+    advanceGameQuestion(renderQuestion);
+    }
+}
+
+/** game 2**/
+function startLookChoose() {
+    currentGameType = 'lookchoose';
+    switchView('game-play-view'); // Hiện màn chơi chung
+    document.getElementById('game-loading').classList.remove('hidden');
+  document.getElementById('game-content').classList.add('hidden');
+    
+  fetchGameDataset('lookchoose', 'getGameLookChooseData', currentUnitSlug).then(function(questions) {
+      gameQuestions = prepareGameQuestions(questions, true);
+        currentQuestionIndex = 0;
+    initializeGameStats(questions.length);
+        renderLookChooseQuestion();
+  });
+}
+function renderLookChooseQuestion() {
+  if (gameQuestions.length === 0) {
+    alert("Unit này chưa có dữ liệu game!");
+    backToMenu();
+    return;
+  }
+
+    clearGameTransitionTimers();
+    const q = gameQuestions[currentQuestionIndex];
+    preloadQuestionAssets(q);
+    const content = document.getElementById('game-content');
+  isQuestionLocked = false;
+  setOptionsDisabled(false);
+    content.innerHTML = `
+        <h2 class="text-xl sm:text-2xl font-bold text-gray-800 mb-5 sm:mb-6">Nhìn hình và chọn từ đúng</h2>
+        
+      <div class="mb-6 animate-fade-in">
+        <img src="${q.image}" class="w-48 h-48 sm:w-56 sm:h-56 md:w-72 md:h-72 object-contain mx-auto rounded-3xl shadow-lg border-[6px] border-white bg-gradient-to-br from-sky-50 via-white to-indigo-100 p-2" loading="eager" decoding="async" fetchpriority="high">
+        </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 md:gap-6 max-w-4xl mx-auto">
+            ${q.options.map(text => `
+                <button onclick="checkLookChooseAnswer('${text}', '${q.correct}', this)" 
+              class="bg-white py-4 sm:py-5 md:py-6 px-4 sm:px-6 rounded-[20px] sm:rounded-[28px] border-4 border-gray-100 text-lg sm:text-xl md:text-2xl font-black text-blue-800 shadow-lg hover:border-purple-400 hover:bg-purple-50 transition-all active:scale-95 min-h-[4rem] sm:min-h-[5rem] flex items-center justify-center text-center">
+                    ${text}
+                </button>
+            `).join('')}
+        </div>
+    `;
+    document.getElementById('game-loading').classList.add('hidden');
+    content.classList.remove('hidden');
+    updateGameStats();
+
+    scheduleQuestionPreload(gameQuestions[currentQuestionIndex + 1]);
+}
+
+// --- SỬA LẠI HÀM CHECK CỦA GAME 2 ---
+function checkLookChooseAnswer(selected, correct, element) {
+    if (isQuestionLocked) return;
+
+    isQuestionLocked = true;
+    setOptionsDisabled(true);
+    if (typeof stopWordPlayback === 'function') {
+      stopWordPlayback();
+    }
+    const question = gameQuestions[currentQuestionIndex];
+
+    if (selected === correct) {
+      currentGameScore += 100;
+      currentGameCorrectCount += 1;
+      updateGameStats();
+      handleSuccessAction(element);
+      showGameSuccessFeedback(getGameSuccessText());
+      advanceGameQuestion(renderLookChooseQuestion, 1000);
+    } else {
+      handleErrorAction(element);
+      advanceGameQuestion(renderLookChooseQuestion);
+    }
+}  
+
+/** game 3**/
+// --- LOGIC CHO GAME 3 ---
+function startPronunciationGame() {
+    currentGameType = 'pronunciation';
+  speechRecognitionActive = false;
+  speechRecognitionHadResponse = false;
+  speechMicrophoneReady = false;
+  speechMicrophonePermission = 'unknown';
+    // 1. Sử dụng hàm switchView (đã hướng dẫn ở trên) để ẩn hết các màn hình khác
+    switchView('pronunciation-game-view');
+
+    if (speechRecognitionAvailable) {
+      updateSpeechMicPanel('granted');
+    } else {
+      updateSpeechMicPanel('unsupported');
+    }
+
+    // 3. Hiển thị trạng thái đang tải dữ liệu (tùy chọn: bạn có thể tạo 1 div loading riêng trong Game 3)
+    updateSpeechStatus("Đang tải dữ liệu bài học...", "text-blue-500 animate-pulse");
+
+    // 4. Gọi dữ liệu từ Google Sheets
+    fetchGameDataset('pronunciation', 'getPronunciationData', currentUnitSlug).then(function(questions) {
+        if (!questions || questions.length === 0) {
+            alert("Unit này chưa có dữ liệu cho Game phát âm!");
+            backToMenu();
+            return;
+        }
+        
+      gameQuestions = prepareGameQuestions(questions, false);
+        currentQuestionIndex = 0;
+        initializeGameStats(gameQuestions.length);
+        const speechScore = document.getElementById('speech-score');
+        if (speechScore) speechScore.innerText = '0';
+        const speechCorrect = document.getElementById('speech-correct-count');
+        if (speechCorrect) speechCorrect.innerText = '0';
+        
+        // 5. Vẽ câu hỏi đầu tiên
+        renderSpeechQuestion();
+      });
+}
+
+function renderSpeechQuestion() {
+    if (gameQuestions.length === 0) {
+        alert("Chưa có dữ liệu cho game này!");
+        backToMenu();
+        return;
+    }
+    const q = gameQuestions[currentQuestionIndex];
+    preloadQuestionAssets(q);
+    isQuestionLocked = false;
+  const speechImage = document.getElementById('speech-img');
+  if (speechImage) {
+    speechImage.loading = 'eager';
+    speechImage.decoding = 'async';
+    speechImage.fetchPriority = 'high';
+    speechImage.src = q.image;
+  }
+    document.getElementById('speech-en').innerText = q.en;
+    document.getElementById('speech-vi').innerText = q.vi;
+    document.getElementById('speech-progress').innerText = `${currentQuestionIndex + 1}/${gameQuestions.length}`;
+
+    updateSpeechStatus("Bấm Ghi âm để kiểm tra xem bé có nghe được không.", "text-blue-700");
+
+  scheduleQuestionPreload(gameQuestions[currentQuestionIndex + 1]);
+}
+
+function nextSpeechQuestion() {
+    stopWordPlayback();
+    currentQuestionIndex++;
+    if (currentQuestionIndex < gameQuestions.length) {
+        renderSpeechQuestion();
+    } else {
+        showGameSummary();
+    }
+}
+let recognition;
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+speechRecognitionAvailable = typeof SpeechRecognition !== "undefined";
+
+function getSpeechMicPanelElements() {
+  return {
+    panel: document.getElementById('speech-mic-panel'),
+    title: document.getElementById('speech-mic-title'),
+    detail: document.getElementById('speech-mic-detail'),
+    button: document.getElementById('btn-enable-mic'),
+    recordButton: document.getElementById('btn-record')
+  };
+}
+
+function updateSpeechMicPanel(state, detailText) {
+  const elements = getSpeechMicPanelElements();
+  const panel = elements.panel;
+  const title = elements.title;
+  const detail = elements.detail;
+  const button = elements.button;
+  const recordButton = elements.recordButton;
+
+  if (recordButton) {
+    const isSupported = state !== 'unsupported';
+    recordButton.disabled = !isSupported;
+    recordButton.classList.toggle('opacity-60', !isSupported);
+    recordButton.classList.toggle('cursor-not-allowed', !isSupported);
+  }
+
+  if (!panel || !title || !detail || !button) return;
+
+  if (state === 'granted') {
+    panel.classList.add('hidden');
+    button.disabled = false;
+    button.classList.remove('opacity-60', 'cursor-not-allowed');
+    button.innerText = 'Cấp quyền micro';
+    return;
+  }
+
+  panel.classList.remove('hidden');
+
+  let titleText = 'Cần quyền micro để chơi game phát âm';
+  let detailValue = detailText || 'Bấm Cấp quyền micro để trình duyệt cho phép dùng micro. Sau đó đọc to để kiểm tra xem máy có nghe được không.';
+  let buttonText = 'Cấp quyền micro';
+  let buttonDisabled = false;
+
+  if (state === 'denied') {
+    titleText = 'Quyền micro đang bị chặn';
+    detailValue = detailText || 'Hãy mở quyền micro trong biểu tượng ổ khóa của trình duyệt, rồi bấm Cấp quyền micro lại.';
+    buttonText = 'Mở quyền micro';
+  } else if (state === 'unsupported') {
+    titleText = 'Trình duyệt chưa hỗ trợ game phát âm';
+    detailValue = detailText || 'Hãy mở game bằng Chrome hoặc Edge trên máy có micro để kiểm tra phát âm.';
+    buttonText = 'Không hỗ trợ';
+    buttonDisabled = true;
+  } else if (state === 'checking') {
+    titleText = 'Đang kiểm tra micro...';
+    detailValue = detailText || 'Đợi một chút để trình duyệt xác nhận quyền micro.';
+    buttonText = 'Đang kiểm tra...';
+    buttonDisabled = true;
+  }
+
+  title.innerText = titleText;
+  detail.innerText = detailValue;
+  button.innerText = buttonText;
+  button.disabled = buttonDisabled;
+  button.classList.toggle('opacity-60', buttonDisabled);
+  button.classList.toggle('cursor-not-allowed', buttonDisabled);
+}
+
+async function refreshSpeechMicState(requestAccess) {
+  if (!speechRecognitionAvailable) {
+    speechMicrophoneReady = false;
+    speechMicrophonePermission = 'unsupported';
+    updateSpeechMicPanel('unsupported');
+    updateSpeechStatus('Trình duyệt này chưa hỗ trợ game phát âm. Hãy dùng Chrome hoặc Edge.', 'text-red-600');
+    return false;
+  }
+
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    speechMicrophoneReady = false;
+    speechMicrophonePermission = 'unsupported';
+    updateSpeechMicPanel('unsupported', 'Trình duyệt chưa cho phép truy cập micro theo cách này. Hãy dùng Chrome hoặc Edge.');
+    updateSpeechStatus('Trình duyệt chưa hỗ trợ kiểm tra micro. Hãy dùng Chrome hoặc Edge.', 'text-red-600');
+    return false;
+  }
+
+  if (speechMicrophoneReady) {
+    updateSpeechMicPanel('granted');
+    updateSpeechStatus('✅ Micro đã sẵn sàng. Bấm Ghi âm để kiểm tra xem bé có nghe được không.', 'text-green-600');
+    return true;
+  }
+
+  if (!requestAccess && navigator.permissions && navigator.permissions.query) {
+    try {
+      const permissionStatus = await navigator.permissions.query({ name: 'microphone' });
+      speechMicrophonePermission = permissionStatus.state || 'prompt';
+      speechMicrophoneReady = speechMicrophonePermission === 'granted';
+
+      if (permissionStatus.onchange !== undefined) {
+        permissionStatus.onchange = function () {
+          refreshSpeechMicState(false);
+        };
+      }
+
+      if (speechMicrophoneReady) {
+        updateSpeechMicPanel('granted');
+        updateSpeechStatus('✅ Micro đã sẵn sàng. Bấm Ghi âm để kiểm tra xem bé có nghe được không.', 'text-green-600');
+        return true;
+      }
+      speechMicrophonePermission = speechMicrophonePermission || 'prompt';
+      return false;
+    } catch (error) {
+      speechMicrophonePermission = 'prompt';
+      speechMicrophoneReady = false;
+      return false;
+    }
+  }
+
+  updateSpeechMicPanel('checking');
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    if (stream && typeof stream.getTracks === 'function') {
+      stream.getTracks().forEach(track => track.stop());
+    }
+    speechMicrophoneReady = true;
+    speechMicrophonePermission = 'granted';
+    updateSpeechMicPanel('granted');
+    updateSpeechStatus('✅ Micro đã sẵn sàng. Bấm Ghi âm để kiểm tra xem bé có nghe được không.', 'text-green-600');
+    return true;
+  } catch (error) {
+    speechMicrophoneReady = false;
+    if (error && (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError' || error.name === 'SecurityError')) {
+      speechMicrophonePermission = 'denied';
+      updateSpeechMicPanel('denied', '⚠️ Chưa cấp quyền micro. Hãy mở quyền trong trình duyệt rồi thử lại.');
+      updateSpeechStatus('⚠️ Chưa cấp quyền micro. Bấm Cấp quyền micro để mở quyền.', 'text-red-600');
+    } else if (error && (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError')) {
+      speechMicrophonePermission = 'prompt';
+      updateSpeechMicPanel('prompt', '⚠️ Không tìm thấy micro trên thiết bị này. Hãy kiểm tra micro rồi thử lại.');
+      updateSpeechStatus('⚠️ Không tìm thấy micro trên thiết bị này.', 'text-red-600');
+    } else {
+      speechMicrophonePermission = 'prompt';
+      updateSpeechMicPanel('prompt', '⚠️ Không thể mở micro. Hãy kiểm tra quyền trình duyệt rồi thử lại.');
+      updateSpeechStatus('⚠️ Không thể mở micro. Hãy thử lại sau khi kiểm tra quyền và thiết bị.', 'text-red-600');
+    }
+    return false;
+  }
+}
+
+function requestPronunciationMicrophoneAccess() {
+  if (speechMicrophoneReady) {
+    updateSpeechMicPanel('granted');
+    updateSpeechStatus('✅ Micro đã sẵn sàng. Bấm Ghi âm để kiểm tra xem bé có nghe được không.', 'text-green-600');
+    return Promise.resolve(true);
+  }
+  
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    updateSpeechMicPanel('unsupported', 'Trình duyệt chưa hỗ trợ lấy quyền micro. Vui lòng dùng trình duyệt khác.');
+    return Promise.resolve(false);
+  }
+
+  updateSpeechMicPanel('checking');
+  return navigator.mediaDevices.getUserMedia({ audio: true })
+    .then(function(stream) {
+      // Cấp quyền thành công nhưng ta đóng ngay lập tức để SpeechRecognition xử lý sau
+      if (stream && typeof stream.getTracks === 'function') {
+        stream.getTracks().forEach(track => track.stop());
+      }
+      speechMicrophoneReady = true;
+      speechMicrophonePermission = 'granted';
+      updateSpeechMicPanel('granted');
+      updateSpeechStatus('✅ Micro đã sẵn sàng. Quay lại và Bấm Ghi âm để nói nhé.', 'text-green-600');
+      return true;
+    })
+    .catch(function(error) {
+      speechMicrophoneReady = false;
+      updateSpeechMicPanel('denied', '⚠️ Chưa cấp quyền hoặc bị chặn. Trình duyệt báo lỗi: ' + error.message);
+      return false;
+    });
+}
+
+if (typeof SpeechRecognition !== "undefined") {
+    recognition = new SpeechRecognition();
+    recognition.continuous = false;
+    recognition.lang = 'en-US'; // Thiết lập nhận diện tiếng Anh
+
+    recognition.onstart = () => {
+        if (isQuestionLocked) {
+            recognition.stop();
+            return;
+        }
+    speechRecognitionActive = true;
+    speechRecognitionHadResponse = false;
+        updateSpeechStatus("🔴 Đang lắng nghe... Bé đọc đi!", "text-red-600");
+        const btnRecord = document.getElementById('btn-record');
+        if (btnRecord) {
+            btnRecord.classList.remove('animate-pulse');
+            btnRecord.classList.add('animate-bounce');
+        }
+    };
+
+  recognition.onspeechstart = () => {
+    if (isQuestionLocked) return;
+    updateSpeechStatus("👂 Mình đã nghe thấy giọng nói, đang xử lý...", "text-blue-700");
+  };
+
+    recognition.onresult = (event) => {
+        if (isQuestionLocked) return;
+    speechRecognitionHadResponse = true;
+    const transcript = String(event.results[0][0].transcript || '').trim();
+    const cleanResult = transcript.toLowerCase().trim().replace(/[.,!?]/g, "");
+        const target = gameQuestions[currentQuestionIndex].en.toLowerCase().trim();
+        const cleanTarget = target.replace(/[.,!?]/g, "");
+
+    if (!transcript) {
+      updateSpeechStatus("⚠️ Mình nghe được âm thanh nhưng chưa nhận ra từ nào. Thử đọc lại nhé!", "text-orange-600");
+      handleErrorAction(document.getElementById('speech-en'));
+      return;
+    }
+        
+        if (cleanResult.includes(cleanTarget) || cleanTarget.includes(cleanResult) || cleanResult === cleanTarget) {
+            isQuestionLocked = true;
+            // ĐÚNG: Sử dụng handleSuccessAction đã có ở game trước
+      updateSpeechStatus(`🎉 Mình nghe được "${transcript}" và bé phát âm rất chuẩn!`, "text-green-600");
+            handleSuccessAction(document.getElementById('speech-en'));
+            
+            // Cập nhật điểm
+            currentGameScore += 100;
+            currentGameCorrectCount += 1;
+            
+            const speechScoreEl = document.getElementById('speech-score');
+            if (speechScoreEl) speechScoreEl.innerText = currentGameScore;
+            
+            const speechCorrectEl = document.getElementById('speech-correct-count');
+            if (speechCorrectEl) speechCorrectEl.innerText = currentGameCorrectCount;
+            
+            advanceGameQuestion(renderSpeechQuestion, 2000);
+        } else {
+            updateSpeechStatus(`👂 Mình nghe được "${transcript}", nhưng chưa khớp với từ mẫu. Thử lại nhé!`, "text-orange-600");
+            handleErrorAction(document.getElementById('speech-en'));
+        }
+    };
+
+        recognition.onnomatch = () => {
+          if (isQuestionLocked) return;
+          speechRecognitionHadResponse = true;
+          updateSpeechStatus("⚠️ Mình có nghe âm thanh nhưng chưa nhận ra từ nào. Thử đọc lại nhé!", "text-orange-600");
+          handleErrorAction(document.getElementById('speech-en'));
+        };
+
+    recognition.onerror = (event) => {
+          speechRecognitionHadResponse = true;
+          if (event.error === 'aborted') {
+            return;
+          }
+
+          const isMicrophoneGranted = speechMicrophoneReady || speechMicrophonePermission === 'granted';
+
+          if (event.error === 'service-not-allowed') {
+            updateSpeechMicPanel('granted');
+            updateSpeechStatus("⚠️ Trình duyệt đang chặn dịch vụ nhận diện giọng nói, không phải quyền micro. Hãy thử lại bằng Chrome hoặc Edge.", "text-red-600");
+          } else if (event.error === 'not-allowed') {
+            if (isMicrophoneGranted) {
+              updateSpeechMicPanel('granted');
+              updateSpeechStatus("⚠️ Micro đã được cấp quyền nhưng trình duyệt chưa bật được nhận diện giọng nói. Hãy bấm Ghi âm lại hoặc đổi sang Chrome/Edge.", "text-red-600");
+            } else {
+              speechMicrophoneReady = false;
+              speechMicrophonePermission = 'denied';
+              updateSpeechMicPanel('denied');
+              updateSpeechStatus("⚠️ Hãy cho phép quyền sử dụng micro nhé!", "text-red-600");
+            }
+          } else if (event.error === 'audio-capture') {
+            speechMicrophoneReady = false;
+            speechMicrophonePermission = 'prompt';
+            updateSpeechMicPanel('prompt', '⚠️ Micro chưa sẵn sàng hoặc đang bị chặn. Hãy kiểm tra micro rồi thử lại.');
+            updateSpeechStatus("⚠️ Không nhận được tín hiệu từ micro. Hãy kiểm tra thiết bị rồi thử lại.", "text-red-600");
+          } else if (event.error === 'no-speech') {
+            updateSpeechStatus("⚠️ Mình chưa nghe thấy tiếng nào. Hãy đọc to hơn rồi thử lại nhé!", "text-orange-600");
+        } else {
+            updateSpeechStatus("⚠️ Không nghe rõ, bé bấm nút ghi âm lại nhé!", "text-gray-600");
+        }
+        console.error("Speech recognition error:", event.error);
+    };
+
+    recognition.onend = () => {
+          speechRecognitionActive = false;
+        const btnRecord = document.getElementById('btn-record');
+        if (btnRecord) {
+            btnRecord.classList.remove('animate-bounce');
+            btnRecord.classList.add('animate-pulse');
+        }
+
+          if (!speechRecognitionHadResponse && !isQuestionLocked) {
+            updateSpeechStatus("⚠️ Mình chưa nghe thấy gì. Hãy đọc to hơn rồi bấm Ghi âm lại nhé!", "text-orange-600");
+          }
+    };
+}
+
+      async function startRecording() {
+    if (isQuestionLocked) return;
+        if (!recognition) {
+          updateSpeechMicPanel('unsupported');
+          updateSpeechStatus("Trình duyệt của bạn chưa hỗ trợ nhận diện giọng nói. Hãy dùng Google Chrome hoặc Edge.", "text-red-600");
+          return;
+        }
+
+        if (speechRecognitionActive) {
+          updateSpeechStatus("Đang nghe rồi. Hãy đọc to câu hiện tại nhé.", "text-blue-700");
+          return;
+        }
+
+        try {
+          speechRecognitionHadResponse = false;
+          recognition.start();
+        } catch (error) {
+          if (error && error.name === 'InvalidStateError') {
+            updateSpeechStatus("Đang nghe rồi. Hãy đọc to câu hiện tại nhé.", "text-blue-700");
+            return;
+          }
+          console.error("Speech recognition start error:", error);
+          updateSpeechStatus("Không thể bật ghi âm. Hãy thử lại sau.", "text-red-600");
+        }
+}
+
+function listenSample() {
+  const question = gameQuestions[currentQuestionIndex];
+  if (!question) return;
+
+  playPreferredAudio(question.audio, question.en);
+}
+
+function updateSpeechStatus(text, colorClass) {
+    const status = document.getElementById('speech-status');
+  if (!status) return;
+    status.innerText = text;
+    status.className = `p-4 text-center font-bold text-lg ${colorClass}`;
+}
+function switchView(viewId) {
+  clearGameTransitionTimers();
+  stopWordPlayback();
+  stopCatchGameLoop();
+  closeSidebarDrawer();
+
+    // Danh sách tất cả các ID màn hình lớn
+    const views = ['menu-game-view', 'game-play-view', 'pronunciation-game-view', 'catch-game-view', 'game-summary-view'];
+    
+    views.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            if (id === viewId) {
+                el.classList.remove('hidden');
+            } else {
+                el.classList.add('hidden');
+            }
+        }
+    });
+}
+
+function showGameSummary() {
+  const scoreEl = document.getElementById('summary-score');
+  const correctEl = document.getElementById('summary-correct');
+  const totalEl = document.getElementById('summary-total');
+
+  if (scoreEl) scoreEl.innerText = currentGameScore;
+  if (correctEl) correctEl.innerText = currentGameCorrectCount;
+  if (totalEl) totalEl.innerText = currentGameTotalQuestions || gameQuestions.length;
+
+  switchView('game-summary-view');
+}
+
+function playAgain() {
+  if (currentGameType === 'listenchoose') {
+    startListenChoose();
+  } else if (currentGameType === 'lookchoose') {
+    startLookChoose();
+  } else if (currentGameType === 'pronunciation') {
+    startPronunciationGame();
+  } else if (currentGameType === 'catch') {
+    startCatchGame();
+  } else {
+    backToMenu();
+  }
+}
+
+function logout() {
+  stopWordPlayback();
+  stopCatchGameLoop();
+
+  window.top.location.href = 'Login.html';
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+  applyGameBackground(GAME_BG_IMAGE_URL);
+  applyMenuBackgrounds();
+  syncSidebarCollapseUI();
+  syncResponsiveSidebarState();
+  window.addEventListener('resize', syncResponsiveSidebarState);
+
+  // Fetch bootstrap configuration (backgrounds & units)
+  fetch(SCRIPT_URL + '?api=app.bootstrap')
+    .then(res => res.json())
+    .then(function(response) {
+      if (response && response.success) {
+        // Apply dynamic background image configuration
+        if (response.gameBgImageUrl) {
+          GAME_BG_IMAGE_URL = response.gameBgImageUrl;
+          applyGameBackground(GAME_BG_IMAGE_URL);
+        }
+        if (response.gameMenuBackgroundMap) {
+          GAME_MENU_BG_MAP = response.gameMenuBackgroundMap;
+          applyMenuBackgrounds();
+        }
+        // Load sidebar units
+        loadSidebarWithUnits(response.units || []);
+      }
+    })
+    .catch(console.error);
+});
+  </script>
+
+</body>
+
+</html>
