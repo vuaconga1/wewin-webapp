@@ -1687,11 +1687,12 @@ function getBestVoice(localePrefix) {
     || null;
 }
 
-function playChildFeedback(isCorrect) {
+function playChildFeedback(isCorrect, text) {
   if (!('speechSynthesis' in window)) return;
 
   window.speechSynthesis.cancel();
-  const utterance = new SpeechSynthesisUtterance(isCorrect ? 'Excellent!' : 'Oops!');
+  const msg = isCorrect ? (text || 'Excellent!') : 'Oops!';
+  const utterance = new SpeechSynthesisUtterance(msg);
   utterance.lang = 'en-US';
   utterance.pitch = isCorrect ? 2 : 1.8;
   utterance.rate = 1.08;
@@ -1705,10 +1706,10 @@ function playChildFeedback(isCorrect) {
   window.speechSynthesis.speak(utterance);
 }
 
-function handleSuccessAction(element) {
+function handleSuccessAction(element, text) {
   if (!element) return;
   element.classList.add('border-green-500', 'bg-green-50', 'ring-4', 'ring-green-200');
-  playChildFeedback(true);
+  playChildFeedback(true, text);
 }
 
 function handleErrorAction(element) {
@@ -1869,8 +1870,9 @@ function checkAnswer(selected, correct, element) {
     currentGameScore += 100;
     currentGameCorrectCount += 1;
     updateGameStats();
-    handleSuccessAction(element);
-    showGameSuccessFeedback(getGameSuccessText());
+    const successText = getGameSuccessText();
+    handleSuccessAction(element, successText);
+    showGameSuccessFeedback(successText);
     advanceGameQuestion(renderQuestion, 1000);
 
     } else {
@@ -1944,8 +1946,9 @@ function checkLookChooseAnswer(selected, correct, element) {
       currentGameScore += 100;
       currentGameCorrectCount += 1;
       updateGameStats();
-      handleSuccessAction(element);
-      showGameSuccessFeedback(getGameSuccessText());
+      const successText = getGameSuccessText();
+      handleSuccessAction(element, successText);
+      showGameSuccessFeedback(successText);
       advanceGameQuestion(renderLookChooseQuestion, 1000);
     } else {
       handleErrorAction(element);
@@ -2267,7 +2270,7 @@ function initSpeechRecognition() {
         if (cleanResult.includes(cleanTarget) || cleanTarget.includes(cleanResult) || cleanResult === cleanTarget) {
             isQuestionLocked = true;
             updateSpeechStatus(`🎉 Mình nghe được "${transcript}" và bé phát âm rất chuẩn!`, "text-green-600");
-            handleSuccessAction(document.getElementById('speech-en'));
+            handleSuccessAction(document.getElementById('speech-en'), getGameSuccessText());
             
             currentGameScore += 100;
             currentGameCorrectCount += 1;
