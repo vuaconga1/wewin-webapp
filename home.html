@@ -1592,6 +1592,26 @@ function loadSelectedLevel() {
   }
 }
 
+    function purgeStaleGameCaches() {
+      try {
+        const cacheVersionKey = 'WW_CACHE_VERSION';
+        const storedVersion = localStorage.getItem(cacheVersionKey) || '';
+        if (storedVersion === GAME_DATA_CACHE_VERSION) return;
+
+        const keysToRemove = [];
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && key.indexOf('WW_CACHE_') === 0) {
+            keysToRemove.push(key);
+          }
+        }
+
+        keysToRemove.forEach(key => localStorage.removeItem(key));
+        localStorage.setItem(cacheVersionKey, GAME_DATA_CACHE_VERSION);
+      } catch (error) {
+      }
+    }
+
 function ensureLevelSelected() {
   if (currentLevelKey) return true;
   openLevelSelector();
@@ -2530,6 +2550,8 @@ document.addEventListener('DOMContentLoaded', function() {
   syncSidebarCollapseUI();
   syncResponsiveSidebarState();
   window.addEventListener('resize', syncResponsiveSidebarState);
+
+  purgeStaleGameCaches();
 
   const savedLevelKey = loadSelectedLevel();
   const savedLevel = getLevelOption(savedLevelKey);
