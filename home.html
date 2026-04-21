@@ -462,7 +462,7 @@
           class="md:hidden inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-white/15 text-white text-2xl font-black shadow-sm transition active:scale-95">
           ☰
         </button>
-        <img src="https://static.kiddihub.com/1/avatar-mam-non-song-ngu-an-ans-school-xa-tan-xuan-Ni0WW0TNbZZVUUmE.jpg" alt="Logo" class="h-10 sm:h-12 w-auto object-contain" width="160" height="40" fetchpriority="high">
+        <img src="https://wewin.edu.vn/wp-content/uploads/2023/07/Artboard-1-copy%401x-e1690017564880-1536x374.png" alt="Logo" class="h-10 sm:h-12 w-auto object-contain" width="160" height="40" fetchpriority="high">
       </div>
       <button type="button" onclick="logout()" class="bg-amber-400 text-blue-900 px-4 md:px-6 py-2 rounded-xl font-bold shadow-md text-sm md:text-base whitespace-nowrap">Đăng xuất</button>
     </div>
@@ -504,8 +504,11 @@
     <main class="flex-1 min-w-0 bg-gradient-to-b from-blue-50 to-blue-100 p-4 sm:p-6 md:p-10 game-bg-frame">
       <div class="flex justify-center mb-8">
         <nav
-          class="inline-flex items-center gap-2 px-5 py-2 bg-white/80 backdrop-blur rounded-2xl border border-gray-200 shadow-sm text-sm font-semibold">
+          class="inline-flex flex-wrap items-center gap-2 px-5 py-2 bg-white/80 backdrop-blur rounded-2xl border border-gray-200 shadow-sm text-sm font-semibold">
+          <span id="breadcrumb-level" class="text-amber-600 uppercase">🎯 Chọn cấp bậc</span>
+          <span class="text-gray-300">•</span>
           <span id="breadcrumb-unit" class="text-blue-600 uppercase">📖 Loading...</span>
+          <button type="button" onclick="openLevelSelector()" class="ml-1 inline-flex items-center rounded-full bg-amber-100 px-3 py-1 text-[11px] font-black uppercase tracking-wide text-amber-700 transition hover:bg-amber-200 active:scale-95">Đổi cấp bậc</button>
         </nav>
       </div>
 
@@ -723,7 +726,7 @@
   <footer class="bg-gradient-to-br from-[#1057C1] to-[#1a5fb4] text-white p-8">
     <div class="max-w-7xl mx-auto grid md:grid-cols-3 gap-8 text-center md:text-left">
       <div>
-        <img src="https://static.kiddihub.com/1/avatar-mam-non-song-ngu-an-ans-school-xa-tan-xuan-Ni0WW0TNbZZVUUmE.jpg" class="h-8 w-auto bg-white p-1 rounded mb-4 mx-auto md:mx-0 object-contain" width="120" height="32" loading="lazy">
+        <img src="https://wewin.edu.vn/wp-content/uploads/2023/07/Artboard-1-copy%401x-e1690017564880-1536x374.png" alt="Footer Logo" class="h-8 w-auto bg-white p-1 rounded mb-4 mx-auto md:mx-0 object-contain" width="120" height="32" loading="lazy">
         <p class="text-xs text-blue-100 uppercase font-bold">WeWIN Education</p>
         <p class="text-[10px] text-blue-200 mt-2 italic">WEWIN BỨT PHÁ TIẾNG ANH – VƯƠN TẦM THẾ GIỚI 🌏</p>
       </div>
@@ -786,7 +789,12 @@
       });
     }
 
-    function runServerMethod(methodName, slug) {
+    function buildLevelScopedCacheKey(gameKey, slug, levelKey) {
+      const normalizedLevelKey = normalizeLevelKeyClient(levelKey) || 'all';
+      return normalizedLevelKey + '::' + String(slug || '');
+    }
+
+    function runServerMethod(methodName, slug, levelKey) {
       return new Promise((resolve, reject) => {
         let apiParam = '';
         if (methodName === 'getGameData') apiParam = 'game.listenchoose';
@@ -794,7 +802,7 @@
         else if (methodName === 'getPronunciationData') apiParam = 'game.pronunciation';
         else apiParam = methodName;
 
-        const url = SCRIPT_URL + '?api=' + apiParam + '&slug=' + encodeURIComponent(slug || '');
+        const url = SCRIPT_URL + '?api=' + apiParam + '&slug=' + encodeURIComponent(slug || '') + '&level=' + encodeURIComponent(normalizeLevelKeyClient(levelKey) || '');
 
         fetch(url)
           .then(res => res.json())
@@ -809,32 +817,33 @@
       });
     }
 
-    function fetchGameDataset(gameKey, methodName, slug) {
+    function fetchGameDataset(gameKey, methodName, slug, levelKey) {
       if (!slug) return Promise.resolve([]);
 
       const cacheBucket = gameDataCache[gameKey];
       const pendingBucket = gameDataPending[gameKey];
+      const cacheKey = buildLevelScopedCacheKey(gameKey, slug, levelKey);
 
-      if (cacheBucket && cacheBucket[slug]) {
-        return Promise.resolve(cacheBucket[slug]);
+      if (cacheBucket && cacheBucket[cacheKey]) {
+        return Promise.resolve(cacheBucket[cacheKey]);
       }
 
-      if (pendingBucket && pendingBucket[slug]) {
-        return pendingBucket[slug];
+      if (pendingBucket && pendingBucket[cacheKey]) {
+        return pendingBucket[cacheKey];
       }
 
-      const localKey = 'WW_CACHE_' + gameKey + '_' + slug;
+      const localKey = 'WW_CACHE_' + gameKey + '_' + cacheKey;
       
       try {
         const localStr = localStorage.getItem(localKey);
         if (localStr) {
           const parsed = JSON.parse(localStr);
-          cacheBucket[slug] = parsed.data || [];
+          cacheBucket[cacheKey] = parsed.data || [];
           
           // Fetch ngầm cập nhật dữ liệu mới nếu có
-          runServerMethod(methodName, slug).then(data => {
+          runServerMethod(methodName, slug, levelKey).then(data => {
             const normalized = Array.isArray(data) ? data : [];
-            cacheBucket[slug] = normalized;
+            cacheBucket[cacheKey] = normalized;
             try { localStorage.setItem(localKey, JSON.stringify({t: Date.now(), data: normalized})); } catch(e) {}
           }).catch(() => {});
 
@@ -842,10 +851,10 @@
         }
       } catch (e) {}
 
-      const request = runServerMethod(methodName, slug)
+      const request = runServerMethod(methodName, slug, levelKey)
         .then(data => {
           const normalized = Array.isArray(data) ? data : [];
-          cacheBucket[slug] = normalized;
+          cacheBucket[cacheKey] = normalized;
           try { localStorage.setItem(localKey, JSON.stringify({t: Date.now(), data: normalized})); } catch(e) {}
           return normalized;
         })
@@ -854,38 +863,39 @@
           return [];
         })
         .finally(() => {
-          delete pendingBucket[slug];
+          delete pendingBucket[cacheKey];
         });
 
-      pendingBucket[slug] = request;
+      pendingBucket[cacheKey] = request;
       return request;
     }
 
-    function warmUnitGameCache(unitSlug) {
+    function warmUnitGameCache(unitSlug, levelKey) {
       if (!unitSlug) return;
 
-      const localKey = 'WW_CACHE_ALL_' + unitSlug;
+      const cacheKey = buildLevelScopedCacheKey('all', unitSlug, levelKey);
+      const localKey = 'WW_CACHE_ALL_' + cacheKey;
       // Tránh fetch nếu đang fetch hoặc đã fetch
-      if (gameDataCache['listenchoose'][unitSlug]) return;
+      if (gameDataCache['listenchoose'][cacheKey]) return;
 
       try {
         const localData = localStorage.getItem(localKey);
         if (localData) {
           const parsed = JSON.parse(localData);
-          gameDataCache['listenchoose'][unitSlug] = parsed.listenchoose || [];
-          gameDataCache['lookchoose'][unitSlug] = parsed.lookchoose || [];
-          gameDataCache['pronunciation'][unitSlug] = parsed.pronunciation || [];
+          gameDataCache['listenchoose'][cacheKey] = parsed.listenchoose || [];
+          gameDataCache['lookchoose'][cacheKey] = parsed.lookchoose || [];
+          gameDataCache['pronunciation'][cacheKey] = parsed.pronunciation || [];
         }
       } catch(e) {}
 
       const warm = () => {
-        fetch(SCRIPT_URL + '?api=game.all&slug=' + encodeURIComponent(unitSlug))
+        fetch(SCRIPT_URL + '?api=game.all&slug=' + encodeURIComponent(unitSlug) + '&level=' + encodeURIComponent(normalizeLevelKeyClient(levelKey) || ''))
           .then(res => res.json())
           .then(response => {
             if (response && response.success && response.data) {
-               gameDataCache['listenchoose'][unitSlug] = response.data.listenchoose || [];
-               gameDataCache['lookchoose'][unitSlug] = response.data.lookchoose || [];
-               gameDataCache['pronunciation'][unitSlug] = response.data.pronunciation || [];
+               gameDataCache['listenchoose'][cacheKey] = response.data.listenchoose || [];
+               gameDataCache['lookchoose'][cacheKey] = response.data.lookchoose || [];
+               gameDataCache['pronunciation'][cacheKey] = response.data.pronunciation || [];
                try { localStorage.setItem(localKey, JSON.stringify(response.data)); } catch(e){}
             }
           })
@@ -1041,6 +1051,7 @@
     const CATCH_FRAME_MS = 1000 / 30;
 
     function startCatchGame() {
+      if (!ensureLevelSelected()) return;
       currentGameType = 'catch';
       switchView('catch-game-view');
 
@@ -1052,7 +1063,7 @@
       stopCatchGameLoop();
       resetCatchGameState();
 
-      fetchGameDataset('pronunciation', 'getPronunciationData', currentUnitSlug).then(function(questions) {
+      fetchGameDataset('pronunciation', 'getPronunciationData', currentUnitSlug, currentLevelKey).then(function(questions) {
         if (!questions || questions.length === 0) {
           alert("Unit này chưa có hình ảnh!");
           backToMenu();
@@ -1395,6 +1406,17 @@
     }
 
     let currentUnitSlug = "";
+const LEVEL_STORAGE_KEY = 'WW_SELECTED_LEVEL';
+const LEVEL_OPTIONS = [
+  { key: 'pre11', title: 'Pre 1.1', ageLabel: '2 tuổi' },
+  { key: 'pre12', title: 'Pre 1.2', ageLabel: '3 tuổi' },
+  { key: 'pre2', title: 'Pre 2', ageLabel: '4-5 tuổi' },
+  { key: 'pre3', title: 'Pre 3', ageLabel: '6 tuổi' }
+];
+const LEVEL_OPTION_MAP = LEVEL_OPTIONS.reduce((map, level) => {
+  map[level.key] = level;
+  return map;
+}, {});
 let gameQuestions = [];
 let currentQuestionIndex = 0;
 let currentGameAudio = new Audio();
@@ -1407,6 +1429,9 @@ currentGameAudio.playsInline = true;
     let pendingGameAdvanceTimer = null;
     let isSidebarCollapsed = false;
     let currentGameType = "";
+    let currentLevelKey = '';
+    let currentLevelLabel = '';
+    let allUnitsData = [];
   let speechRecognitionActive = false;
   let speechRecognitionHadResponse = false;
   let speechMicrophoneReady = false;
@@ -1524,22 +1549,103 @@ function syncResponsiveSidebarState() {
   }
 }
 
+function normalizeLevelKeyClient(value) {
+  return String(value || '')
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, '')
+    .replace(/[^a-z0-9]/g, '');
+}
+
+function getLevelOption(levelKey) {
+  const normalizedKey = normalizeLevelKeyClient(levelKey);
+  return LEVEL_OPTION_MAP[normalizedKey] || null;
+}
+
+function getLevelDisplayText(levelKey) {
+  const level = getLevelOption(levelKey);
+  return level ? `${level.title}: ${level.ageLabel}` : '';
+}
+
+function getSelectedLevelText() {
+  return currentLevelLabel || getLevelDisplayText(currentLevelKey) || 'Chọn cấp bậc';
+}
+
+function updateLevelBreadcrumb() {
+  const levelEl = document.getElementById('breadcrumb-level');
+  if (levelEl) {
+    levelEl.innerText = currentLevelKey ? `🎯 ${getSelectedLevelText()}` : '🎯 Chọn cấp bậc';
+  }
+}
+
+function openLevelSelector() {
+  window.location.href = 'chooselevel.html';
+}
+
+function loadSelectedLevel() {
+  try {
+    return localStorage.getItem(LEVEL_STORAGE_KEY) || '';
+  } catch (error) {
+    return '';
+  }
+}
+
+function ensureLevelSelected() {
+  if (currentLevelKey) return true;
+  openLevelSelector();
+  return false;
+}
+
+function filterUnitsForCurrentLevel(units) {
+  const source = Array.isArray(units) ? units : [];
+  if (!currentLevelKey) return source;
+
+  return source.filter(unit => {
+    const unitLevels = Array.isArray(unit && unit.levels) ? unit.levels : [];
+    if (!unitLevels.length) return true;
+    return unitLevels.indexOf(currentLevelKey) !== -1;
+  });
+}
+
+function renderSidebarForCurrentLevel() {
+  if (!Array.isArray(allUnitsData) || allUnitsData.length === 0) {
+    loadSidebarWithUnits([]);
+    return;
+  }
+
+  loadSidebarWithUnits(allUnitsData, currentUnitSlug);
+}
+
 // 1. Tải danh sách Sidebar
-function loadSidebarWithUnits(units) {
-        units = units || [];
+function loadSidebarWithUnits(units, preferredSlug) {
+        units = filterUnitsForCurrentLevel(units);
         const container = document.getElementById('sidebar-menu');
-        container.innerHTML = ''; 
-        if (units.length === 0) return;
+        if (!container) return;
+        container.innerHTML = '';
+        updateLevelBreadcrumb();
+
+        if (!currentLevelKey) {
+          currentUnitSlug = '';
+          container.innerHTML = '<div class="p-4 text-center text-blue-500 text-sm font-semibold">Chọn cấp bậc để xem danh sách unit.</div>';
+          return;
+        }
+
+        if (units.length === 0) {
+          currentUnitSlug = '';
+          container.innerHTML = '<div class="p-4 text-center text-amber-600 text-sm font-semibold">Chưa có unit phù hợp với cấp bậc này.</div>';
+          return;
+        }
+
+        const activeUnit = units.find(unit => unit.slug === preferredSlug) || units[0];
 
         units.forEach((unit, index) => {
             const a = document.createElement('a');
             a.href = "#";
             const baseClass = "sidebar-item flex items-center gap-3 p-3 rounded-xl transition-all border border-transparent";
             const inactiveClass = "hover:bg-white/40 text-blue-700 text-sm";
-            a.className = baseClass + " " + (index === 0 ? "active-unit" : inactiveClass);
+            const isActive = activeUnit && unit.slug === activeUnit.slug;
+            a.className = baseClass + " " + (isActive ? "active-unit" : inactiveClass);
           a.innerHTML = `<span class="sidebar-unit-icon shrink-0">${unit.icon || '📘'}</span><span class="sidebar-unit-label line-clamp-2">${unit.name}</span>`;
-            
-            if(index === 0) updateUIForUnit(unit);
 
             a.onclick = function() {
                 document.querySelectorAll('.sidebar-item').forEach(el => {
@@ -1552,20 +1658,26 @@ function loadSidebarWithUnits(units) {
             };
             container.appendChild(a);
         });
+
+        if (activeUnit) {
+          updateUIForUnit(activeUnit);
+        }
 }
 
 function updateUIForUnit(unit) {
+    if (!ensureLevelSelected()) return;
     currentUnitSlug = unit.slug;
     document.getElementById('breadcrumb-unit').innerText = "📖 " + unit.name;
     document.getElementById('main-title').innerText = unit.name;
   closeSidebarDrawer();
-    warmUnitGameCache(unit.slug);
+    warmUnitGameCache(unit.slug, currentLevelKey);
     backToMenu(); // Luôn quay về menu khi đổi Unit
 }
 
 // 2. Chuyển đổi màn hình
 // --- SỬA LẠI HÀM START CỦA GAME 1 ---
 function startListenChoose() {
+  if (!ensureLevelSelected()) return;
     currentGameType = 'listenchoose';
     switchView('game-play-view'); // Hiện màn chơi chung
     
@@ -1581,7 +1693,7 @@ function startListenChoose() {
     document.getElementById('game-loading').classList.remove('hidden');
     document.getElementById('game-content').classList.add('hidden');
 
-    fetchGameDataset('listenchoose', 'getGameData', currentUnitSlug).then(function(questions) {
+    fetchGameDataset('listenchoose', 'getGameData', currentUnitSlug, currentLevelKey).then(function(questions) {
         gameQuestions = prepareGameQuestions(questions, true);
         currentQuestionIndex = 0;
       initializeGameStats(questions.length);
@@ -1883,12 +1995,13 @@ function checkAnswer(selected, correct, element) {
 
 /** game 2**/
 function startLookChoose() {
+    if (!ensureLevelSelected()) return;
     currentGameType = 'lookchoose';
     switchView('game-play-view'); // Hiện màn chơi chung
     document.getElementById('game-loading').classList.remove('hidden');
   document.getElementById('game-content').classList.add('hidden');
     
-  fetchGameDataset('lookchoose', 'getGameLookChooseData', currentUnitSlug).then(function(questions) {
+  fetchGameDataset('lookchoose', 'getGameLookChooseData', currentUnitSlug, currentLevelKey).then(function(questions) {
       gameQuestions = prepareGameQuestions(questions, true);
         currentQuestionIndex = 0;
     initializeGameStats(questions.length);
@@ -1959,6 +2072,7 @@ function checkLookChooseAnswer(selected, correct, element) {
 /** game 3**/
 // --- LOGIC CHO GAME 3 ---
 function startPronunciationGame() {
+  if (!ensureLevelSelected()) return;
     currentGameType = 'pronunciation';
   speechRecognitionActive = false;
   speechRecognitionHadResponse = false;
@@ -1977,7 +2091,7 @@ function startPronunciationGame() {
     updateSpeechStatus("Đang tải dữ liệu bài học...", "text-blue-500 animate-pulse");
 
     // 4. Gọi dữ liệu từ Google Sheets
-    fetchGameDataset('pronunciation', 'getPronunciationData', currentUnitSlug).then(function(questions) {
+    fetchGameDataset('pronunciation', 'getPronunciationData', currentUnitSlug, currentLevelKey).then(function(questions) {
         if (!questions || questions.length === 0) {
             alert("Unit này chưa có dữ liệu cho Game phát âm!");
             backToMenu();
@@ -2415,8 +2529,18 @@ document.addEventListener('DOMContentLoaded', function() {
   syncResponsiveSidebarState();
   window.addEventListener('resize', syncResponsiveSidebarState);
 
+  const savedLevelKey = loadSelectedLevel();
+  const savedLevel = getLevelOption(savedLevelKey);
+  if (savedLevel) {
+    currentLevelKey = savedLevel.key;
+    currentLevelLabel = `${savedLevel.title}: ${savedLevel.ageLabel}`;
+  } else {
+    window.location.replace('chooselevel.html');
+    return;
+  }
+  updateLevelBreadcrumb();
+
   // Thử nạp giao diện từ Cache nếu có
-  let hasCache = false;
   try {
     const localBoot = localStorage.getItem('WW_BOOTSTRAP');
     if (localBoot) {
@@ -2430,8 +2554,8 @@ document.addEventListener('DOMContentLoaded', function() {
          applyMenuBackgrounds();
        }
        if (cachedRes.units) {
-         loadSidebarWithUnits(cachedRes.units || []);
-         hasCache = true;
+         allUnitsData = cachedRes.units || [];
+         renderSidebarForCurrentLevel();
        }
     }
   } catch(e) {}
@@ -2450,17 +2574,8 @@ document.addEventListener('DOMContentLoaded', function() {
           applyMenuBackgrounds();
         }
         
-        // Nếu lần đầu (chưa có cache), chạy load lại sidebar từ server
-        if (!hasCache) {
-           loadSidebarWithUnits(response.units || []);
-        } else {
-           // Nếu đã có cache nhưng số lượng Unit bị thay đổi (giáo viên thêm bài), vẽ lại để cập nhật
-           const currentUnitsLength = document.querySelectorAll('#sidebar-unit-list li').length;
-           const newUnitsLength = (response.units || []).length;
-           if (currentUnitsLength !== newUnitsLength) {
-             loadSidebarWithUnits(response.units || []);
-           }
-        }
+        allUnitsData = response.units || allUnitsData || [];
+        renderSidebarForCurrentLevel();
       }
   });
 });
