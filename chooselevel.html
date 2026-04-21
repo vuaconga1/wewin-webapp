@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="WeWIN - Chọn cấp bậc học trước khi vào game.">
+  <title>WeWIN - Chọn cấp bậc</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-1: #0f172a;
+      --bg-2: #1d4ed8;
+      --bg-3: #38bdf8;
+      --panel: rgba(255, 255, 255, 0.12);
+      --panel-strong: rgba(255, 255, 255, 0.2);
+      --text: #f8fafc;
+      --muted: rgba(248, 250, 252, 0.78);
+      --gold: #facc15;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+    }
+
+    body {
+      font-family: 'Lexend', system-ui, sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(56, 189, 248, 0.35), transparent 30%),
+        radial-gradient(circle at 85% 15%, rgba(250, 204, 21, 0.22), transparent 26%),
+        linear-gradient(135deg, var(--bg-1) 0%, var(--bg-2) 48%, var(--bg-3) 100%);
+      overflow-x: hidden;
+    }
+
+    .page {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 28px 16px;
+    }
+
+    .shell {
+      width: min(1200px, 100%);
+    }
+
+    .hero {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 16px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.12);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+      font-size: 12px;
+      font-weight: 900;
+      color: rgba(255, 255, 255, 0.72);
+      backdrop-filter: blur(12px);
+    }
+
+    h1 {
+      margin: 18px 0 10px;
+      font-size: clamp(2rem, 6vw, 4.4rem);
+      line-height: 0.98;
+      font-weight: 900;
+      letter-spacing: -0.04em;
+    }
+
+    .lead {
+      margin: 0 auto;
+      max-width: 760px;
+      color: var(--muted);
+      font-size: clamp(0.98rem, 2vw, 1.2rem);
+      line-height: 1.6;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 16px;
+      margin-top: 28px;
+    }
+
+    .card {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 14px;
+      width: 100%;
+      min-height: 220px;
+      padding: 22px;
+      border-radius: 28px;
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.08));
+      color: var(--text);
+      box-shadow: 0 18px 40px rgba(2, 6, 23, 0.28);
+      backdrop-filter: blur(18px);
+      cursor: pointer;
+      transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease, background 180ms ease;
+      text-align: left;
+      appearance: none;
+      -webkit-appearance: none;
+      outline: none;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(250, 204, 21, 0.55);
+      box-shadow: 0 24px 50px rgba(2, 6, 23, 0.38);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.1));
+    }
+
+    .card.active {
+      transform: translateY(-4px) scale(1.01);
+      border-color: rgba(250, 204, 21, 0.95);
+      box-shadow: 0 0 0 4px rgba(250, 204, 21, 0.35), 0 24px 50px rgba(2, 6, 23, 0.42);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.24), rgba(255, 255, 255, 0.14));
+    }
+
+    .badge-row {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 52px;
+      height: 52px;
+      border-radius: 18px;
+      font-weight: 900;
+      font-size: 22px;
+      color: white;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28);
+    }
+
+    .tag {
+      font-size: 11px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.28em;
+      color: rgba(255, 255, 255, 0.64);
+    }
+
+    .title {
+      margin: 0;
+      font-size: clamp(1.8rem, 3vw, 2.6rem);
+      line-height: 1.02;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+    }
+
+    .desc {
+      margin: 0;
+      color: rgba(255, 255, 255, 0.82);
+      line-height: 1.55;
+      font-size: 0.98rem;
+    }
+
+    .footer {
+      margin-top: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 18px 20px;
+      border-radius: 24px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      backdrop-filter: blur(16px);
+    }
+
+    .footer-note {
+      color: rgba(255, 255, 255, 0.72);
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .continue {
+      border: 0;
+      border-radius: 999px;
+      padding: 14px 20px;
+      background: linear-gradient(135deg, #facc15 0%, #f59e0b 100%);
+      color: #0f172a;
+      font: inherit;
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 12px 26px rgba(250, 204, 21, 0.32);
+      transition: transform 180ms ease, box-shadow 180ms ease, opacity 180ms ease;
+    }
+
+    .continue:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 16px 32px rgba(250, 204, 21, 0.4);
+    }
+
+    .continue:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .selected-line {
+      font-size: 13px;
+      font-weight: 800;
+      color: rgba(255, 255, 255, 0.75);
+      min-height: 20px;
+    }
+
+    .pre11 .badge { background: linear-gradient(135deg, #38bdf8, #0ea5e9); }
+    .pre12 .badge { background: linear-gradient(135deg, #34d399, #10b981); }
+    .pre2 .badge { background: linear-gradient(135deg, #fbbf24, #f59e0b); }
+    .pre3 .badge { background: linear-gradient(135deg, #fb7185, #f43f5e); }
+
+    @media (max-width: 1024px) {
+      .grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 640px) {
+      .page {
+        padding: 20px 14px;
+      }
+
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .card {
+        min-height: 196px;
+      }
+
+      .footer {
+        align-items: stretch;
+      }
+
+      .continue {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="shell">
+      <div class="hero">
+        <div class="eyebrow">WeWIN</div>
+        <h1>Chọn cấp bậc để vào game</h1>
+        <p class="lead">Mỗi cấp bậc sẽ lọc đúng unit, hình ảnh, audio và bài tập phù hợp. Chọn một lần rồi vào thẳng màn game để tải nhanh hơn.</p>
+      </div>
+
+      <div class="grid" id="level-grid">
+        <button type="button" class="card pre11" data-level-key="pre11" onclick="chooseLevel('pre11')">
+          <div class="badge-row">
+            <span class="badge">1</span>
+            <span class="tag">2 tuổi</span>
+          </div>
+          <p class="title">Pre 1.1</p>
+          <p class="desc">Khởi động với từ vựng rất cơ bản, hình ảnh rõ ràng và câu ngắn.</p>
+        </button>
+
+        <button type="button" class="card pre12" data-level-key="pre12" onclick="chooseLevel('pre12')">
+          <div class="badge-row">
+            <span class="badge">2</span>
+            <span class="tag">3 tuổi</span>
+          </div>
+          <p class="title">Pre 1.2</p>
+          <p class="desc">Tăng dần độ dài từ, âm rõ hơn và phản xạ nghe tốt hơn.</p>
+        </button>
+
+        <button type="button" class="card pre2" data-level-key="pre2" onclick="chooseLevel('pre2')">
+          <div class="badge-row">
+            <span class="badge">3</span>
+            <span class="tag">4-5 tuổi</span>
+          </div>
+          <p class="title">Pre 2</p>
+          <p class="desc">Bắt đầu ghép mẫu câu ngắn, từ vựng theo chủ đề và nghe chọn hình.</p>
+        </button>
+
+        <button type="button" class="card pre3" data-level-key="pre3" onclick="chooseLevel('pre3')">
+          <div class="badge-row">
+            <span class="badge">4</span>
+            <span class="tag">6 tuổi</span>
+          </div>
+          <p class="title">Pre 3</p>
+          <p class="desc">Nâng độ khó với ngôn ngữ dài hơn, nhiều lựa chọn hơn và phát âm chuẩn hơn.</p>
+        </button>
+      </div>
+
+      <div class="footer">
+        <div>
+          <div class="selected-line" id="selected-level-line">Chưa chọn cấp bậc.</div>
+          <div class="footer-note">Nếu đã chọn trước đó, bạn có thể bấm tiếp tục để vào lại game ngay.</div>
+        </div>
+        <button type="button" id="continue-btn" class="continue" onclick="continueToGame()" disabled>Vào game</button>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const LEVEL_STORAGE_KEY = 'WW_SELECTED_LEVEL';
+    const LEVELS = {
+      pre11: { title: 'Pre 1.1', ageLabel: '2 tuổi' },
+      pre12: { title: 'Pre 1.2', ageLabel: '3 tuổi' },
+      pre2: { title: 'Pre 2', ageLabel: '4-5 tuổi' },
+      pre3: { title: 'Pre 3', ageLabel: '6 tuổi' }
+    };
+
+    function normalizeLevelKey(value) {
+      return String(value || '').trim().toLowerCase().replace(/\s+/g, '').replace(/[^a-z0-9]/g, '');
+    }
+
+    function getStoredLevel() {
+      try {
+        return normalizeLevelKey(localStorage.getItem(LEVEL_STORAGE_KEY) || '');
+      } catch (error) {
+        return '';
+      }
+    }
+
+    function saveLevel(levelKey) {
+      try {
+        localStorage.setItem(LEVEL_STORAGE_KEY, levelKey || '');
+      } catch (error) {
+      }
+    }
+
+    function setActiveCard(levelKey) {
+      const normalizedKey = normalizeLevelKey(levelKey);
+      document.querySelectorAll('[data-level-key]').forEach(card => {
+        card.classList.toggle('active', normalizeLevelKey(card.dataset.levelKey || '') === normalizedKey);
+      });
+    }
+
+    function updateSelectionText(levelKey) {
+      const line = document.getElementById('selected-level-line');
+      const continueBtn = document.getElementById('continue-btn');
+      const level = LEVELS[normalizeLevelKey(levelKey)];
+
+      if (level) {
+        line.textContent = `Đã chọn: ${level.title} - ${level.ageLabel}`;
+        continueBtn.disabled = false;
+      } else {
+        line.textContent = 'Chưa chọn cấp bậc.';
+        continueBtn.disabled = true;
+      }
+    }
+
+    function chooseLevel(levelKey) {
+      const normalizedKey = normalizeLevelKey(levelKey);
+      if (!LEVELS[normalizedKey]) return;
+
+      saveLevel(normalizedKey);
+      setActiveCard(normalizedKey);
+      updateSelectionText(normalizedKey);
+      window.location.href = 'home.html';
+    }
+
+    function continueToGame() {
+      const selectedLevel = getStoredLevel();
+      if (!LEVELS[selectedLevel]) return;
+      window.location.href = 'home.html';
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const selectedLevel = getStoredLevel();
+      if (LEVELS[selectedLevel]) {
+        setActiveCard(selectedLevel);
+        updateSelectionText(selectedLevel);
+      }
+    });
+  </script>
+</body>
+</html>
