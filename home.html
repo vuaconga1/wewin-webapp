@@ -2181,44 +2181,7 @@ async function refreshSpeechMicState(requestAccess) {
 }
 
 function requestPronunciationMicrophoneAccess() {
-  if (speechMicrophoneReady) {
-    updateSpeechMicPanel('granted');
-    updateSpeechStatus('✅ Micro đã sẵn sàng. Bấm Ghi âm để kiểm tra xem bé có nghe được không.', 'text-green-600');
-    return Promise.resolve(true);
-  }
-  
-  if (!speechRecognitionAvailable) {
-    updateSpeechMicPanel('unsupported', 'Trình duyệt chưa hỗ trợ ghi âm phát âm (chưa có SpeechRecognition). Vui lòng dùng Google Chrome/Edge.');
-    return Promise.resolve(false);
-  }
-
-  updateSpeechMicPanel('checking');
-  
-  return new Promise((resolve) => {
-    try {
-      const tempRec = new SpeechRecognition();
-      tempRec.lang = 'en-US';
-      tempRec.onstart = () => {
-        tempRec.stop();
-        speechMicrophoneReady = true;
-        speechMicrophonePermission = 'granted';
-        updateSpeechMicPanel('granted');
-        updateSpeechStatus('✅ Micro đã sẵn sàng. Bấm Ghi âm để nói nhé.', 'text-green-600');
-        resolve(true);
-      };
-      tempRec.onerror = (event) => {
-        speechMicrophoneReady = false;
-        speechMicrophonePermission = 'denied';
-        updateSpeechMicPanel('denied', '⚠️ Chưa cấp quyền hoặc bị chặn. Trình duyệt báo lỗi: ' + event.error);
-        resolve(false);
-      };
-      tempRec.start();
-    } catch (err) {
-      speechMicrophoneReady = false;
-      updateSpeechMicPanel('denied', '⚠️ Không thể mở micro. Error: ' + err.message);
-      resolve(false);
-    }
-  });
+  return refreshSpeechMicState(true);
 }
 
 function initSpeechRecognition() {
