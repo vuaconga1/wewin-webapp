@@ -834,7 +834,7 @@
         .then(res => res.json())
         .then(function(response) {
           if (response.success) {
-            window.top.location.href = 'home.html';
+            window.top.location.href = 'chooselevel.html';
           } else {
             showError(response.message || 'Đăng nhập chưa được. Bé thử lại nhé!');
             setLoading(false);
