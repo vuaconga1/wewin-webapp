@@ -405,6 +405,7 @@
     function updateSelectionText(levelKey) {
       const line = document.getElementById('selected-level-line');
       const continueBtn = document.getElementById('continue-btn');
+      if (!line || !continueBtn) return;
       const level = LEVELS[normalizeLevelKey(levelKey)];
 
       if (level) {
@@ -422,7 +423,6 @@
 
       saveLevel(normalizedKey);
       setActiveCard(normalizedKey);
-      updateSelectionText(normalizedKey);
       window.location.href = 'home.html';
     }
 
