@@ -65,7 +65,7 @@
       background-color: white !important;
       box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
       font-weight: 800;
-      color: #1e40af !important;
+      color: #166534 !important;
       border-color: white !important;
     }
 
@@ -1669,7 +1669,7 @@ function loadSidebarWithUnits(units, preferredSlug) {
             const a = document.createElement('a');
             a.href = "#";
             const baseClass = "sidebar-item flex items-center gap-3 p-3 rounded-xl transition-all border border-transparent";
-            const inactiveClass = "hover:bg-white/40 text-blue-700 text-sm";
+            const inactiveClass = "hover:bg-white/40 text-green-700 text-sm";
             const isActive = activeUnit && unit.slug === activeUnit.slug;
             a.className = baseClass + " " + (isActive ? "active-unit" : inactiveClass);
           a.innerHTML = `<span class="sidebar-unit-icon shrink-0">${unit.icon || '📘'}</span><span class="sidebar-unit-label line-clamp-2">${unit.name}</span>`;
@@ -1677,10 +1677,10 @@ function loadSidebarWithUnits(units, preferredSlug) {
             a.onclick = function() {
                 document.querySelectorAll('.sidebar-item').forEach(el => {
                     el.classList.remove('active-unit');
-                    el.classList.add('hover:bg-white/40', 'text-blue-700', 'text-sm');
+                  el.classList.add('hover:bg-white/40', 'text-green-700', 'text-sm');
                 });
                 this.classList.add('active-unit');
-                this.classList.remove('hover:bg-white/40', 'text-blue-700', 'text-sm');
+                this.classList.remove('hover:bg-white/40', 'text-green-700', 'text-sm');
                 updateUIForUnit(unit);
             };
             container.appendChild(a);
