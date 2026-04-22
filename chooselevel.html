@@ -423,7 +423,7 @@
 
       saveLevel(normalizedKey);
       setActiveCard(normalizedKey);
-      window.location.href = 'home.html';
+      window.location.href = `home.html?level=${encodeURIComponent(normalizedKey)}`;
     }
 
     function continueToGame() {
