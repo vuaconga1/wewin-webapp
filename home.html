@@ -455,7 +455,7 @@
 <body class="bg-pink-50 text-gray-900 flex flex-col min-h-screen">
 
   <nav
-    class="fixed top-0 left-0 right-0 z-50 h-20 bg-gradient-to-r from-[#1057C1] via-[#0E4BA9] to-[#1057C1] flex items-center px-4 sm:px-6 shadow-lg">
+    class="fixed top-0 left-0 right-0 z-50 h-20 bg-gradient-to-r from-[#16a34a] via-[#15803d] to-[#16a34a] flex items-center px-4 sm:px-6 shadow-lg">
       <div class="flex items-center justify-between w-full max-w-8xl mx-auto gap-3">
       <div class="flex items-center gap-3 min-w-0">
         <button type="button" onclick="toggleSidebarDrawer()" aria-label="Mở menu unit"
@@ -464,7 +464,7 @@
         </button>
         <img src="https://drive.google.com/thumbnail?id=1GxMPO-OPxB0WuJrD9iJK1J4Jp6UaTtT6&sz=w800" alt="AnSchool Logo" class="h-14 sm:h-16 w-auto object-contain" width="224" height="64" fetchpriority="high">
       </div>
-      <button type="button" onclick="logout()" class="bg-amber-400 text-blue-900 px-4 md:px-6 py-2 rounded-xl font-bold shadow-md text-sm md:text-base whitespace-nowrap">Đăng xuất</button>
+      <button type="button" onclick="logout()" class="bg-amber-300 text-green-950 px-4 md:px-6 py-2 rounded-xl font-bold shadow-md text-sm md:text-base whitespace-nowrap">Đăng xuất</button>
     </div>
   </nav>
 
@@ -477,44 +477,44 @@
         <div class="flex items-center gap-3 min-w-0">
           <div class="p-2 bg-white rounded-xl shadow-sm shrink-0">📚</div>
           <div class="sidebar-brand-copy min-w-0">
-            <p class="text-sm font-extrabold text-blue-800">Kids Book</p>
-            <p class="text-[10px] text-blue-600">Chọn Unit để chuyển nhanh</p>
+            <p class="text-sm font-extrabold text-green-800">Kids Book</p>
+            <p class="text-[10px] text-green-600">Chọn Unit để chuyển nhanh</p>
           </div>
         </div>
         <div class="flex items-center gap-2">
           <button type="button" onclick="closeSidebarDrawer()" aria-label="Đóng menu unit"
-            class="md:hidden inline-flex h-10 w-10 items-center justify-center rounded-xl bg-white text-blue-700 shadow-sm transition active:scale-95">
+            class="md:hidden inline-flex h-10 w-10 items-center justify-center rounded-xl bg-white text-green-700 shadow-sm transition active:scale-95">
             ✕
           </button>
         </div>
       </div>
 
       <nav id="sidebar-menu" class="sidebar-menu flex-1 space-y-2 overflow-y-auto pr-1">
-        <div class="p-4 text-center text-blue-400 text-xs italic animate-pulse">
+        <div class="p-4 text-center text-green-500 text-xs italic animate-pulse">
           Đang tải danh sách...
         </div>
       </nav>
 
       <button id="sidebar-toggle-footer" type="button" onclick="toggleSidebarCollapse()"
-        class="mt-4 hidden md:flex w-full items-center justify-center gap-2 py-2 bg-blue-100 text-blue-800 rounded-xl text-xs font-bold shadow-sm transition hover:bg-blue-200 active:scale-95">
+        class="mt-4 hidden md:flex w-full items-center justify-center gap-2 py-2 bg-green-100 text-green-800 rounded-xl text-xs font-bold shadow-sm transition hover:bg-green-200 active:scale-95">
         <span class="sidebar-footer-text">Thu gọn / mở rộng</span>
       </button>
     </aside>
 
-    <main class="flex-1 min-w-0 bg-gradient-to-b from-blue-50 to-blue-100 p-4 sm:p-6 md:p-10 game-bg-frame">
+    <main class="flex-1 min-w-0 bg-gradient-to-b from-green-50 to-emerald-100 p-4 sm:p-6 md:p-10 game-bg-frame">
       <div class="flex justify-center mb-8">
         <nav
           class="inline-flex flex-wrap items-center gap-2 px-5 py-2 bg-white/80 backdrop-blur rounded-2xl border border-gray-200 shadow-sm text-sm font-semibold">
           <span id="breadcrumb-level" class="text-amber-600 uppercase">🎯 Chọn cấp bậc</span>
           <span class="text-gray-300">•</span>
-          <span id="breadcrumb-unit" class="text-blue-600 uppercase">📖 Loading...</span>
+          <span id="breadcrumb-unit" class="text-green-600 uppercase">📖 Loading...</span>
           <button type="button" onclick="openLevelSelector()" class="ml-1 inline-flex items-center rounded-full bg-amber-100 px-3 py-1 text-[11px] font-black uppercase tracking-wide text-amber-700 transition hover:bg-amber-200 active:scale-95">Đổi cấp bậc</button>
         </nav>
       </div>
 
       <div id="menu-game-view" class="block animate-fade-in">
         <div class="text-center mb-10">
-          <h1 id="main-title" class="text-4xl md:text-5xl font-extrabold text-blue-900 mb-4 uppercase">UNIT NAME</h1>
+          <h1 id="main-title" class="text-4xl md:text-5xl font-extrabold text-green-900 mb-4 uppercase">UNIT NAME</h1>
           <p class="text-gray-600 font-medium">Chọn một trò chơi để bắt đầu khám phá!</p>
         </div>
 
@@ -535,16 +535,16 @@
       </div>
       <div id="pronunciation-game-view" class="hidden animate-slide-up w-full">
         <div class="w-full mx-auto px-2 sm:px-4">
-          <button onclick="backToMenu()" class="mb-4 sm:mb-6 inline-flex items-center gap-2 bg-white border-4 border-blue-400 text-blue-800 font-black text-base sm:text-lg px-6 py-3 rounded-full shadow-[0_8px_20px_rgba(59,130,246,0.4)] hover:bg-blue-50 hover:border-blue-500 hover:shadow-[0_12px_25px_rgba(59,130,246,0.5)] transform hover:-translate-y-1 transition-all active:scale-95 group w-fit relative z-[70]">
+          <button onclick="backToMenu()" class="mb-4 sm:mb-6 inline-flex items-center gap-2 bg-white border-4 border-green-400 text-green-800 font-black text-base sm:text-lg px-6 py-3 rounded-full shadow-[0_8px_20px_rgba(34,197,94,0.28)] hover:bg-green-50 hover:border-green-500 hover:shadow-[0_12px_25px_rgba(34,197,94,0.34)] transform hover:-translate-y-1 transition-all active:scale-95 group w-fit relative z-[70]">
             <span class="inline-block group-hover:-translate-x-1 transition-transform text-xl sm:text-2xl leading-none">←</span> Quay lại Menu Game
           </button>
 
           <section class="bg-white/95 rounded-[36px] sm:rounded-[48px] md:rounded-[60px] border border-blue-100 shadow-2xl overflow-hidden w-full flex flex-col relative game-section">
             
             <!-- Stats Header -->
-            <div class="grid grid-cols-3 gap-2 sm:gap-4 p-4 sm:p-6 md:p-8 bg-gradient-to-b from-blue-50/50 to-transparent text-center font-black text-sm sm:text-lg md:text-xl">
-              <div class="bg-white/80 backdrop-blur border border-blue-100 py-3 sm:py-4 rounded-2xl text-blue-700 shadow-sm">⭐ <span id="speech-score" class="text-xl sm:text-2xl drop-shadow-sm">0</span></div>
-              <div class="bg-white/80 backdrop-blur border border-purple-100 py-3 sm:py-4 rounded-2xl text-purple-700 shadow-sm">📚 <span id="speech-progress" class="text-xl sm:text-2xl drop-shadow-sm">1/8</span></div>
+            <div class="grid grid-cols-3 gap-2 sm:gap-4 p-4 sm:p-6 md:p-8 bg-gradient-to-b from-green-50/50 to-transparent text-center font-black text-sm sm:text-lg md:text-xl">
+              <div class="bg-white/80 backdrop-blur border border-green-100 py-3 sm:py-4 rounded-2xl text-green-700 shadow-sm">⭐ <span id="speech-score" class="text-xl sm:text-2xl drop-shadow-sm">0</span></div>
+              <div class="bg-white/80 backdrop-blur border border-emerald-100 py-3 sm:py-4 rounded-2xl text-emerald-700 shadow-sm">📚 <span id="speech-progress" class="text-xl sm:text-2xl drop-shadow-sm">1/8</span></div>
               <div class="bg-white/80 backdrop-blur border border-green-100 py-3 sm:py-4 rounded-2xl text-green-700 shadow-sm">✅ <span id="speech-correct-count" class="text-xl sm:text-2xl drop-shadow-sm">0</span></div>
             </div>
 
@@ -552,25 +552,25 @@
             <div class="flex-1 p-4 sm:p-6 md:p-8 text-center flex flex-col justify-center items-center relative overflow-hidden min-h-[30vh] sm:min-h-[40vh]">
               <!-- Animated blobs behind the image -->
               <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-50 z-0">
-                <div class="absolute w-40 h-40 sm:w-64 sm:h-64 bg-blue-300 rounded-full mix-blend-multiply filter blur-[40px] animate-pulse"></div>
-                <div class="absolute w-40 h-40 sm:w-64 sm:h-64 bg-purple-300 rounded-full mix-blend-multiply filter blur-[40px] animate-pulse" style="animation-delay: 2s; transform: translateX(30px);"></div>
+                <div class="absolute w-40 h-40 sm:w-64 sm:h-64 bg-green-300 rounded-full mix-blend-multiply filter blur-[40px] animate-pulse"></div>
+                <div class="absolute w-40 h-40 sm:w-64 sm:h-64 bg-emerald-300 rounded-full mix-blend-multiply filter blur-[40px] animate-pulse" style="animation-delay: 2s; transform: translateX(30px);"></div>
               </div>
               
               <div class="relative z-10 mb-6 sm:mb-8 md:mb-10 group">
-                <div class="absolute inset-0 bg-blue-100/50 rounded-[32px] sm:rounded-[44px] transform rotate-3 scale-105 transition-transform group-hover:rotate-6"></div>
+                <div class="absolute inset-0 bg-green-100/50 rounded-[32px] sm:rounded-[44px] transform rotate-3 scale-105 transition-transform group-hover:rotate-6"></div>
                 <img id="speech-img" src="" class="relative w-48 h-48 sm:w-64 sm:h-64 md:w-72 md:h-72 object-contain bg-white rounded-[32px] sm:rounded-[44px] p-4 sm:p-6 md:p-8 shadow-[0_20px_50px_rgba(59,130,246,0.15)] border-4 border-white transition-transform hover:-translate-y-2">
               </div>
               
-              <h2 id="speech-en" class="relative z-10 text-4xl sm:text-5xl md:text-7xl font-black mb-4 sm:mb-6 tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-blue-700 to-indigo-600 drop-shadow-sm uppercase">Teacher</h2>
+              <h2 id="speech-en" class="relative z-10 text-4xl sm:text-5xl md:text-7xl font-black mb-4 sm:mb-6 tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-green-700 to-emerald-600 drop-shadow-sm uppercase">Teacher</h2>
               
-              <div class="relative z-10 px-8 sm:px-10 py-3 bg-white/70 backdrop-blur-md rounded-full text-lg md:text-2xl font-bold border-2 border-indigo-50 shadow-inner text-gray-600 inline-block">
+              <div class="relative z-10 px-8 sm:px-10 py-3 bg-white/70 backdrop-blur-md rounded-full text-lg md:text-2xl font-bold border-2 border-green-50 shadow-inner text-gray-600 inline-block">
                 <span id="speech-vi">Giáo viên</span>
               </div>
             </div>
 
             <!-- Controls Area -->
             <div class="p-4 sm:p-6 md:p-8 flex flex-wrap justify-center items-center gap-3 sm:gap-6 bg-gradient-to-t from-gray-50 to-white relative z-20">
-              <button onclick="listenSample()" class="flex items-center justify-center gap-2 sm:gap-3 px-6 sm:px-8 py-3 sm:py-4 bg-white text-blue-600 rounded-[24px] text-lg sm:text-xl font-black border-4 border-blue-100 shadow-md hover:bg-blue-50 hover:border-blue-300 transition-all active:scale-95 group">
+                <button onclick="listenSample()" class="flex items-center justify-center gap-2 sm:gap-3 px-6 sm:px-8 py-3 sm:py-4 bg-white text-green-600 rounded-[24px] text-lg sm:text-xl font-black border-4 border-green-100 shadow-md hover:bg-green-50 hover:border-green-300 transition-all active:scale-95 group">
                     <span class="text-2xl sm:text-3xl group-hover:scale-110 transition-transform">🔊</span> Nghe
                 </button>
               <button id="btn-record" onclick="startRecording()" class="flex items-center justify-center gap-3 sm:gap-4 px-8 sm:px-12 py-4 sm:py-5 bg-gradient-to-r from-red-500 to-rose-500 text-white rounded-[28px] sm:rounded-[32px] text-xl sm:text-2xl font-black shadow-[0_15px_30px_rgba(225,29,72,0.3)] hover:-translate-y-1 hover:shadow-xl transition-all animate-pulse active:scale-95 group">
@@ -595,7 +595,7 @@
             </div>
 
             <!-- Feedback Status -->
-            <div id="speech-status" role="status" aria-live="polite" class="px-4 py-5 sm:py-6 bg-gradient-to-r from-blue-100 via-indigo-50 to-blue-100 text-blue-800 text-center font-black text-lg sm:text-xl md:text-2xl border-t border-blue-100 relative z-20 shadow-inner">
+            <div id="speech-status" role="status" aria-live="polite" class="px-4 py-5 sm:py-6 bg-gradient-to-r from-green-100 via-emerald-50 to-green-100 text-green-800 text-center font-black text-lg sm:text-xl md:text-2xl border-t border-green-100 relative z-20 shadow-inner">
               Lắng nghe thật kỹ và đọc to nhé! 👂
             </div>
           </section>
@@ -603,37 +603,37 @@
       </div>
       <div id="catch-game-view" class="hidden animate-slide-up w-full h-full">
         <div class="w-full mx-auto px-2 sm:px-4 h-full flex flex-col">
-          <button onclick="backToMenu()" class="mb-4 sm:mb-6 inline-flex items-center gap-2 bg-white border-4 border-blue-400 text-blue-800 font-black text-base sm:text-lg px-6 py-3 rounded-full shadow-[0_8px_20px_rgba(59,130,246,0.4)] hover:bg-blue-50 hover:border-blue-500 hover:shadow-[0_12px_25px_rgba(59,130,246,0.5)] transform hover:-translate-y-1 transition-all active:scale-95 group w-fit relative z-[70]">
+          <button onclick="backToMenu()" class="mb-4 sm:mb-6 inline-flex items-center gap-2 bg-white border-4 border-green-400 text-green-800 font-black text-base sm:text-lg px-6 py-3 rounded-full shadow-[0_8px_20px_rgba(34,197,94,0.28)] hover:bg-green-50 hover:border-green-500 hover:shadow-[0_12px_25px_rgba(34,197,94,0.34)] transform hover:-translate-y-1 transition-all active:scale-95 group w-fit relative z-[70]">
             <span class="inline-block group-hover:-translate-x-1 transition-transform text-xl sm:text-2xl leading-none">←</span> Quay lại Menu Game
           </button>
 
-          <section class="bg-white/90 backdrop-blur-sm rounded-[20px] sm:rounded-[28px] md:rounded-[36px] border-2 border-orange-100/80 shadow-[0_8px_40px_rgba(249,115,22,0.1),0_2px_8px_rgba(0,0,0,0.05)] p-2.5 sm:p-4 md:p-5 text-center game-section relative flex flex-col overflow-hidden min-h-[calc(100vh-12rem)] sm:min-h-[calc(100vh-14rem)]">
+          <section class="bg-white/90 backdrop-blur-sm rounded-[20px] sm:rounded-[28px] md:rounded-[36px] border-2 border-green-100/80 shadow-[0_8px_40px_rgba(34,197,94,0.10),0_2px_8px_rgba(0,0,0,0.05)] p-2.5 sm:p-4 md:p-5 text-center game-section relative flex flex-col overflow-hidden min-h-[calc(100vh-12rem)] sm:min-h-[calc(100vh-14rem)]">
             
             <!-- Stats Header - Glassmorphism -->
             <div id="catch-stats" class="grid grid-cols-2 gap-2 sm:gap-3 md:gap-4 mb-2 sm:mb-3 shrink-0 z-10 w-full">
               <div class="catch-stat-card flex flex-col items-center justify-center gap-0.5">
                 <span class="catch-stat-icon text-xl sm:text-2xl">⭐</span>
-                <span id="catch-score" class="catch-stat-value font-black text-amber-600 tabular-nums">0</span>
-                <span class="catch-stat-label text-xs font-bold text-amber-800/60 uppercase tracking-wider">Điểm</span>
+                <span id="catch-score" class="catch-stat-value font-black text-green-600 tabular-nums">0</span>
+                <span class="catch-stat-label text-xs font-bold text-green-800/60 uppercase tracking-wider">Điểm</span>
               </div>
               <div id="catch-timer-card" class="catch-stat-card flex flex-col items-center justify-center gap-0.5">
                 <span class="catch-stat-icon text-xl sm:text-2xl">⏱️</span>
                 <div class="flex items-baseline gap-0.5">
-                  <span id="catch-timer" class="catch-stat-value font-black text-sky-600 tabular-nums">60</span>
-                  <span class="text-xs font-bold text-sky-500">s</span>
+                  <span id="catch-timer" class="catch-stat-value font-black text-emerald-600 tabular-nums">60</span>
+                  <span class="text-xs font-bold text-emerald-500">s</span>
                 </div>
-                <span class="catch-stat-label text-xs font-bold text-sky-800/60 uppercase tracking-wider">Thời gian</span>
+                <span class="catch-stat-label text-xs font-bold text-emerald-800/60 uppercase tracking-wider">Thời gian</span>
               </div>
             </div>
 
             <!-- Loading State -->
             <div id="catch-loading" class="flex-1 flex flex-col items-center justify-center gap-4 py-12 sm:py-16">
-              <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full border-4 border-orange-200 border-t-orange-500 animate-spin"></div>
-              <p class="text-orange-500 font-bold text-base sm:text-lg">Đang chuẩn bị màn chơi...</p>
+              <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full border-4 border-green-200 border-t-green-500 animate-spin"></div>
+              <p class="text-green-500 font-bold text-base sm:text-lg">Đang chuẩn bị màn chơi...</p>
             </div>
 
             <!-- Game Area -->
-            <div id="catch-game-area" class="hidden relative flex-1 w-full catch-sky-bg rounded-[14px] sm:rounded-[20px] md:rounded-[24px] border-2 border-sky-200/60 overflow-hidden cursor-crosshair touch-none shadow-inner" style="min-height: max(45vh, 280px);">
+              <div id="catch-game-area" class="hidden relative flex-1 w-full catch-sky-bg rounded-[14px] sm:rounded-[20px] md:rounded-[24px] border-2 border-green-200/60 overflow-hidden cursor-crosshair touch-none shadow-inner" style="min-height: max(45vh, 280px);">
               
               <!-- Sun -->
               <div class="catch-sun"></div>
@@ -642,7 +642,7 @@
               <div class="catch-ground"></div>
 
               <!-- Overlay Start Game -->
-              <div id="catch-start-overlay" class="absolute inset-0 bg-gradient-to-b from-white/60 via-white/40 to-green-50/50 backdrop-blur-[3px] z-[100] flex flex-col items-center justify-center gap-4 sm:gap-6">
+              <div id="catch-start-overlay" class="absolute inset-0 bg-gradient-to-b from-white/30 via-white/20 to-green-50/30 backdrop-blur-[1px] z-[100] flex flex-col items-center justify-center gap-4 sm:gap-6">
                 <div class="text-4xl sm:text-5xl md:text-6xl mb-2 animate-bounce">🧺</div>
                 <button onclick="runCatchGame()" class="catch-start-btn">
                   <span class="text-2xl sm:text-3xl">▶</span> BẮT ĐẦU
@@ -661,23 +661,23 @@
       </div>
       <div id="game-play-view" class="hidden animate-slide-up">
         <div class="w-full mx-auto px-2 sm:px-4">
-          <button onclick="backToMenu()" class="mb-4 sm:mb-6 inline-flex items-center gap-2 bg-white border-4 border-blue-400 text-blue-800 font-black text-base sm:text-lg px-6 py-3 rounded-full shadow-[0_8px_20px_rgba(59,130,246,0.4)] hover:bg-blue-50 hover:border-blue-500 hover:shadow-[0_12px_25px_rgba(59,130,246,0.5)] transform hover:-translate-y-1 transition-all active:scale-95 group w-fit relative z-[70]">
+          <button onclick="backToMenu()" class="mb-4 sm:mb-6 inline-flex items-center gap-2 bg-white border-4 border-green-400 text-green-800 font-black text-base sm:text-lg px-6 py-3 rounded-full shadow-[0_8px_20px_rgba(34,197,94,0.28)] hover:bg-green-50 hover:border-green-500 hover:shadow-[0_12px_25px_rgba(34,197,94,0.34)] transform hover:-translate-y-1 transition-all active:scale-95 group w-fit relative z-[70]">
             <span class="inline-block group-hover:-translate-x-1 transition-transform text-xl sm:text-2xl leading-none">←</span> Quay lại Menu Game
           </button>
 
-          <section class="bg-white/95 rounded-[28px] sm:rounded-[36px] md:rounded-[40px] border border-blue-100 shadow-2xl p-4 sm:p-6 md:p-8 text-center game-section relative">
+          <section class="bg-white/95 rounded-[28px] sm:rounded-[36px] md:rounded-[40px] border border-green-100 shadow-2xl p-4 sm:p-6 md:p-8 text-center game-section relative">
             <div id="game-stats" class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-4 sm:mb-6 text-center font-black text-lg sm:text-xl">
-              <div class="bg-blue-50 py-4 rounded-3xl text-blue-700 shadow-sm">⭐ Điểm: <span id="game-score">0</span></div>
-              <div class="bg-purple-50 py-4 rounded-3xl text-purple-700 shadow-sm">📚 Từ: <span id="game-progress">1/1</span></div>
-              <div class="bg-green-50 py-4 rounded-3xl text-green-700 shadow-sm">✅ Đúng: <span id="game-correct-count">0</span></div>
+              <div class="bg-green-50 py-4 rounded-3xl text-green-700 shadow-sm">⭐ Điểm: <span id="game-score">0</span></div>
+              <div class="bg-emerald-50 py-4 rounded-3xl text-emerald-700 shadow-sm">📚 Từ: <span id="game-progress">1/1</span></div>
+              <div class="bg-lime-50 py-4 rounded-3xl text-lime-700 shadow-sm">✅ Đúng: <span id="game-correct-count">0</span></div>
             </div>
 
-            <div id="game-loading" class="py-16 sm:py-20 text-blue-500 font-bold text-lg sm:text-xl animate-pulse">Đang chuẩn bị câu hỏi...</div>
+            <div id="game-loading" class="py-16 sm:py-20 text-green-500 font-bold text-lg sm:text-xl animate-pulse">Đang chuẩn bị câu hỏi...</div>
 
             <div id="game-content" class="hidden">
               <h2 class="text-xl sm:text-2xl font-bold text-gray-800 mb-6 sm:mb-8">Nghe và chọn hình đúng</h2>
 
-              <button onclick="playTargetAudio()" class="w-24 h-24 sm:w-32 sm:h-32 bg-blue-500 hover:bg-blue-600 text-white rounded-full shadow-2xl transition-transform active:scale-90 flex items-center justify-center mx-auto mb-8 sm:mb-12">
+              <button onclick="playTargetAudio()" class="w-24 h-24 sm:w-32 sm:h-32 bg-green-500 hover:bg-green-600 text-white rounded-full shadow-2xl transition-transform active:scale-90 flex items-center justify-center mx-auto mb-8 sm:mb-12">
                         <span class="text-4xl sm:text-5xl">🔊</span>
                     </button>
 
@@ -693,7 +693,7 @@
         <div class="w-full max-w-2xl mx-auto px-4 mt-8 sm:mt-12">
           <section class="bg-white/95 rounded-[36px] sm:rounded-[48px] border border-yellow-200 shadow-2xl p-6 sm:p-10 text-center relative overflow-hidden">
             <div class="absolute -top-20 -left-20 w-40 h-40 bg-yellow-300 rounded-full mix-blend-multiply filter blur-2xl opacity-50 animate-pulse"></div>
-            <div class="absolute -bottom-20 -right-20 w-40 h-40 bg-blue-300 rounded-full mix-blend-multiply filter blur-2xl opacity-50 animate-pulse" style="animation-delay: 2s;"></div>
+            <div class="absolute -bottom-20 -right-20 w-40 h-40 bg-green-300 rounded-full mix-blend-multiply filter blur-2xl opacity-50 animate-pulse" style="animation-delay: 2s;"></div>
             
             <h2 class="text-3xl sm:text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-yellow-500 mb-6 drop-shadow-sm uppercase">Chúc mừng bé!</h2>
             <p class="text-lg sm:text-xl text-gray-600 font-bold mb-8">Bé đã hoàn thành xuất sắc trò chơi 🏆</p>
@@ -707,14 +707,14 @@
               <div class="bg-green-100 text-green-700 px-4 sm:px-6 py-3 rounded-2xl shadow-sm border border-green-200 flex items-center gap-2">
                 <span class="text-xl">✅</span> <span id="summary-correct">0</span> Đúng
               </div>
-              <div class="bg-blue-100 text-blue-700 px-4 sm:px-6 py-3 rounded-2xl shadow-sm border border-blue-200 flex items-center gap-2">
+              <div class="bg-green-100 text-green-700 px-4 sm:px-6 py-3 rounded-2xl shadow-sm border border-green-200 flex items-center gap-2">
                 <span class="text-xl">🎯</span> <span id="summary-total">0</span> Câu
               </div>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <button onclick="playAgain()" class="py-4 px-6 bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-[24px] text-lg sm:text-xl font-black shadow-[0_10px_20px_rgba(59,130,246,0.3)] hover:-translate-y-1 hover:shadow-xl transition-all active:scale-95 flex items-center justify-center gap-2">🔄 Chơi lại nhé</button>
-              <button onclick="backToMenu()" class="py-4 px-6 bg-white text-blue-600 border-4 border-blue-100 rounded-[24px] text-lg sm:text-xl font-black shadow-lg hover:border-blue-300 hover:bg-blue-50 transition-all active:scale-95 flex items-center justify-center gap-2">🎮 Chọn Game Khác</button>
+              <button onclick="playAgain()" class="py-4 px-6 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-[24px] text-lg sm:text-xl font-black shadow-[0_10px_20px_rgba(34,197,94,0.28)] hover:-translate-y-1 hover:shadow-xl transition-all active:scale-95 flex items-center justify-center gap-2">🔄 Chơi lại nhé</button>
+              <button onclick="backToMenu()" class="py-4 px-6 bg-white text-green-600 border-4 border-green-100 rounded-[24px] text-lg sm:text-xl font-black shadow-lg hover:border-green-300 hover:bg-green-50 transition-all active:scale-95 flex items-center justify-center gap-2">🎮 Chọn Game Khác</button>
             </div>
           </section>
         </div>
@@ -723,7 +723,7 @@
   </div>
 
 
-  <footer class="bg-gradient-to-br from-[#1057C1] to-[#1a5fb4] text-white p-8">
+  <footer class="bg-gradient-to-br from-[#16a34a] to-[#15803d] text-white p-8">
     <div class="max-w-7xl mx-auto grid md:grid-cols-3 gap-8 text-center md:text-left">
       <div>
         <img src="https://drive.google.com/thumbnail?id=1GxMPO-OPxB0WuJrD9iJK1J4Jp6UaTtT6&sz=w800" alt="AnSchool Logo" class="h-12 w-auto bg-white p-1 rounded mb-4 mx-auto md:mx-0 object-contain" width="192" height="48" loading="lazy">
@@ -732,11 +732,11 @@
       </div>
       <div class="md:col-span-2 grid sm:grid-cols-2 gap-4">
         <div class="bg-white/10 p-4 rounded-xl text-xs">
-          <p class="text-amber-300 font-bold">Địa chỉ</p>
+          <p class="text-green-200 font-bold">Địa chỉ</p>
           <p>292B Nơ Trang Long, P.12, Bình Thạnh, TP.HCM</p>
         </div>
         <div class="bg-white/10 p-4 rounded-xl text-xs">
-          <p class="text-amber-300 font-bold">Điện thoại</p>
+          <p class="text-green-200 font-bold">Điện thoại</p>
           <p>0345 969 388</p>
         </div>
       </div>
