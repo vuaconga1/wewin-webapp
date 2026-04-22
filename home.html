@@ -1586,6 +1586,11 @@ function openLevelSelector() {
 
 function loadSelectedLevel() {
   try {
+    const queryLevel = new URLSearchParams(window.location.search).get('level') || '';
+    const normalizedQueryLevel = normalizeLevelKeyClient(queryLevel);
+    if (normalizedQueryLevel) {
+      return normalizedQueryLevel;
+    }
     return localStorage.getItem(LEVEL_STORAGE_KEY) || '';
   } catch (error) {
     return '';
