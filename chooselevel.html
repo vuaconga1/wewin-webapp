@@ -96,7 +96,7 @@
 
     .hero {
       text-align: center;
-      margin-bottom: 22px;
+      margin-bottom: 18px;
       position: relative;
       z-index: 1;
     }
@@ -140,14 +140,6 @@
       color: #14532d;
     }
 
-    .lead {
-      margin: 0 auto;
-      max-width: 760px;
-      color: #166534;
-      font-size: clamp(0.98rem, 2vw, 1.2rem);
-      line-height: 1.6;
-    }
-
     .grid {
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -162,7 +154,7 @@
       align-items: flex-start;
       gap: 14px;
       width: 100%;
-      min-height: 206px;
+      min-height: 170px;
       padding: 20px;
       border-radius: 26px;
       border: 1px solid rgba(21, 128, 61, 0.14);
@@ -211,14 +203,6 @@
       font-size: 22px;
       color: white;
       box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28);
-    }
-
-    .tag {
-      font-size: 11px;
-      font-weight: 900;
-      text-transform: uppercase;
-      letter-spacing: 0.28em;
-      color: rgba(21, 128, 61, 0.74);
     }
 
     .title {
@@ -310,7 +294,7 @@
       }
 
       .card {
-        min-height: 196px;
+        min-height: 150px;
       }
 
       .footer {
@@ -332,44 +316,35 @@
         </div>
         <div class="eyebrow">AnSchool</div>
         <h1>Chọn cấp bậc để vào game</h1>
-        <p class="lead">Mỗi cấp bậc sẽ lọc đúng unit, hình ảnh, audio và bài tập phù hợp. Chọn một lần rồi vào thẳng màn game để tải nhanh hơn.</p>
       </div>
 
       <div class="grid" id="level-grid">
         <button type="button" class="card pre11" data-level-key="pre11" onclick="chooseLevel('pre11')">
           <div class="badge-row">
             <span class="badge">1</span>
-            <span class="tag">2 tuổi</span>
           </div>
           <p class="title">Pre 1.1</p>
-          <p class="desc">Khởi động với từ vựng rất cơ bản, hình ảnh rõ ràng và câu ngắn.</p>
         </button>
 
         <button type="button" class="card pre12" data-level-key="pre12" onclick="chooseLevel('pre12')">
           <div class="badge-row">
             <span class="badge">2</span>
-            <span class="tag">3 tuổi</span>
           </div>
           <p class="title">Pre 1.2</p>
-          <p class="desc">Tăng dần độ dài từ, âm rõ hơn và phản xạ nghe tốt hơn.</p>
         </button>
 
         <button type="button" class="card pre2" data-level-key="pre2" onclick="chooseLevel('pre2')">
           <div class="badge-row">
             <span class="badge">3</span>
-            <span class="tag">4-5 tuổi</span>
           </div>
           <p class="title">Pre 2</p>
-          <p class="desc">Bắt đầu ghép mẫu câu ngắn, từ vựng theo chủ đề và nghe chọn hình.</p>
         </button>
 
         <button type="button" class="card pre3" data-level-key="pre3" onclick="chooseLevel('pre3')">
           <div class="badge-row">
             <span class="badge">4</span>
-            <span class="tag">6 tuổi</span>
           </div>
           <p class="title">Pre 3</p>
-          <p class="desc">Nâng độ khó với ngôn ngữ dài hơn, nhiều lựa chọn hơn và phát âm chuẩn hơn.</p>
         </button>
       </div>
 
