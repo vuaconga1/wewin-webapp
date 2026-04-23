@@ -789,11 +789,12 @@
       });
     }
 
-    const GAME_DATA_CACHE_VERSION = 'class-v2';
+    const GAME_DATA_CACHE_VERSION = 'class-week-v1';
 
     function buildLevelScopedCacheKey(gameKey, slug, levelKey) {
       const normalizedLevelKey = normalizeLevelKeyClient(levelKey) || 'all';
-      return GAME_DATA_CACHE_VERSION + '::' + normalizedLevelKey + '::' + String(slug || '');
+      const normalizedWeekKey = String(currentWeekValue || '').trim().toLowerCase() || 'all';
+      return GAME_DATA_CACHE_VERSION + '::' + normalizedWeekKey + '::' + normalizedLevelKey + '::' + String(slug || '');
     }
 
     function runServerMethod(methodName, slug, levelKey) {
