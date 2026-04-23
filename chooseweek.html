@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="vi">
 <head>
   <meta charset="UTF-8">
@@ -321,50 +321,34 @@
         <h1>Chọn tuần học để vào game</h1>
       </div>
 
-      <div class="grid" id="level-grid">
-        <button type="button" class="card pre11" data-week-key="pre11" onclick="chooseWeek('pre11')">
+      <div class="grid" id="week-grid" style="grid-template-columns: repeat(2, minmax(0, 1fr)); max-width: 620px; margin: 24px auto 0;">
+        <button type="button" class="card pre11" data-week-key="1" onclick="chooseWeek('1')">
           <div class="badge-row">
             <span class="badge">1</span>
-            <span class="tag">2 tuổi</span>
+            <span class="tag">Week</span>
           </div>
-          <p class="title">Pre 1.1</p>
+          <p class="title">Tuần 1</p>
+          <p class="desc">Bộ từ vựng cho tuần đầu tiên.</p>
         </button>
 
-        <button type="button" class="card pre12" data-week-key="pre12" onclick="chooseWeek('pre12')">
+        <button type="button" class="card pre12" data-week-key="2" onclick="chooseWeek('2')">
           <div class="badge-row">
             <span class="badge">2</span>
-            <span class="tag">3 tuổi</span>
+            <span class="tag">Week</span>
           </div>
-          <p class="title">Pre 1.2</p>
-        </button>
-
-        <button type="button" class="card pre2" data-week-key="pre2" onclick="chooseWeek('pre2')">
-          <div class="badge-row">
-            <span class="badge">3</span>
-            <span class="tag">4-5 tuổi</span>
-          </div>
-          <p class="title">Pre 2</p>
-        </button>
-
-        <button type="button" class="card pre3" data-week-key="pre3" onclick="chooseWeek('pre3')">
-          <div class="badge-row">
-            <span class="badge">4</span>
-            <span class="tag">6 tuổi</span>
-          </div>
-          <p class="title">Pre 3</p>
+          <p class="title">Tuần 2</p>
+          <p class="desc">Bộ từ vựng cho tuần thứ hai.</p>
         </button>
       </div>
-    </section>
+      </section>
   </main>
 
   <script>
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyD2G7ROY58fHoKM6aPlZ9V9SqZ4g61Gf6-hS1kj2pf1uBNwRRw3A_x4We3av3ojyK_/exec';
     const WEEK_STORAGE_KEY = 'WW_SELECTED_WEEK';
-    const WEEKS = {
-      pre11: { title: 'Pre 1.1', ageLabel: '2 tuổi' },
-      pre12: { title: 'Pre 1.2', ageLabel: '3 tuổi' },
-      pre2: { title: 'Pre 2', ageLabel: '4-5 tuổi' },
-      pre3: { title: 'Pre 3', ageLabel: '6 tuổi' }
+    const WEEK_OPTIONS = {
+      '1': { title: 'Tuần 1' },
+      '2': { title: 'Tuần 2' }
     };
 
     const bgPromise = fetch(`${SCRIPT_URL}?api=app.bootstrap`).then(res => res.json()).catch(() => null);
@@ -382,57 +366,48 @@
 
     function getStoredWeek() {
       try {
+        const queryWeek = new URLSearchParams(window.location.search).get('week') || '';
+        const normalizedQueryWeek = normalizeWeekKey(queryWeek);
+        if (normalizedQueryWeek) {
+          localStorage.setItem(WEEK_STORAGE_KEY, normalizedQueryWeek);
+          return normalizedQueryWeek;
+        }
+
         return normalizeWeekKey(localStorage.getItem(WEEK_STORAGE_KEY) || '');
       } catch (error) {
         return '';
       }
     }
 
-    function saveWeek(levelKey) {
+    function saveWeek(weekKey) {
       try {
-        localStorage.setItem(WEEK_STORAGE_KEY, levelKey || '');
+        localStorage.setItem(WEEK_STORAGE_KEY, weekKey || '');
       } catch (error) {
       }
     }
 
-    function setActiveCard(levelKey) {
-      const normalizedKey = normalizeWeekKey(levelKey);
+    function setActiveCard(weekKey) {
+      const normalizedKey = normalizeWeekKey(weekKey);
       document.querySelectorAll('[data-week-key]').forEach(card => {
-        card.classList.toggle('active', normalizeWeekKey(card.dataset.levelKey || '') === normalizedKey);
+        card.classList.toggle('active', normalizeWeekKey(card.dataset.weekKey || '') === normalizedKey);
       });
     }
 
-    function updateSelectionText(levelKey) {
-      const line = document.getElementById('selected-week-line');
-      const continueBtn = document.getElementById('continue-btn');
-      if (!line || !continueBtn) return;
-      const level = WEEKS[normalizeWeekKey(levelKey)];
-
-      if (level) {
-        line.textContent = `Đã chọn: ${level.title} - ${level.ageLabel}`;
-        continueBtn.disabled = false;
-      } else {
-        line.textContent = 'Chưa Chọn tuần học.';
-        continueBtn.disabled = true;
-      }
-    }
-
-    function chooseWeek(levelKey) {
-      const normalizedKey = normalizeWeekKey(levelKey);
-      if (!WEEKS[normalizedKey]) return;
+    function chooseWeek(weekKey) {
+      const normalizedKey = normalizeWeekKey(weekKey);
+      if (!WEEK_OPTIONS[normalizedKey]) return;
 
       saveWeek(normalizedKey);
       setActiveCard(normalizedKey);
-      window.location.href = `chooselevel.html`;
-    }
-
-    function continueToGame() {
-      const selectedLevel = getStoredWeek();
-      if (!WEEKS[selectedLevel]) return;
-      window.location.href = 'chooselevel.html';
+      window.location.href = `chooselevel.html?week=${encodeURIComponent(normalizedKey)}`;
     }
 
     document.addEventListener('DOMContentLoaded', () => {
+      const selectedWeek = getStoredWeek();
+      if (selectedWeek) {
+        setActiveCard(selectedWeek);
+      }
+
       try {
         const localBoot = localStorage.getItem('WW_BOOTSTRAP');
         if (localBoot) {
@@ -452,13 +427,9 @@
           }
         }
       });
-
-      const selectedLevel = getStoredWeek();
-      if (WEEKS[selectedLevel]) {
-        setActiveCard(selectedLevel);
-        updateSelectionText(selectedLevel);
-      }
     });
   </script>
 </body>
 </html>
+
+
