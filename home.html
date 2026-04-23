@@ -804,7 +804,7 @@
         else if (methodName === 'getPronunciationData') apiParam = 'game.pronunciation';
         else apiParam = methodName;
 
-        const url = SCRIPT_URL + '?api=' + apiParam + '&slug=' + encodeURIComponent(slug || '') + '&level=' + encodeURIComponent(normalizeLevelKeyClient(levelKey) || '');
+        const url = SCRIPT_URL + '?api=' + apiParam + '&slug=' + encodeURIComponent(slug || '') + '&level=' + encodeURIComponent(normalizeLevelKeyClient(levelKey) || '') + '&week=' + encodeURIComponent(currentWeekValue || '');
 
         fetch(url)
           .then(res => res.json())
@@ -891,7 +891,7 @@
       } catch(e) {}
 
       const warm = () => {
-        fetch(SCRIPT_URL + '?api=game.all&slug=' + encodeURIComponent(unitSlug) + '&level=' + encodeURIComponent(normalizeLevelKeyClient(levelKey) || ''))
+        fetch(SCRIPT_URL + '?api=game.all&slug=' + encodeURIComponent(unitSlug) + '&level=' + encodeURIComponent(normalizeLevelKeyClient(levelKey) || '') + '&week=' + encodeURIComponent(currentWeekValue || ''))
           .then(res => res.json())
           .then(response => {
             if (response && response.success && response.data) {
@@ -1408,7 +1408,9 @@
     }
 
     let currentUnitSlug = "";
+    let currentWeekValue = "";
 const LEVEL_STORAGE_KEY = 'WW_SELECTED_LEVEL';
+const WEEK_STORAGE_KEY = 'WW_SELECTED_WEEK';
 const LEVEL_OPTIONS = [
   { key: 'pre11', title: 'Pre 1.1', ageLabel: '2 tuổi' },
   { key: 'pre12', title: 'Pre 1.2', ageLabel: '3 tuổi' },
@@ -1582,6 +1584,16 @@ function updateLevelBreadcrumb() {
 
 function openLevelSelector() {
   window.location.href = 'chooselevel.html';
+}
+
+function loadSelectedWeek() {
+  try {
+    const queryWeek = new URLSearchParams(window.location.search).get('week') || '';
+    if (queryWeek) return queryWeek;
+    return localStorage.getItem(WEEK_STORAGE_KEY) || '';
+  } catch (error) {
+    return '';
+  }
 }
 
 function loadSelectedLevel() {
@@ -2557,6 +2569,15 @@ document.addEventListener('DOMContentLoaded', function() {
   window.addEventListener('resize', syncResponsiveSidebarState);
 
   purgeStaleGameCaches();
+
+  const savedWeekValue = loadSelectedWeek();
+  if (savedWeekValue) {
+    currentWeekValue = savedWeekValue;
+  } else {
+    // Nếu chưa chọn week thì về trang chọn week
+    window.location.replace('chooseweek.html');
+    return;
+  }
 
   const savedLevelKey = loadSelectedLevel();
   const savedLevel = getLevelOption(savedLevelKey);
