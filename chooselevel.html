@@ -82,7 +82,7 @@
     }
 
     .shell {
-      width: min(1100px, 100%);
+      width: min(1280px, 100%);
       padding: clamp(24px, 4vw, 48px);
       border-radius: 40px;
       background: rgba(255, 255, 255, 0.85);
@@ -200,8 +200,8 @@
       align-items: flex-start;
       gap: 16px;
       width: 100%;
-      min-height: 190px;
-      padding: 26px;
+      min-height: 220px;
+      padding: 28px;
       border-radius: 32px;
       border: 2px solid rgba(255, 255, 255, 0.8);
       background: linear-gradient(145deg, rgba(255, 255, 255, 0.95) 0%, rgba(240, 253, 244, 0.8) 100%);
@@ -286,11 +286,12 @@
       background: var(--pill-bg);
       border: 1px solid var(--pill-border);
       box-shadow: var(--pill-shadow);
-      font-size: clamp(2rem, 3.5vw, 2.8rem);
+      font-size: clamp(1.5rem, 2.1vw, 2.05rem);
       line-height: 1.1;
       font-weight: 900;
       letter-spacing: -0.03em;
       color: #064e3b;
+      white-space: nowrap;
     }
 
     .desc {
@@ -367,8 +368,8 @@
       .back-button { top: 14px; left: 14px; padding: 10px 14px; font-size: 13px; }
       h1 { font-size: 2rem; }
       .grid { grid-template-columns: 1fr; gap: 16px; }
-      .card { min-height: 160px; padding: 20px; border-radius: 28px; }
-      .title { padding: 10px 14px; border-radius: 20px; font-size: clamp(1.8rem, 7vw, 2.4rem); }
+      .card { min-height: 180px; padding: 20px; border-radius: 28px; }
+      .title { padding: 10px 14px; border-radius: 20px; font-size: clamp(1.35rem, 5vw, 1.8rem); }
       .footer { align-items: stretch; }
       .continue { width: 100%; }
     }
@@ -393,7 +394,6 @@
         <button type="button" class="card pre11" data-level-key="pre11" onclick="chooseLevel('pre11')">
           <div class="badge-row">
             <span class="badge">1</span>
-            <span class="tag">2 years old</span>
           </div>
           <p class="title">2 years old</p>
         </button>
@@ -401,7 +401,6 @@
         <button type="button" class="card pre12" data-level-key="pre12" onclick="chooseLevel('pre12')">
           <div class="badge-row">
             <span class="badge">2</span>
-            <span class="tag">3 years old</span>
           </div>
           <p class="title">3 years old</p>
         </button>
@@ -409,7 +408,6 @@
         <button type="button" class="card pre2" data-level-key="pre2" onclick="chooseLevel('pre2')">
           <div class="badge-row">
             <span class="badge">3</span>
-            <span class="tag">4-5 years old</span>
           </div>
           <p class="title">4-5 years old</p>
         </button>
@@ -417,7 +415,6 @@
         <button type="button" class="card pre3" data-level-key="pre3" onclick="chooseLevel('pre3')">
           <div class="badge-row">
             <span class="badge">4</span>
-            <span class="tag">6 years old</span>
           </div>
           <p class="title">6 years old</p>
         </button>
