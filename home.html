@@ -827,32 +827,11 @@
       const pendingBucket = gameDataPending[gameKey];
       const cacheKey = buildLevelScopedCacheKey(gameKey, slug, levelKey);
 
-      if (cacheBucket && cacheBucket[cacheKey]) {
-        return Promise.resolve(cacheBucket[cacheKey]);
-      }
-
       if (pendingBucket && pendingBucket[cacheKey]) {
         return pendingBucket[cacheKey];
       }
 
       const localKey = 'WW_CACHE_' + gameKey + '_' + cacheKey;
-      
-      try {
-        const localStr = localStorage.getItem(localKey);
-        if (localStr) {
-          const parsed = JSON.parse(localStr);
-          cacheBucket[cacheKey] = parsed.data || [];
-          
-          // Fetch ngầm cập nhật dữ liệu mới nếu có
-          runServerMethod(methodName, slug, levelKey).then(data => {
-            const normalized = Array.isArray(data) ? data : [];
-            cacheBucket[cacheKey] = normalized;
-            try { localStorage.setItem(localKey, JSON.stringify({t: Date.now(), data: normalized})); } catch(e) {}
-          }).catch(() => {});
-
-          return Promise.resolve(parsed.data || []);
-        }
-      } catch (e) {}
 
       const request = runServerMethod(methodName, slug, levelKey)
         .then(data => {
@@ -863,6 +842,18 @@
         })
         .catch(error => {
           console.error(`Failed loading ${methodName} for ${slug}`, error);
+
+          try {
+            const localStr = localStorage.getItem(localKey);
+            if (localStr) {
+              const parsed = JSON.parse(localStr);
+              const fallbackData = Array.isArray(parsed.data) ? parsed.data : [];
+              cacheBucket[cacheKey] = fallbackData;
+              return fallbackData;
+            }
+          } catch (fallbackError) {
+          }
+
           return [];
         })
         .finally(() => {
