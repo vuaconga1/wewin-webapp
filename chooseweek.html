@@ -1,0 +1,464 @@
+﻿<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="AnSchool - Chọn tuần học trước khi vào game.">
+  <title>AnSchool - Chọn Tuần</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-1: #052e16;
+      --bg-2: #16a34a;
+      --bg-3: #86efac;
+      --panel: rgba(255, 255, 255, 0.78);
+      --panel-strong: rgba(255, 255, 255, 0.92);
+      --text: #14532d;
+      --muted: rgba(22, 101, 52, 0.74);
+      --gold: #facc15;
+      --primary: #16a34a;
+      --primary-dark: #15803d;
+      --primary-light: #4ade80;
+      --surface: rgba(255, 255, 255, 0.86);
+      --surface-border: rgba(255, 255, 255, 0.68);
+      --game-bg-image: linear-gradient(180deg, rgba(229, 255, 214, 0.98), rgba(200, 245, 179, 0.96));
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html, body {
+      margin: 0;
+      min-height: 100%;
+    }
+
+    body {
+      font-family: 'Lexend', system-ui, sans-serif;
+      color: var(--text);
+      min-height: 100vh;
+      position: relative;
+      background: #f0fdf4;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      background-image: var(--game-bg-image);
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      pointer-events: none;
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background: linear-gradient(180deg, rgba(240, 253, 244, 0.80), rgba(220, 252, 231, 0.86));
+      pointer-events: none;
+    }
+
+    .page {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 28px 16px;
+    }
+
+    .shell {
+      width: min(1100px, 100%);
+      padding: clamp(14px, 2.2vw, 22px);
+      border-radius: 34px;
+      background: rgba(255, 255, 255, 0.98);
+      border: 1px solid var(--surface-border);
+      box-shadow: 0 20px 50px rgba(21, 128, 61, 0.14), 0 4px 12px rgba(15, 23, 42, 0.06);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .shell::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0));
+      pointer-events: none;
+    }
+
+    .hero {
+      text-align: center;
+      margin-bottom: 18px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .brand-mark {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 18px;
+    }
+
+    .brand-logo {
+      width: min(190px, 48vw);
+      height: auto;
+      object-fit: contain;
+      filter: drop-shadow(0 8px 20px rgba(21, 128, 61, 0.18));
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 16px;
+      border-radius: 999px;
+      background: rgba(220, 252, 231, 0.9);
+      border: 1px solid rgba(34, 197, 94, 0.20);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      font-size: 12px;
+      font-weight: 900;
+      color: #166534;
+    }
+
+    h1 {
+      margin: 18px 0 10px;
+      font-size: clamp(2rem, 6vw, 4.4rem);
+      line-height: 0.98;
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      color: #14532d;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 24px;
+    }
+
+    .card {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 14px;
+      width: 100%;
+      min-height: 170px;
+      padding: 20px;
+      border-radius: 26px;
+      border: 1px solid rgba(21, 128, 61, 0.14);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(240, 253, 244, 0.92));
+      color: #14532d;
+      box-shadow: 0 18px 40px rgba(15, 23, 42, 0.12);
+      cursor: pointer;
+      transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease, background 180ms ease;
+      text-align: left;
+      appearance: none;
+      -webkit-appearance: none;
+      outline: none;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      border-color: rgba(34, 197, 94, 0.55);
+      box-shadow: 0 24px 50px rgba(21, 128, 61, 0.22);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(236, 253, 245, 0.96));
+    }
+
+    .card.active {
+      transform: translateY(-4px) scale(1.01);
+      border-color: rgba(34, 197, 94, 0.95);
+      box-shadow: 0 0 0 4px rgba(34, 197, 94, 0.20), 0 24px 50px rgba(21, 128, 61, 0.24);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(220, 252, 231, 0.96));
+    }
+
+    .badge-row {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .tag {
+      font-size: 11px;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 0.28em;
+      color: rgba(21, 128, 61, 0.74);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 52px;
+      height: 52px;
+      border-radius: 18px;
+      font-weight: 900;
+      font-size: 22px;
+      color: white;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28);
+    }
+
+    .title {
+      margin: 0;
+      font-size: clamp(1.8rem, 3vw, 2.6rem);
+      line-height: 1.02;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      color: #14532d;
+    }
+
+    .desc {
+      margin: 0;
+      color: #166534;
+      line-height: 1.55;
+      font-size: 0.98rem;
+    }
+
+    .footer {
+      margin-top: 16px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 16px 18px;
+      border-radius: 22px;
+      background: rgba(255, 255, 255, 0.96);
+      border: 1px solid rgba(21, 128, 61, 0.12);
+    }
+
+    .footer-note {
+      color: #166534;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .continue {
+      border: 0;
+      border-radius: 999px;
+      padding: 14px 20px;
+      background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+      color: #ffffff;
+      font: inherit;
+      font-weight: 900;
+      cursor: pointer;
+      box-shadow: 0 12px 26px rgba(34, 197, 94, 0.28);
+      transition: transform 180ms ease, box-shadow 180ms ease, opacity 180ms ease;
+    }
+
+    .continue:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 16px 32px rgba(34, 197, 94, 0.36);
+    }
+
+    .continue:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .selected-line {
+      font-size: 13px;
+      font-weight: 800;
+      color: #14532d;
+      min-height: 20px;
+    }
+
+    .pre11 .badge { background: linear-gradient(135deg, #22c55e, #16a34a); }
+    .pre12 .badge { background: linear-gradient(135deg, #4ade80, #22c55e); }
+    .pre2 .badge { background: linear-gradient(135deg, #86efac, #4ade80); }
+    .pre3 .badge { background: linear-gradient(135deg, #bbf7d0, #86efac); }
+
+    @media (max-width: 1024px) {
+      .grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 640px) {
+      .page {
+        padding: 20px 14px;
+      }
+
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .card {
+        min-height: 150px;
+      }
+
+      .footer {
+        align-items: stretch;
+      }
+
+      .continue {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="shell">
+      <div class="hero">
+        <div class="brand-mark">
+          <img src="https://drive.google.com/thumbnail?id=1GxMPO-OPxB0WuJrD9iJK1J4Jp6UaTtT6&sz=w800" alt="AnSchool Logo" class="brand-logo">
+        </div>
+        <div class="eyebrow">AnSchool</div>
+        <h1>Chọn tuần học để vào game</h1>
+      </div>
+
+      <div class="grid" id="level-grid">
+        <button type="button" class="card pre11" data-week-key="pre11" onclick="chooseWeek('pre11')">
+          <div class="badge-row">
+            <span class="badge">1</span>
+            <span class="tag">2 tuổi</span>
+          </div>
+          <p class="title">Pre 1.1</p>
+        </button>
+
+        <button type="button" class="card pre12" data-week-key="pre12" onclick="chooseWeek('pre12')">
+          <div class="badge-row">
+            <span class="badge">2</span>
+            <span class="tag">3 tuổi</span>
+          </div>
+          <p class="title">Pre 1.2</p>
+        </button>
+
+        <button type="button" class="card pre2" data-week-key="pre2" onclick="chooseWeek('pre2')">
+          <div class="badge-row">
+            <span class="badge">3</span>
+            <span class="tag">4-5 tuổi</span>
+          </div>
+          <p class="title">Pre 2</p>
+        </button>
+
+        <button type="button" class="card pre3" data-week-key="pre3" onclick="chooseWeek('pre3')">
+          <div class="badge-row">
+            <span class="badge">4</span>
+            <span class="tag">6 tuổi</span>
+          </div>
+          <p class="title">Pre 3</p>
+        </button>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyD2G7ROY58fHoKM6aPlZ9V9SqZ4g61Gf6-hS1kj2pf1uBNwRRw3A_x4We3av3ojyK_/exec';
+    const WEEK_STORAGE_KEY = 'WW_SELECTED_WEEK';
+    const WEEKS = {
+      pre11: { title: 'Pre 1.1', ageLabel: '2 tuổi' },
+      pre12: { title: 'Pre 1.2', ageLabel: '3 tuổi' },
+      pre2: { title: 'Pre 2', ageLabel: '4-5 tuổi' },
+      pre3: { title: 'Pre 3', ageLabel: '6 tuổi' }
+    };
+
+    const bgPromise = fetch(`${SCRIPT_URL}?api=app.bootstrap`).then(res => res.json()).catch(() => null);
+
+    function applyGameBackground(imageUrl) {
+      const value = imageUrl && String(imageUrl).trim()
+        ? `url("${String(imageUrl).trim()}")`
+        : 'linear-gradient(180deg, rgba(229, 255, 214, 0.98), rgba(200, 245, 179, 0.96))';
+      document.documentElement.style.setProperty('--game-bg-image', value);
+    }
+
+    function normalizeWeekKey(value) {
+      return String(value || '').trim().toLowerCase().replace(/\s+/g, '').replace(/[^a-z0-9]/g, '');
+    }
+
+    function getStoredWeek() {
+      try {
+        return normalizeWeekKey(localStorage.getItem(WEEK_STORAGE_KEY) || '');
+      } catch (error) {
+        return '';
+      }
+    }
+
+    function saveWeek(levelKey) {
+      try {
+        localStorage.setItem(WEEK_STORAGE_KEY, levelKey || '');
+      } catch (error) {
+      }
+    }
+
+    function setActiveCard(levelKey) {
+      const normalizedKey = normalizeWeekKey(levelKey);
+      document.querySelectorAll('[data-week-key]').forEach(card => {
+        card.classList.toggle('active', normalizeWeekKey(card.dataset.levelKey || '') === normalizedKey);
+      });
+    }
+
+    function updateSelectionText(levelKey) {
+      const line = document.getElementById('selected-week-line');
+      const continueBtn = document.getElementById('continue-btn');
+      if (!line || !continueBtn) return;
+      const level = WEEKS[normalizeWeekKey(levelKey)];
+
+      if (level) {
+        line.textContent = `Đã chọn: ${level.title} - ${level.ageLabel}`;
+        continueBtn.disabled = false;
+      } else {
+        line.textContent = 'Chưa Chọn tuần học.';
+        continueBtn.disabled = true;
+      }
+    }
+
+    function chooseWeek(levelKey) {
+      const normalizedKey = normalizeWeekKey(levelKey);
+      if (!WEEKS[normalizedKey]) return;
+
+      saveWeek(normalizedKey);
+      setActiveCard(normalizedKey);
+      window.location.href = `chooselevel.html`;
+    }
+
+    function continueToGame() {
+      const selectedLevel = getStoredWeek();
+      if (!WEEKS[selectedLevel]) return;
+      window.location.href = 'chooselevel.html';
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      try {
+        const localBoot = localStorage.getItem('WW_BOOTSTRAP');
+        if (localBoot) {
+          const cachedRes = JSON.parse(localBoot);
+          if (cachedRes && cachedRes.gameBgImageUrl) {
+            applyGameBackground(cachedRes.gameBgImageUrl);
+          }
+        }
+      } catch (error) {
+      }
+
+      bgPromise.then(data => {
+        if (data && data.success) {
+          try { localStorage.setItem('WW_BOOTSTRAP', JSON.stringify(data)); } catch (error) {}
+          if (data.gameBgImageUrl) {
+            applyGameBackground(data.gameBgImageUrl);
+          }
+        }
+      });
+
+      const selectedLevel = getStoredWeek();
+      if (WEEKS[selectedLevel]) {
+        setActiveCard(selectedLevel);
+        updateSelectionText(selectedLevel);
+      }
+    });
+  </script>
+</body>
+</html>
