@@ -21,20 +21,27 @@
       --game-bg-image: linear-gradient(180deg, rgba(229, 255, 214, 0.98), rgba(200, 245, 179, 0.96));
     }
 
-    * { box-sizing: border-box; }
+    * { 
+      box-sizing: border-box; 
+      -webkit-tap-highlight-color: transparent;
+    }
 
     html, body {
       margin: 0;
       min-height: 100%;
+      min-height: 100dvh;
     }
 
     body {
       font-family: 'Lexend', system-ui, sans-serif;
       color: var(--text);
       min-height: 100vh;
+      min-height: 100dvh;
       position: relative;
       background: #f0fdf4;
       overflow-x: hidden;
+      -webkit-user-select: none;
+      user-select: none;
     }
 
     body::before {
@@ -75,6 +82,7 @@
 
     .page {
       min-height: 100vh;
+      min-height: 100dvh;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -368,13 +376,15 @@
     }
 
     @media (max-width: 640px) {
-      .page { padding: 20px 14px; }
-      .shell { border-radius: 32px; padding: 24px 16px; }
-      .back-button { top: 14px; left: 14px; padding: 10px 14px; font-size: 13px; }
-      h1 { font-size: 2rem; }
-      .grid { grid-template-columns: 1fr; gap: 16px; }
-      .card { min-height: 180px; padding: 20px; border-radius: 28px; }
-      .title { padding: 10px 14px; border-radius: 20px; font-size: clamp(1.25rem, 4.8vw, 1.7rem); }
+      .page { padding: 16px 12px; }
+      .shell { border-radius: 28px; padding: 20px 12px; }
+      .back-button { top: 12px; left: 12px; padding: 8px 12px; font-size: 12px; }
+      h1 { font-size: 1.75rem; margin: 16px 0 8px; }
+      .brand-logo { width: 160px; margin-bottom: 16px; }
+      .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 24px; }
+      .card { min-height: 140px; padding: 16px 12px; border-radius: 24px; gap: 12px; }
+      .title { padding: 8px 10px; border-radius: 16px; font-size: clamp(1rem, 3.5vw, 1.25rem); }
+      .badge { width: 44px; height: 44px; font-size: 20px; border-radius: 14px; }
       .footer { align-items: stretch; }
       .continue { width: 100%; }
     }
@@ -400,28 +410,28 @@
           <div class="badge-row">
             <span class="badge">1</span>
           </div>
-          <p class="title">Pre 1.1</p>
+          <p class="title">2 years old</p>
         </button>
 
         <button type="button" class="card pre12" data-level-key="pre12" onclick="chooseLevel('pre12')">
           <div class="badge-row">
             <span class="badge">2</span>
           </div>
-          <p class="title">Pre 1.2</p>
+          <p class="title">3 years old</p>
         </button>
 
         <button type="button" class="card pre2" data-level-key="pre2" onclick="chooseLevel('pre2')">
           <div class="badge-row">
             <span class="badge">3</span>
           </div>
-          <p class="title">Pre 2</p>
+          <p class="title">4-5 years old</p>
         </button>
 
         <button type="button" class="card pre3" data-level-key="pre3" onclick="chooseLevel('pre3')">
           <div class="badge-row">
             <span class="badge">4</span>
           </div>
-          <p class="title">Pre 3</p>
+          <p class="title">6 years old</p>
         </button>
       </div>
     </section>
