@@ -1605,6 +1605,10 @@ function getUnitOrderValue(unit, fallbackIndex) {
   return Number.isFinite(indexValue) ? String(indexValue + 1) : '';
 }
 
+function getPreferredWeekKeyForUnit(unitValue) {
+  return normalizeUnitKey(unitValue) === '1' ? '2' : '1';
+}
+
 function getSelectedSidebarWeekKey() {
   return normalizeWeekKey(currentWeekValue || loadSelectedWeek() || '1') || '1';
 }
@@ -1659,7 +1663,7 @@ function resolvePreferredUnitSlug(units) {
 function buildSidebarUnitItems(units) {
   const source = Array.isArray(units) ? filterUnitsForCurrentLevel(units) : [];
   const queryUnitValue = normalizeUnitKey(getSelectedUnitValue());
-  const activeWeekKey = getSelectedSidebarWeekKey();
+  const selectedUnitValue = normalizeUnitKey(queryUnitValue || currentUnitOrder);
   const fixedUnitOne = source.find((unit, index) => getUnitOrderValue(unit, index) === '1') || null;
   const fixedUnitFive = source.find((unit, index) => getUnitOrderValue(unit, index) === '5') || null;
   const currentUnit = source.find((unit, index) => {
@@ -1668,19 +1672,22 @@ function buildSidebarUnitItems(units) {
     return queryUnitValue && (normalizeUnitKey(unit.slug) === queryUnitValue || unitOrderKey === queryUnitValue);
   }) || source.find(unit => unit && unit.slug === currentUnitSlug) || null;
 
+  const fixedUnitOneWeekKey = getPreferredWeekKeyForUnit('1');
+  const currentUnitWeekKey = getPreferredWeekKeyForUnit(selectedUnitValue || getUnitOrderValue(currentUnit, source.indexOf(currentUnit)));
+
   const items = [];
   if (fixedUnitOne) {
-    items.push({ unit: fixedUnitOne, unitValue: '1', weekKey: '1', weekLabel: 'Tuần 1', fixed: true });
+    items.push({ unit: fixedUnitOne, unitValue: '1', weekKey: fixedUnitOneWeekKey, weekLabel: 'Tuần ' + fixedUnitOneWeekKey, fixed: true });
   }
   if (fixedUnitFive) {
-    items.push({ unit: fixedUnitFive, unitValue: '5', weekKey: activeWeekKey, weekLabel: 'Tuần ' + activeWeekKey, fixed: true });
+    items.push({ unit: fixedUnitFive, unitValue: '5', weekKey: '1', weekLabel: 'Tuần 1', fixed: true });
   }
   if (currentUnit) {
     items.push({
       unit: currentUnit,
       unitValue: queryUnitValue || getUnitOrderValue(currentUnit, source.indexOf(currentUnit)),
-      weekKey: activeWeekKey,
-      weekLabel: 'Tuần ' + activeWeekKey,
+      weekKey: currentUnitWeekKey,
+      weekLabel: 'Tuần ' + currentUnitWeekKey,
       fixed: false
     });
   }
@@ -1700,8 +1707,8 @@ function buildSidebarUnitItems(units) {
 function syncUnitSelection(unit, weekKey, unitValue, navigateAfterSync) {
   if (!ensureLevelSelected() || !unit) return null;
 
-  const resolvedWeekKey = normalizeWeekKey(weekKey || currentWeekValue || loadSelectedWeek() || '1') || '1';
   const resolvedUnitValue = String(unitValue || getUnitOrderValue(unit) || '').trim();
+  const resolvedWeekKey = getPreferredWeekKeyForUnit(resolvedUnitValue || getUnitOrderValue(unit)) || '1';
 
   currentUnitSlug = unit.slug || '';
   currentUnitOrder = resolvedUnitValue;
@@ -1731,11 +1738,13 @@ function syncUnitSelection(unit, weekKey, unitValue, navigateAfterSync) {
 function applySelectedUnitFromUnits(units) {
   const source = Array.isArray(units) ? filterUnitsForCurrentLevel(units) : [];
   const sidebarItems = buildSidebarUnitItems(source);
-  const queryUnitValue = normalizeUnitKey(getSelectedUnitValue());
+  const queryUnitValue = normalizeUnitKey(getSelectedUnitValue() || currentUnitOrder);
+  const preferredWeekKey = getPreferredWeekKeyForUnit(queryUnitValue);
   const activeItem = sidebarItems.find(item => item.unit && (
-    (queryUnitValue && (normalizeUnitKey(item.unitValue) === queryUnitValue || normalizeUnitKey(item.unit.slug) === queryUnitValue)) ||
-    (currentUnitSlug && item.unit.slug === currentUnitSlug)
-  )) || null;
+    queryUnitValue &&
+    (normalizeUnitKey(item.unitValue) === queryUnitValue || normalizeUnitKey(item.unit.slug) === queryUnitValue) &&
+    normalizeWeekKey(item.weekKey) === normalizeWeekKey(preferredWeekKey)
+  )) || sidebarItems.find(item => item.unit && currentUnitSlug && item.unit.slug === currentUnitSlug && normalizeWeekKey(item.weekKey) === normalizeWeekKey(preferredWeekKey)) || null;
 
   if (!activeItem || !activeItem.unit) {
     currentUnitSlug = '';
@@ -1749,6 +1758,27 @@ function applySelectedUnitFromUnits(units) {
 
   syncUnitSelection(activeItem.unit, activeItem.weekKey, activeItem.unitValue, false);
   return activeItem.unit;
+}
+
+function updateLevelBreadcrumb() {
+  const levelEl = document.getElementById('breadcrumb-level');
+  if (levelEl) {
+    levelEl.innerText = currentLevelKey ? `🎯 ${getSelectedLevelText()}` : '🎯 Chọn cấp bậc';
+  }
+}
+
+function openLevelSelector() {
+  window.location.href = 'chooselevel.html';
+}
+
+function loadSelectedWeek() {
+  try {
+    const queryWeek = new URLSearchParams(window.location.search).get('week') || '';
+    if (queryWeek) return queryWeek;
+    return localStorage.getItem(WEEK_STORAGE_KEY) || '';
+  } catch (error) {
+    return '';
+  }
 }
 
 function updateLevelBreadcrumb() {
@@ -1847,11 +1877,11 @@ function loadSidebarWithUnits(units) {
           return;
         }
 
-        const queryUnitValue = normalizeUnitKey(getSelectedUnitValue());
-        const activeItem = items.find(item => item.unit && (
-          (currentUnitSlug && item.unit.slug === currentUnitSlug) ||
-          (queryUnitValue && (normalizeUnitKey(item.unitValue) === queryUnitValue || normalizeUnitKey(item.unit.slug) === queryUnitValue))
-        )) || items[0];
+        const queryUnitValue = normalizeUnitKey(getSelectedUnitValue() || currentUnitOrder);
+        const preferredWeekKey = getPreferredWeekKeyForUnit(queryUnitValue);
+        const activeItem = items.find(item => item.unit && queryUnitValue && (
+          normalizeUnitKey(item.unitValue) === queryUnitValue || normalizeUnitKey(item.unit.slug) === queryUnitValue
+        ) && normalizeWeekKey(item.weekKey) === normalizeWeekKey(preferredWeekKey)) || items.find(item => item.unit && currentUnitSlug && item.unit.slug === currentUnitSlug && normalizeWeekKey(item.weekKey) === normalizeWeekKey(preferredWeekKey)) || null;
 
         items.forEach((item) => {
             const unit = item.unit;
