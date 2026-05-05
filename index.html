@@ -31,7 +31,7 @@
       --radius-md: 16px;
       --shadow-card: 0 25px 50px -12px rgba(22, 163, 74, 0.25);
       --shadow-btn: 0 10px 25px -5px rgba(245, 158, 11, 0.5);
-      --game-bg-image: linear-gradient(180deg, rgba(229, 255, 214, 0.98), rgba(200, 245, 179, 0.96));
+      --login-bg-image: linear-gradient(180deg, rgba(229, 255, 214, 0.98), rgba(200, 245, 179, 0.96));
     }
 
     html {
@@ -48,7 +48,7 @@
       position: relative;
       overflow-x: hidden;
       isolation: isolate;
-      background: var(--bg-page);
+      background: #d9f7c7;
     }
 
     body::before {
@@ -56,10 +56,19 @@
       position: fixed;
       inset: 0;
       z-index: -1;
-      background-image: var(--game-bg-image);
+      background-image: var(--login-bg-image);
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
+      pointer-events: none;
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background: linear-gradient(180deg, rgba(223, 255, 213, 0.72), rgba(241, 253, 233, 0.88));
       pointer-events: none;
     }
 
@@ -122,10 +131,10 @@
     }
 
     .container {
-      width: min(1400px, 100%);
+      width: min(1180px, 100%);
       display: grid;
       grid-template-columns: 1.05fr 0.95fr;
-      border-radius: 40px;
+      border-radius: 34px;
       overflow: hidden;
       box-shadow: var(--shadow-card);
       background: rgba(255, 255, 255, 0.96);
@@ -135,9 +144,9 @@
     }
 
     .hero-panel {
-      min-height: 720px;
-      padding: 56px 52px;
-      background: linear-gradient(180deg, #159a47 0%, #29b259 48%, #1e9a49 100%);
+      min-height: 700px;
+      padding: 58px 50px;
+      background: linear-gradient(180deg, #179a48 0%, #27ad57 48%, #1f9d4a 100%);
       color: white;
       display: flex;
       flex-direction: column;
@@ -152,21 +161,21 @@
       position: absolute;
       inset: 0;
       background:
-        radial-gradient(circle at 18% 20%, rgba(255, 255, 255, 0.13) 0 16%, transparent 17%),
-        radial-gradient(circle at 82% 12%, rgba(255, 255, 255, 0.10) 0 13%, transparent 14%),
-        radial-gradient(circle at 80% 76%, rgba(255, 255, 255, 0.10) 0 10%, transparent 11%);
+        radial-gradient(circle at 18% 20%, rgba(255, 255, 255, 0.16) 0 17%, transparent 18%),
+        radial-gradient(circle at 82% 12%, rgba(255, 255, 255, 0.12) 0 13%, transparent 14%),
+        radial-gradient(circle at 80% 76%, rgba(255, 255, 255, 0.12) 0 10%, transparent 11%);
       pointer-events: none;
     }
 
     .brand-badge {
-      width: 290px;
-      height: 290px;
+      width: 282px;
+      height: 282px;
       border-radius: 50%;
-      margin: 0 auto 32px;
-      background: #f8e86c;
+      margin: 0 auto 34px;
+      background: #f6e96a;
       display: grid;
       place-items: center;
-      box-shadow: inset 0 0 0 14px rgba(255, 255, 255, 0.08);
+      box-shadow: inset 0 0 0 12px rgba(255, 255, 255, 0.08);
       position: relative;
       z-index: 1;
     }
@@ -185,14 +194,15 @@
     }
 
     .hero-copy h1 {
-      font-size: clamp(2.4rem, 4vw, 3.4rem);
+      font-size: clamp(2.3rem, 3.9vw, 3.3rem);
       line-height: 1.05;
       margin-bottom: 14px;
       letter-spacing: -0.03em;
+      font-weight: 900;
     }
 
     .hero-copy p {
-      font-size: clamp(1rem, 1.35vw, 1.15rem);
+      font-size: clamp(0.98rem, 1.25vw, 1.08rem);
       opacity: 0.92;
       max-width: 520px;
       margin: 0 auto 34px;
@@ -212,8 +222,8 @@
       display: flex;
       align-items: center;
       gap: 14px;
-      padding: 12px 16px;
-      border-radius: 18px;
+      padding: 13px 16px;
+      border-radius: 16px;
       background: rgba(255, 255, 255, 0.16);
       backdrop-filter: blur(8px);
       font-weight: 800;
@@ -232,9 +242,9 @@
     }
 
     .form-panel {
-      min-height: 720px;
-      padding: 64px 56px;
-      background: rgba(255, 255, 255, 0.95);
+      min-height: 700px;
+      padding: 60px 54px;
+      background: rgba(255, 255, 255, 0.97);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -246,16 +256,17 @@
 
     .form-card h2 {
       color: var(--primary);
-      font-size: clamp(2rem, 3vw, 2.7rem);
+      font-size: clamp(2.05rem, 2.9vw, 2.85rem);
       line-height: 1.1;
       margin-bottom: 10px;
       text-align: center;
+      font-weight: 900;
     }
 
     .form-card .subtitle {
       text-align: center;
       color: var(--text-muted);
-      font-size: 1rem;
+      font-size: 0.98rem;
       margin-bottom: 34px;
       font-weight: 700;
     }
@@ -271,7 +282,7 @@
       margin-bottom: 10px;
       color: var(--text-muted);
       font-weight: 800;
-      font-size: 1.02rem;
+      font-size: 0.98rem;
     }
 
     .input-wrap {
@@ -282,8 +293,8 @@
       width: 100%;
       border: 2px solid #c8d5e8;
       background: #ecf3ff;
-      border-radius: 16px;
-      padding: 18px 56px 18px 18px;
+      border-radius: 14px;
+      padding: 17px 56px 17px 18px;
       font-size: 1rem;
       font-family: inherit;
       color: #0f172a;
@@ -314,11 +325,11 @@
     .submit-btn {
       width: 100%;
       border: 0;
-      border-radius: 24px;
+      border-radius: 26px;
       padding: 18px 20px;
       margin-top: 8px;
       font: inherit;
-      font-size: 1.05rem;
+      font-size: 1.04rem;
       font-weight: 900;
       letter-spacing: 0.02em;
       color: white;
@@ -476,11 +487,40 @@
     const statusText = document.getElementById('statusText');
     const togglePass = document.getElementById('togglePass');
 
+    function applyLoginBackground(imageUrl) {
+      const value = imageUrl && String(imageUrl).trim()
+        ? `url("${String(imageUrl).trim()}")`
+        : 'linear-gradient(180deg, rgba(229, 255, 214, 0.98), rgba(200, 245, 179, 0.96))';
+      document.documentElement.style.setProperty('--login-bg-image', value);
+    }
+
+    const bgPromise = fetch(SCRIPT_URL + '?api=app.bootstrap').then(res => res.json()).catch(() => null);
+
     try {
       const savedEmail = localStorage.getItem('WW_LOGIN_EMAIL');
       if (savedEmail) emailInput.value = savedEmail;
     } catch (error) {
     }
+
+    try {
+      const localBoot = localStorage.getItem('WW_BOOTSTRAP');
+      if (localBoot) {
+        const cachedRes = JSON.parse(localBoot);
+        if (cachedRes && cachedRes.gameBgImageUrl) {
+          applyLoginBackground(cachedRes.gameBgImageUrl);
+        }
+      }
+    } catch (error) {
+    }
+
+    bgPromise.then(data => {
+      if (data && data.success) {
+        try { localStorage.setItem('WW_BOOTSTRAP', JSON.stringify(data)); } catch (error) { }
+        if (data.gameBgImageUrl) {
+          applyLoginBackground(data.gameBgImageUrl);
+        }
+      }
+    });
 
     togglePass.addEventListener('click', function () {
       const isHidden = passwordInput.type === 'password';
