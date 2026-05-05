@@ -454,53 +454,17 @@
 
 <body class="bg-pink-50 text-gray-900 flex flex-col min-h-screen">
 
-  <nav
-    class="fixed top-0 left-0 right-0 z-50 h-20 bg-gradient-to-r from-[#16a34a] via-[#15803d] to-[#16a34a] flex items-center px-4 sm:px-6 shadow-lg">
+    <nav
+      class="fixed top-0 left-0 right-0 z-50 h-20 bg-gradient-to-r from-[#16a34a] via-[#15803d] to-[#16a34a] flex items-center px-4 sm:px-6 shadow-lg">
       <div class="flex items-center justify-between w-full max-w-8xl mx-auto gap-3">
-      <div class="flex items-center gap-3 min-w-0">
-        <button type="button" onclick="toggleSidebarDrawer()" aria-label="Mở menu unit"
-          class="md:hidden inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-white/15 text-white text-2xl font-black shadow-sm transition active:scale-95">
-          ☰
-        </button>
-        <img src="https://drive.google.com/thumbnail?id=1GxMPO-OPxB0WuJrD9iJK1J4Jp6UaTtT6&sz=w800" alt="AnSchool Logo" class="h-14 sm:h-16 w-auto object-contain" width="224" height="64" fetchpriority="high">
+        <div class="flex items-center gap-3 min-w-0">
+          <img src="https://drive.google.com/thumbnail?id=1GxMPO-OPxB0WuJrD9iJK1J4Jp6UaTtT6&sz=w800" alt="AnSchool Logo" class="h-14 sm:h-16 w-auto object-contain" width="224" height="64" fetchpriority="high">
+        </div>
+        <button type="button" onclick="logout()" class="bg-amber-300 text-green-950 px-4 md:px-6 py-2 rounded-xl font-bold shadow-md text-sm md:text-base whitespace-nowrap">Đăng xuất</button>
       </div>
-      <button type="button" onclick="logout()" class="bg-amber-300 text-green-950 px-4 md:px-6 py-2 rounded-xl font-bold shadow-md text-sm md:text-base whitespace-nowrap">Đăng xuất</button>
-    </div>
-  </nav>
-
-  <div id="sidebar-backdrop" class="fixed inset-0 z-40 hidden bg-slate-900/35 backdrop-blur-[2px] md:hidden" onclick="closeSidebarDrawer()" aria-hidden="true"></div>
+    </nav>
 
   <div class="flex flex-1 pt-20 min-h-[calc(100vh-5rem)] overflow-x-hidden app-shell">
-    <!-- <aside id="unit-sidebar"
-      class="app-sidebar fixed top-0 left-0 z-[60] flex flex-col h-screen bg-pink-50 border-r border-pink-200 p-4 shadow-2xl -translate-x-full transition-transform duration-300 ease-out md:sticky md:top-20 md:z-40 md:h-[calc(100vh-5rem)] md:translate-x-0 md:shadow-none">
-      <div class="flex items-start justify-between gap-3 pb-4 border-b border-pink-200 mb-4">
-        <div class="flex items-center gap-3 min-w-0">
-          <div class="p-2 bg-white rounded-xl shadow-sm shrink-0">📚</div>
-          <div class="sidebar-brand-copy min-w-0">
-            <p class="text-sm font-extrabold text-green-800">Kids Book</p>
-            <p class="text-[10px] text-green-600">Chọn Unit để chuyển nhanh</p>
-          </div>
-        </div>
-        <div class="flex items-center gap-2">
-          <button type="button" onclick="closeSidebarDrawer()" aria-label="Đóng menu unit"
-            class="md:hidden inline-flex h-10 w-10 items-center justify-center rounded-xl bg-white text-green-700 shadow-sm transition active:scale-95">
-            ✕
-          </button>
-        </div>
-      </div>
-
-      <nav id="sidebar-menu" class="sidebar-menu flex-1 space-y-2 overflow-y-auto pr-1">
-        <div class="p-4 text-center text-green-500 text-xs italic animate-pulse">
-          Đang tải danh sách...
-        </div>
-      </nav>
-
-      <button id="sidebar-toggle-footer" type="button" onclick="toggleSidebarCollapse()"
-        class="mt-4 hidden md:flex w-full items-center justify-center gap-2 py-2 bg-green-100 text-green-800 rounded-xl text-xs font-bold shadow-sm transition hover:bg-green-200 active:scale-95">
-        <span class="sidebar-footer-text">Thu gọn / mở rộng</span>
-      </button>
-    </aside> -->
-
     <main class="flex-1 min-w-0 bg-gradient-to-b from-green-50 to-emerald-100 p-4 sm:p-6 md:p-10 game-bg-frame">
       <div class="flex justify-center mb-8">
         <nav
@@ -1630,14 +1594,44 @@ function resolvePreferredUnitSlug(units) {
 
   const queryUnit = normalizeUnitKey(getSelectedUnitValue());
   if (queryUnit) {
-    const matched = source.find(unit => {
+    const matched = source.find((unit, index) => {
       if (!unit) return false;
-      return normalizeUnitKey(unit.slug) === queryUnit || normalizeUnitKey(unit.order) === queryUnit;
+      return normalizeUnitKey(unit.slug) === queryUnit
+        || normalizeUnitKey(unit.order) === queryUnit
+        || normalizeUnitKey(getUnitOrderValue(unit, index)) === queryUnit;
     });
     if (matched) return matched.slug;
   }
 
   return source.length > 0 ? source[0].slug : '';
+}
+
+function applySelectedUnitFromUnits(units) {
+  const source = Array.isArray(units) ? filterUnitsForCurrentLevel(units) : [];
+  const resolvedSlug = resolvePreferredUnitSlug(source);
+  const activeUnit = source.find(unit => unit && unit.slug === resolvedSlug) || source[0] || null;
+
+  if (!activeUnit) {
+    currentUnitSlug = '';
+    currentUnitOrder = '';
+    const breadcrumbUnit = document.getElementById('breadcrumb-unit');
+    if (breadcrumbUnit) breadcrumbUnit.innerText = '📖 Loading...';
+    const mainTitle = document.getElementById('main-title');
+    if (mainTitle) mainTitle.innerText = 'UNIT NAME';
+    return null;
+  }
+
+  currentUnitSlug = activeUnit.slug || '';
+  currentUnitOrder = getUnitOrderValue(activeUnit, source.indexOf(activeUnit));
+
+  const breadcrumbUnit = document.getElementById('breadcrumb-unit');
+  if (breadcrumbUnit) breadcrumbUnit.innerText = '📖 ' + activeUnit.name;
+
+  const mainTitle = document.getElementById('main-title');
+  if (mainTitle) mainTitle.innerText = activeUnit.name;
+
+  updateHomeUrlForUnit(activeUnit);
+  return activeUnit;
 }
 
 function updateLevelBreadcrumb() {
@@ -1712,12 +1706,7 @@ function filterUnitsForCurrentLevel(units) {
 }
 
 function renderSidebarForCurrentLevel() {
-  if (!Array.isArray(allUnitsData) || allUnitsData.length === 0) {
-    loadSidebarWithUnits([]);
-    return;
-  }
-
-  loadSidebarWithUnits(allUnitsData, resolvePreferredUnitSlug(allUnitsData));
+  applySelectedUnitFromUnits(allUnitsData);
 }
 
 // 1. Tải danh sách Sidebar
@@ -1775,7 +1764,6 @@ function updateUIForUnit(unit) {
     document.getElementById('breadcrumb-unit').innerText = "📖 " + unit.name;
     document.getElementById('main-title').innerText = unit.name;
     updateHomeUrlForUnit(unit);
-  closeSidebarDrawer();
     warmUnitGameCache(unit.slug, currentLevelKey);
     backToMenu(); // Luôn quay về menu khi đổi Unit
 }
