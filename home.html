@@ -458,13 +458,49 @@
       class="fixed top-0 left-0 right-0 z-50 h-20 bg-gradient-to-r from-[#16a34a] via-[#15803d] to-[#16a34a] flex items-center px-4 sm:px-6 shadow-lg">
       <div class="flex items-center justify-between w-full max-w-8xl mx-auto gap-3">
         <div class="flex items-center gap-3 min-w-0">
+          <button type="button" onclick="toggleSidebarDrawer()" aria-label="Mở menu unit"
+            class="md:hidden inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-white/15 text-white text-2xl font-black shadow-sm transition active:scale-95">
+            ☰
+          </button>
           <img src="https://drive.google.com/thumbnail?id=1GxMPO-OPxB0WuJrD9iJK1J4Jp6UaTtT6&sz=w800" alt="AnSchool Logo" class="h-14 sm:h-16 w-auto object-contain" width="224" height="64" fetchpriority="high">
         </div>
         <button type="button" onclick="logout()" class="bg-amber-300 text-green-950 px-4 md:px-6 py-2 rounded-xl font-bold shadow-md text-sm md:text-base whitespace-nowrap">Đăng xuất</button>
       </div>
     </nav>
 
+  <div id="sidebar-backdrop" class="fixed inset-0 z-40 hidden bg-slate-900/35 backdrop-blur-[2px] md:hidden" onclick="closeSidebarDrawer()" aria-hidden="true"></div>
+
   <div class="flex flex-1 pt-20 min-h-[calc(100vh-5rem)] overflow-x-hidden app-shell">
+    <aside id="unit-sidebar"
+      class="app-sidebar fixed top-0 left-0 z-[60] flex flex-col h-screen bg-pink-50 border-r border-pink-200 p-4 shadow-2xl -translate-x-full transition-transform duration-300 ease-out md:sticky md:top-20 md:z-40 md:h-[calc(100vh-5rem)] md:translate-x-0 md:shadow-none">
+      <div class="flex items-start justify-between gap-3 pb-4 border-b border-pink-200 mb-4">
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="p-2 bg-white rounded-xl shadow-sm shrink-0">📚</div>
+          <div class="sidebar-brand-copy min-w-0">
+            <p class="text-sm font-extrabold text-green-800">Kids Book</p>
+            <p class="text-[10px] text-green-600">3 unit theo link hiện tại</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <button type="button" onclick="closeSidebarDrawer()" aria-label="Đóng menu unit"
+            class="md:hidden inline-flex h-10 w-10 items-center justify-center rounded-xl bg-white text-green-700 shadow-sm transition active:scale-95">
+            ✕
+          </button>
+        </div>
+      </div>
+
+      <nav id="sidebar-menu" class="sidebar-menu flex-1 space-y-2 overflow-y-auto pr-1">
+        <div class="p-4 text-center text-green-500 text-xs italic animate-pulse">
+          Đang tải danh sách...
+        </div>
+      </nav>
+
+      <button id="sidebar-toggle-footer" type="button" onclick="toggleSidebarCollapse()"
+        class="mt-4 hidden md:flex w-full items-center justify-center gap-2 py-2 bg-green-100 text-green-800 rounded-xl text-xs font-bold shadow-sm transition hover:bg-green-200 active:scale-95">
+        <span class="sidebar-footer-text">Thu gọn / mở rộng</span>
+      </button>
+    </aside>
+
     <main class="flex-1 min-w-0 bg-gradient-to-b from-green-50 to-emerald-100 p-4 sm:p-6 md:p-10 game-bg-frame">
       <div class="flex justify-center mb-8">
         <nav
@@ -472,7 +508,7 @@
           <span id="breadcrumb-level" class="text-amber-600 uppercase">🎯 Chọn cấp bậc</span>
           <span class="text-gray-300">•</span>
           <span id="breadcrumb-unit" class="text-green-600 uppercase">📖 Loading...</span>
-          <!-- <button type="button" onclick="openLevelSelector()" class="ml-1 inline-flex items-center rounded-full bg-amber-100 px-3 py-1 text-[11px] font-black uppercase tracking-wide text-amber-700 transition hover:bg-amber-200 active:scale-95">Đổi cấp bậc</button> -->
+          <button type="button" onclick="openLevelSelector()" class="ml-1 inline-flex items-center rounded-full bg-amber-100 px-3 py-1 text-[11px] font-black uppercase tracking-wide text-amber-700 transition hover:bg-amber-200 active:scale-95">Đổi cấp bậc</button>
         </nav>
       </div>
 
@@ -1546,6 +1582,14 @@ function normalizeUnitKey(value) {
     .replace(/[^a-z0-9]/g, '');
 }
 
+function normalizeWeekKey(value) {
+  return String(value || '')
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, '')
+    .replace(/[^a-z0-9]/g, '');
+}
+
 function getSelectedUnitValue() {
   try {
     return new URLSearchParams(window.location.search).get('unit') || '';
@@ -1561,7 +1605,11 @@ function getUnitOrderValue(unit, fallbackIndex) {
   return Number.isFinite(indexValue) ? String(indexValue + 1) : '';
 }
 
-function updateHomeUrlForUnit(unit) {
+function getSelectedSidebarWeekKey() {
+  return normalizeWeekKey(currentWeekValue || loadSelectedWeek() || '1') || '1';
+}
+
+function updateHomeUrlForUnit(unit, weekKey, unitValue) {
   if (!unit) return;
 
   try {
@@ -1569,13 +1617,15 @@ function updateHomeUrlForUnit(unit) {
     if (currentLevelKey) {
       url.searchParams.set('level', currentLevelKey);
     }
-    if (currentWeekValue) {
-      url.searchParams.set('week', currentWeekValue);
+
+    const resolvedWeekKey = normalizeWeekKey(weekKey || currentWeekValue || loadSelectedWeek() || '1');
+    if (resolvedWeekKey) {
+      url.searchParams.set('week', resolvedWeekKey);
     }
 
-    const unitValue = getUnitOrderValue(unit);
-    if (unitValue) {
-      url.searchParams.set('unit', unitValue);
+    const resolvedUnitValue = String(unitValue || getUnitOrderValue(unit) || '').trim();
+    if (resolvedUnitValue) {
+      url.searchParams.set('unit', resolvedUnitValue);
     } else {
       url.searchParams.delete('unit');
     }
@@ -1606,12 +1656,84 @@ function resolvePreferredUnitSlug(units) {
   return source.length > 0 ? source[0].slug : '';
 }
 
+function buildSidebarUnitItems(units) {
+  const source = Array.isArray(units) ? filterUnitsForCurrentLevel(units) : [];
+  const queryUnitValue = normalizeUnitKey(getSelectedUnitValue());
+  const activeWeekKey = getSelectedSidebarWeekKey();
+  const fixedUnitOne = source.find((unit, index) => getUnitOrderValue(unit, index) === '1') || null;
+  const fixedUnitFive = source.find((unit, index) => getUnitOrderValue(unit, index) === '5') || null;
+  const currentUnit = source.find((unit, index) => {
+    if (!unit) return false;
+    const unitOrderKey = normalizeUnitKey(getUnitOrderValue(unit, index));
+    return queryUnitValue && (normalizeUnitKey(unit.slug) === queryUnitValue || unitOrderKey === queryUnitValue);
+  }) || source.find(unit => unit && unit.slug === currentUnitSlug) || source[0] || null;
+
+  const items = [];
+  if (fixedUnitOne) {
+    items.push({ unit: fixedUnitOne, unitValue: '1', weekKey: '1', weekLabel: 'Tuần 1', fixed: true });
+  }
+  if (fixedUnitFive) {
+    items.push({ unit: fixedUnitFive, unitValue: '5', weekKey: activeWeekKey, weekLabel: 'Tuần ' + activeWeekKey, fixed: true });
+  }
+  if (currentUnit) {
+    items.push({
+      unit: currentUnit,
+      unitValue: queryUnitValue || getUnitOrderValue(currentUnit, source.indexOf(currentUnit)),
+      weekKey: activeWeekKey,
+      weekLabel: 'Tuần ' + activeWeekKey,
+      fixed: false
+    });
+  }
+
+  const uniqueItems = [];
+  const seen = {};
+  items.forEach(item => {
+    const key = `${item.unit && item.unit.slug ? item.unit.slug : ''}|${item.unitValue}|${item.weekKey}`;
+    if (seen[key]) return;
+    seen[key] = true;
+    uniqueItems.push(item);
+  });
+
+  return uniqueItems;
+}
+
+function syncUnitSelection(unit, weekKey, unitValue, navigateAfterSync) {
+  if (!ensureLevelSelected() || !unit) return null;
+
+  const resolvedWeekKey = normalizeWeekKey(weekKey || currentWeekValue || loadSelectedWeek() || '1') || '1';
+  const resolvedUnitValue = String(unitValue || getUnitOrderValue(unit) || '').trim();
+
+  currentUnitSlug = unit.slug || '';
+  currentUnitOrder = resolvedUnitValue;
+  currentWeekValue = resolvedWeekKey;
+
+  try {
+    saveWeek(resolvedWeekKey);
+  } catch (error) {
+  }
+
+  const breadcrumbUnit = document.getElementById('breadcrumb-unit');
+  if (breadcrumbUnit) breadcrumbUnit.innerText = '📖 ' + unit.name;
+
+  const mainTitle = document.getElementById('main-title');
+  if (mainTitle) mainTitle.innerText = unit.name;
+
+  updateHomeUrlForUnit(unit, resolvedWeekKey, resolvedUnitValue);
+
+  if (navigateAfterSync !== false) {
+    warmUnitGameCache(unit.slug, currentLevelKey);
+    backToMenu();
+  }
+
+  return unit;
+}
+
 function applySelectedUnitFromUnits(units) {
   const source = Array.isArray(units) ? filterUnitsForCurrentLevel(units) : [];
-  const resolvedSlug = resolvePreferredUnitSlug(source);
-  const activeUnit = source.find(unit => unit && unit.slug === resolvedSlug) || source[0] || null;
+  const sidebarItems = buildSidebarUnitItems(source);
+  const activeItem = sidebarItems.find(item => item.unit && item.unit.slug === currentUnitSlug) || sidebarItems[0] || null;
 
-  if (!activeUnit) {
+  if (!activeItem || !activeItem.unit) {
     currentUnitSlug = '';
     currentUnitOrder = '';
     const breadcrumbUnit = document.getElementById('breadcrumb-unit');
@@ -1621,17 +1743,8 @@ function applySelectedUnitFromUnits(units) {
     return null;
   }
 
-  currentUnitSlug = activeUnit.slug || '';
-  currentUnitOrder = getUnitOrderValue(activeUnit, source.indexOf(activeUnit));
-
-  const breadcrumbUnit = document.getElementById('breadcrumb-unit');
-  if (breadcrumbUnit) breadcrumbUnit.innerText = '📖 ' + activeUnit.name;
-
-  const mainTitle = document.getElementById('main-title');
-  if (mainTitle) mainTitle.innerText = activeUnit.name;
-
-  updateHomeUrlForUnit(activeUnit);
-  return activeUnit;
+  syncUnitSelection(activeItem.unit, activeItem.weekKey, activeItem.unitValue, false);
+  return activeItem.unit;
 }
 
 function updateLevelBreadcrumb() {
@@ -1706,12 +1819,13 @@ function filterUnitsForCurrentLevel(units) {
 }
 
 function renderSidebarForCurrentLevel() {
-  applySelectedUnitFromUnits(allUnitsData);
+  loadSidebarWithUnits(allUnitsData);
 }
 
 // 1. Tải danh sách Sidebar
-function loadSidebarWithUnits(units, preferredSlug) {
-        units = filterUnitsForCurrentLevel(units);
+function loadSidebarWithUnits(units) {
+        const source = Array.isArray(units) ? filterUnitsForCurrentLevel(units) : [];
+        const items = buildSidebarUnitItems(source);
         const container = document.getElementById('sidebar-menu');
         if (!container) return;
         container.innerHTML = '';
@@ -1723,48 +1837,50 @@ function loadSidebarWithUnits(units, preferredSlug) {
           return;
         }
 
-        if (units.length === 0) {
+        if (items.length === 0) {
           currentUnitSlug = '';
           container.innerHTML = '<div class="p-4 text-center text-amber-600 text-sm font-semibold">Chưa có unit phù hợp với cấp bậc này.</div>';
           return;
         }
 
-        const activeUnit = units.find(unit => unit.slug === preferredSlug) || units[0];
+        const queryUnitValue = normalizeUnitKey(getSelectedUnitValue());
+        const activeItem = items.find(item => item.unit && (
+          (currentUnitSlug && item.unit.slug === currentUnitSlug) ||
+          (queryUnitValue && (normalizeUnitKey(item.unitValue) === queryUnitValue || normalizeUnitKey(item.unit.slug) === queryUnitValue))
+        )) || items[0];
 
-        units.forEach((unit, index) => {
+        items.forEach((item) => {
+            const unit = item.unit;
             const a = document.createElement('a');
             a.href = "#";
             const baseClass = "sidebar-item flex items-center gap-3 p-3 rounded-xl transition-all border border-transparent";
             const inactiveClass = "hover:bg-white/40 text-green-700 text-sm";
-            const isActive = activeUnit && unit.slug === activeUnit.slug;
+            const isActive = activeItem && unit.slug === activeItem.unit.slug && normalizeWeekKey(item.weekKey) === normalizeWeekKey(activeItem.weekKey) && String(item.unitValue || '') === String(activeItem.unitValue || '');
             a.className = baseClass + " " + (isActive ? "active-unit" : inactiveClass);
-          a.innerHTML = `<span class="sidebar-unit-icon shrink-0">${unit.icon || '📘'}</span><span class="sidebar-unit-label line-clamp-2">${unit.name}</span>`;
+          a.innerHTML = `<span class="sidebar-unit-icon shrink-0">${unit.icon || '📘'}</span><div class="min-w-0 flex-1"><span class="sidebar-unit-label line-clamp-2 block">${unit.name}</span><span class="block text-[10px] font-bold text-green-500 mt-1 uppercase tracking-wide">${item.weekLabel || ''}</span></div>`;
 
-            a.onclick = function() {
+            a.onclick = function(event) {
+                if (event) event.preventDefault();
                 document.querySelectorAll('.sidebar-item').forEach(el => {
                     el.classList.remove('active-unit');
                   el.classList.add('hover:bg-white/40', 'text-green-700', 'text-sm');
                 });
                 this.classList.add('active-unit');
                 this.classList.remove('hover:bg-white/40', 'text-green-700', 'text-sm');
-                updateUIForUnit(unit);
+                updateUIForUnit(unit, item.weekKey, item.unitValue);
             };
             container.appendChild(a);
         });
 
-        if (activeUnit) {
-          updateUIForUnit(activeUnit);
+        if (activeItem && activeItem.unit) {
+          syncUnitSelection(activeItem.unit, activeItem.weekKey, activeItem.unitValue, false);
         }
 }
 
-function updateUIForUnit(unit) {
-    if (!ensureLevelSelected()) return;
-    currentUnitSlug = unit.slug;
-    currentUnitOrder = getUnitOrderValue(unit);
-    document.getElementById('breadcrumb-unit').innerText = "📖 " + unit.name;
-    document.getElementById('main-title').innerText = unit.name;
-    updateHomeUrlForUnit(unit);
-    warmUnitGameCache(unit.slug, currentLevelKey);
+function updateUIForUnit(unit, weekKey, unitValue) {
+    const selectedUnit = syncUnitSelection(unit, weekKey, unitValue, false);
+    if (!selectedUnit) return;
+    warmUnitGameCache(selectedUnit.slug, currentLevelKey);
     backToMenu(); // Luôn quay về menu khi đổi Unit
 }
 
