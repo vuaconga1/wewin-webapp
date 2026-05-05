@@ -1666,7 +1666,7 @@ function buildSidebarUnitItems(units) {
     if (!unit) return false;
     const unitOrderKey = normalizeUnitKey(getUnitOrderValue(unit, index));
     return queryUnitValue && (normalizeUnitKey(unit.slug) === queryUnitValue || unitOrderKey === queryUnitValue);
-  }) || source.find(unit => unit && unit.slug === currentUnitSlug) || source[0] || null;
+  }) || source.find(unit => unit && unit.slug === currentUnitSlug) || null;
 
   const items = [];
   if (fixedUnitOne) {
@@ -1731,7 +1731,11 @@ function syncUnitSelection(unit, weekKey, unitValue, navigateAfterSync) {
 function applySelectedUnitFromUnits(units) {
   const source = Array.isArray(units) ? filterUnitsForCurrentLevel(units) : [];
   const sidebarItems = buildSidebarUnitItems(source);
-  const activeItem = sidebarItems.find(item => item.unit && item.unit.slug === currentUnitSlug) || sidebarItems[0] || null;
+  const queryUnitValue = normalizeUnitKey(getSelectedUnitValue());
+  const activeItem = sidebarItems.find(item => item.unit && (
+    (queryUnitValue && (normalizeUnitKey(item.unitValue) === queryUnitValue || normalizeUnitKey(item.unit.slug) === queryUnitValue)) ||
+    (currentUnitSlug && item.unit.slug === currentUnitSlug)
+  )) || null;
 
   if (!activeItem || !activeItem.unit) {
     currentUnitSlug = '';
