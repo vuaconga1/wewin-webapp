@@ -1406,6 +1406,7 @@
     }
 
     let currentUnitSlug = "";
+    let currentUnitOrder = "";
     let currentWeekValue = "";
 const LEVEL_STORAGE_KEY = 'WW_SELECTED_LEVEL';
 const WEEK_STORAGE_KEY = 'WW_SELECTED_WEEK';
@@ -1573,6 +1574,72 @@ function getSelectedLevelText() {
   return currentLevelLabel || getLevelDisplayText(currentLevelKey) || 'Chọn cấp bậc';
 }
 
+function normalizeUnitKey(value) {
+  return String(value || '')
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, '')
+    .replace(/[^a-z0-9]/g, '');
+}
+
+function getSelectedUnitValue() {
+  try {
+    return new URLSearchParams(window.location.search).get('unit') || '';
+  } catch (error) {
+    return '';
+  }
+}
+
+function getUnitOrderValue(unit, fallbackIndex) {
+  const orderValue = unit && unit.order != null ? String(unit.order).trim() : '';
+  if (orderValue) return orderValue;
+  const indexValue = Number(fallbackIndex);
+  return Number.isFinite(indexValue) ? String(indexValue + 1) : '';
+}
+
+function updateHomeUrlForUnit(unit) {
+  if (!unit) return;
+
+  try {
+    const url = new URL(window.location.href);
+    if (currentLevelKey) {
+      url.searchParams.set('level', currentLevelKey);
+    }
+    if (currentWeekValue) {
+      url.searchParams.set('week', currentWeekValue);
+    }
+
+    const unitValue = getUnitOrderValue(unit);
+    if (unitValue) {
+      url.searchParams.set('unit', unitValue);
+    } else {
+      url.searchParams.delete('unit');
+    }
+
+    window.history.replaceState({}, '', url.toString());
+  } catch (error) {
+  }
+}
+
+function resolvePreferredUnitSlug(units) {
+  const source = Array.isArray(units) ? units : [];
+  if (currentUnitSlug) {
+    const existing = source.find(unit => unit && unit.slug === currentUnitSlug);
+    if (existing) return existing.slug;
+  }
+
+  const queryUnit = normalizeUnitKey(getSelectedUnitValue());
+  if (queryUnit) {
+    const matched = source.find(unit => {
+      if (!unit) return false;
+      return normalizeUnitKey(unit.slug) === queryUnit || normalizeUnitKey(unit.order) === queryUnit;
+    });
+    if (matched) return matched.slug;
+  }
+
+  return source.length > 0 ? source[0].slug : '';
+}
+
 function updateLevelBreadcrumb() {
   const levelEl = document.getElementById('breadcrumb-level');
   if (levelEl) {
@@ -1650,7 +1717,7 @@ function renderSidebarForCurrentLevel() {
     return;
   }
 
-  loadSidebarWithUnits(allUnitsData, currentUnitSlug);
+  loadSidebarWithUnits(allUnitsData, resolvePreferredUnitSlug(allUnitsData));
 }
 
 // 1. Tải danh sách Sidebar
@@ -1704,8 +1771,10 @@ function loadSidebarWithUnits(units, preferredSlug) {
 function updateUIForUnit(unit) {
     if (!ensureLevelSelected()) return;
     currentUnitSlug = unit.slug;
+    currentUnitOrder = getUnitOrderValue(unit);
     document.getElementById('breadcrumb-unit').innerText = "📖 " + unit.name;
     document.getElementById('main-title').innerText = unit.name;
+    updateHomeUrlForUnit(unit);
   closeSidebarDrawer();
     warmUnitGameCache(unit.slug, currentLevelKey);
     backToMenu(); // Luôn quay về menu khi đổi Unit
@@ -2600,6 +2669,10 @@ document.addEventListener('DOMContentLoaded', function() {
   } else {
     window.location.replace('chooselevel.html');
     return;
+  }
+  const queryUnitValue = normalizeUnitKey(getSelectedUnitValue());
+  if (queryUnitValue) {
+    currentUnitOrder = queryUnitValue;
   }
   updateLevelBreadcrumb();
 
