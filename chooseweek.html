@@ -432,6 +432,16 @@
       '1': { title: 'Tuần 1' },
       '2': { title: 'Tuần 2' }
     };
+    const WEEK_LABELS = {
+      kindergarten: {
+        '1': 'Week 1 & 2',
+        '2': 'Week 3 & 4'
+      },
+      starters: {
+        '1': 'Week 1',
+        '2': 'Week 2'
+      }
+    };
 
     const bgPromise = fetch(`${SCRIPT_URL}?api=app.bootstrap`).then(res => res.json()).catch(() => null);
 
@@ -507,6 +517,23 @@
       });
     }
 
+    function getWeekButtonLabel(weekKey, gameKey) {
+      const normalizedGameKey = normalizeGameKey(gameKey) === 'starters' ? 'starters' : 'kindergarten';
+      const normalizedWeekKey = normalizeWeekKey(weekKey);
+      return (WEEK_LABELS[normalizedGameKey] && WEEK_LABELS[normalizedGameKey][normalizedWeekKey])
+        || (WEEK_OPTIONS[normalizedWeekKey] && WEEK_OPTIONS[normalizedWeekKey].title)
+        || '';
+    }
+
+    function applyWeekLabels() {
+      const selectedGame = getStoredGame() || 'kindergarten';
+      document.querySelectorAll('#week-grid [data-week-key]').forEach(card => {
+        const title = card.querySelector('.title');
+        if (!title) return;
+        title.textContent = getWeekButtonLabel(card.dataset.weekKey || '', selectedGame);
+      });
+    }
+
     function chooseWeek(weekKey) {
       const normalizedKey = normalizeWeekKey(weekKey);
       if (!WEEK_OPTIONS[normalizedKey]) return;
@@ -531,6 +558,7 @@
       }
 
       saveGame(selectedGame);
+      applyWeekLabels();
 
       const selectedWeek = getStoredWeek();
       if (selectedWeek) {
