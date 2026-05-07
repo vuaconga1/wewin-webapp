@@ -555,6 +555,20 @@
       pre2: { title: 'Pre 2', ageLabel: '4-5 tuổi' },
       pre3: { title: 'Pre 3', ageLabel: '6 tuổi' }
     };
+    const LEVEL_LABELS = {
+      kindergarten: {
+        pre11: 'Pre 1.1',
+        pre12: 'Pre 1.2',
+        pre2: 'Pre 2',
+        pre3: 'Pre 3'
+      },
+      starters: {
+        pre11: 'Lesson 1',
+        pre12: 'Lesson 2',
+        pre2: 'Lesson 3',
+        pre3: 'Lesson 4'
+      }
+    };
 
     const bgPromise = fetch(`${SCRIPT_URL}?api=app.bootstrap`).then(res => res.json()).catch(() => null);
 
@@ -637,6 +651,23 @@
       }
     }
 
+    function getLevelButtonLabel(levelKey, gameKey) {
+      const normalizedGameKey = normalizeGameKey(gameKey) === 'starters' ? 'starters' : 'kindergarten';
+      const normalizedLevelKey = normalizeLevelKey(levelKey);
+      return (LEVEL_LABELS[normalizedGameKey] && LEVEL_LABELS[normalizedGameKey][normalizedLevelKey])
+        || (LEVELS[normalizedLevelKey] && LEVELS[normalizedLevelKey].title)
+        || '';
+    }
+
+    function applyLevelLabels() {
+      const selectedGame = currentGameKey || getStoredGame() || 'kindergarten';
+      document.querySelectorAll('#level-grid [data-level-key]').forEach(card => {
+        const title = card.querySelector('.title');
+        if (!title) return;
+        title.textContent = getLevelButtonLabel(card.dataset.levelKey || '', selectedGame);
+      });
+    }
+
     function goBack() {
       const weekKey = currentWeekKey || getStoredWeek();
       const gameKey = currentGameKey || getStoredGame();
@@ -660,7 +691,7 @@
       const level = LEVELS[normalizeLevelKey(levelKey)];
 
       if (level) {
-        line.textContent = `Đã chọn: ${level.title} - ${level.ageLabel}`;
+        line.textContent = `Đã chọn: ${getLevelButtonLabel(levelKey, currentGameKey || getStoredGame())} - ${level.ageLabel}`;
         continueBtn.disabled = false;
       } else {
         line.textContent = 'Chưa chọn cấp bậc.';
@@ -727,6 +758,7 @@
       }
 
       saveGame(currentGameKey);
+      applyLevelLabels();
 
       currentWeekKey = getStoredWeek();
       if (!currentWeekKey) {
