@@ -1601,9 +1601,25 @@ function normalizeWeekKey(value) {
     .replace(/[^a-z0-9]/g, '');
 }
 
+function getQueryParamValue(name) {
+  try {
+    return new URLSearchParams(window.location.search).get(name) || '';
+  } catch (error) {
+    return '';
+  }
+}
+
+function getRequestedWeekValue() {
+  return normalizeWeekKey(getQueryParamValue('week'));
+}
+
+function getDefaultWeekKeyForUnit(unitValue) {
+  return normalizeUnitKey(unitValue) === '5' ? '2' : '1';
+}
+
 function getSelectedUnitValue() {
   try {
-    return new URLSearchParams(window.location.search).get('unit') || '';
+    return getQueryParamValue('unit');
   } catch (error) {
     return '';
   }
@@ -1617,7 +1633,7 @@ function getUnitOrderValue(unit, fallbackIndex) {
 }
 
 function getPreferredWeekKeyForUnit(unitValue) {
-  return normalizeUnitKey(unitValue) === '1' ? '2' : '1';
+  return getDefaultWeekKeyForUnit(unitValue);
 }
 
 function getSelectedSidebarWeekKey() {
@@ -1678,6 +1694,7 @@ function resolvePreferredUnitSlug(units) {
 function buildSidebarUnitItems(units) {
   const source = Array.isArray(units) ? filterUnitsForCurrentLevel(units) : [];
   const queryUnitValue = normalizeUnitKey(getSelectedUnitValue());
+  const queryWeekValue = getRequestedWeekValue();
   const selectedUnitValue = normalizeUnitKey(queryUnitValue || currentUnitOrder);
   const fixedUnitOne = source.find((unit, index) => getUnitOrderValue(unit, index) === '1') || null;
   const fixedUnitFive = source.find((unit, index) => getUnitOrderValue(unit, index) === '5') || null;
@@ -1687,15 +1704,16 @@ function buildSidebarUnitItems(units) {
     return queryUnitValue && (normalizeUnitKey(unit.slug) === queryUnitValue || unitOrderKey === queryUnitValue);
   }) || source.find(unit => unit && unit.slug === currentUnitSlug) || null;
 
-  const fixedUnitOneWeekKey = getPreferredWeekKeyForUnit('1');
-  const currentUnitWeekKey = getPreferredWeekKeyForUnit(selectedUnitValue || getUnitOrderValue(currentUnit, source.indexOf(currentUnit)));
+  const fixedUnitOneWeekKey = getDefaultWeekKeyForUnit('1');
+  const fixedUnitFiveWeekKey = getDefaultWeekKeyForUnit('5');
+  const currentUnitWeekKey = queryWeekValue || getPreferredWeekKeyForUnit(selectedUnitValue || getUnitOrderValue(currentUnit, source.indexOf(currentUnit)));
 
   const items = [];
   if (fixedUnitOne) {
     items.push({ unit: fixedUnitOne, unitValue: '1', weekKey: fixedUnitOneWeekKey, weekLabel: 'Tuần ' + fixedUnitOneWeekKey, fixed: true });
   }
   if (fixedUnitFive) {
-    items.push({ unit: fixedUnitFive, unitValue: '5', weekKey: '1', weekLabel: 'Tuần 1', fixed: true });
+    items.push({ unit: fixedUnitFive, unitValue: '5', weekKey: fixedUnitFiveWeekKey, weekLabel: 'Tuần ' + fixedUnitFiveWeekKey, fixed: true });
   }
   if (currentUnit) {
     items.push({
@@ -1723,7 +1741,7 @@ function syncUnitSelection(unit, weekKey, unitValue, navigateAfterSync) {
   if (!ensureLevelSelected() || !unit) return null;
 
   const resolvedUnitValue = String(unitValue || getUnitOrderValue(unit) || '').trim();
-  const resolvedWeekKey = getPreferredWeekKeyForUnit(resolvedUnitValue || getUnitOrderValue(unit)) || '1';
+  const resolvedWeekKey = normalizeWeekKey(weekKey) || getPreferredWeekKeyForUnit(resolvedUnitValue || getUnitOrderValue(unit)) || '1';
 
   currentUnitSlug = unit.slug || '';
   currentUnitOrder = resolvedUnitValue;
@@ -1754,12 +1772,13 @@ function applySelectedUnitFromUnits(units) {
   const source = Array.isArray(units) ? filterUnitsForCurrentLevel(units) : [];
   const sidebarItems = buildSidebarUnitItems(source);
   const queryUnitValue = normalizeUnitKey(getSelectedUnitValue() || currentUnitOrder);
-  const preferredWeekKey = getPreferredWeekKeyForUnit(queryUnitValue);
+  const queryWeekValue = getRequestedWeekValue();
+  const preferredWeekKey = queryWeekValue || getPreferredWeekKeyForUnit(queryUnitValue);
   const activeItem = sidebarItems.find(item => item.unit && (
     queryUnitValue &&
     (normalizeUnitKey(item.unitValue) === queryUnitValue || normalizeUnitKey(item.unit.slug) === queryUnitValue) &&
     normalizeWeekKey(item.weekKey) === normalizeWeekKey(preferredWeekKey)
-  )) || sidebarItems.find(item => item.unit && currentUnitSlug && item.unit.slug === currentUnitSlug && normalizeWeekKey(item.weekKey) === normalizeWeekKey(preferredWeekKey)) || null;
+  )) || sidebarItems.find(item => item.unit && currentUnitSlug && item.unit.slug === currentUnitSlug && normalizeWeekKey(item.weekKey) === normalizeWeekKey(preferredWeekKey)) || (!queryUnitValue ? sidebarItems.find(item => item.unit && normalizeUnitKey(item.unitValue) === '1' && normalizeWeekKey(item.weekKey) === '1') || sidebarItems.find(item => item.unit && normalizeUnitKey(item.unitValue) === '5' && normalizeWeekKey(item.weekKey) === '2') || sidebarItems.find(item => item.unit) : null);
 
   if (!activeItem || !activeItem.unit) {
     currentUnitSlug = '';
@@ -1809,7 +1828,12 @@ function updateLevelBreadcrumb() {
 }
 
 function openLevelSelector() {
-  window.location.href = 'chooselevel.html';
+  const selectedGameKey = getSelectedGameKeyForRequests();
+  const selectedWeekKey = normalizeWeekKey(currentWeekValue || loadSelectedWeek() || '');
+  const targetUrl = selectedGameKey
+    ? `chooselevel.html?game=${encodeURIComponent(selectedGameKey)}${selectedWeekKey ? `&week=${encodeURIComponent(selectedWeekKey)}` : ''}`
+    : 'chooselevel.html';
+  window.location.href = targetUrl;
 }
 
 function loadSelectedWeek() {
@@ -1920,10 +1944,11 @@ function loadSidebarWithUnits(units) {
         }
 
         const queryUnitValue = normalizeUnitKey(getSelectedUnitValue() || currentUnitOrder);
-        const preferredWeekKey = getPreferredWeekKeyForUnit(queryUnitValue);
+        const queryWeekValue = getRequestedWeekValue();
+        const preferredWeekKey = queryWeekValue || getPreferredWeekKeyForUnit(queryUnitValue);
         const activeItem = items.find(item => item.unit && queryUnitValue && (
           normalizeUnitKey(item.unitValue) === queryUnitValue || normalizeUnitKey(item.unit.slug) === queryUnitValue
-        ) && normalizeWeekKey(item.weekKey) === normalizeWeekKey(preferredWeekKey)) || items.find(item => item.unit && currentUnitSlug && item.unit.slug === currentUnitSlug && normalizeWeekKey(item.weekKey) === normalizeWeekKey(preferredWeekKey)) || null;
+        ) && normalizeWeekKey(item.weekKey) === normalizeWeekKey(preferredWeekKey)) || items.find(item => item.unit && currentUnitSlug && item.unit.slug === currentUnitSlug && normalizeWeekKey(item.weekKey) === normalizeWeekKey(preferredWeekKey)) || (!queryUnitValue ? items.find(item => item.unit && normalizeUnitKey(item.unitValue) === '1' && normalizeWeekKey(item.weekKey) === '1') || items.find(item => item.unit && normalizeUnitKey(item.unitValue) === '5' && normalizeWeekKey(item.weekKey) === '2') || items.find(item => item.unit) : null);
 
         items.forEach((item) => {
             const unit = item.unit;
@@ -2834,14 +2859,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   purgeStaleGameCaches();
 
-  const savedWeekValue = loadSelectedWeek();
-  if (savedWeekValue) {
-    currentWeekValue = savedWeekValue;
-  } else {
-    // Nếu chưa chọn week thì về trang chọn week
-    window.location.replace('chooseweek.html');
-    return;
-  }
+  currentWeekValue = getRequestedWeekValue() || '1';
 
   const savedGameValue = loadSelectedGame();
   if (savedGameValue) {
