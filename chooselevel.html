@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,7 +8,8 @@
   <title>AnSchool - Chọn cấp bậc</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;600;700;800;900&display=swap"
+    rel="stylesheet">
   <style>
     :root {
       --bg-1: #064e3b;
@@ -21,12 +23,13 @@
       --game-bg-image: linear-gradient(180deg, rgba(229, 255, 214, 0.98), rgba(200, 245, 179, 0.96));
     }
 
-    * { 
-      box-sizing: border-box; 
+    * {
+      box-sizing: border-box;
       -webkit-tap-highlight-color: transparent;
     }
 
-    html, body {
+    html,
+    body {
       margin: 0;
       min-height: 100%;
       min-height: 100dvh;
@@ -66,18 +69,39 @@
     }
 
     @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(30px); }
-      to { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
 
     @keyframes float {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-12px); }
+
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-12px);
+      }
     }
 
     @keyframes pulseGlow {
-      0%, 100% { box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.25), 0 24px 50px rgba(6, 78, 59, 0.2), inset 0 2px 0 rgba(255, 255, 255, 1); }
-      50% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0.15), 0 24px 50px rgba(6, 78, 59, 0.2), inset 0 2px 0 rgba(255, 255, 255, 1); }
+
+      0%,
+      100% {
+        box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.25), 0 24px 50px rgba(6, 78, 59, 0.2), inset 0 2px 0 rgba(255, 255, 255, 1);
+      }
+
+      50% {
+        box-shadow: 0 0 0 8px rgba(16, 185, 129, 0.15), 0 24px 50px rgba(6, 78, 59, 0.2), inset 0 2px 0 rgba(255, 255, 255, 1);
+      }
     }
 
     .page {
@@ -106,8 +130,11 @@
     .shell::before {
       content: '';
       position: absolute;
-      top: -50%; left: -50%; right: -50%; bottom: -50%;
-      background: radial-gradient(circle at 50% 0%, rgba(255,255,255,0.8) 0%, rgba(255,255,255,0) 60%);
+      top: -50%;
+      left: -50%;
+      right: -50%;
+      bottom: -50%;
+      background: radial-gradient(circle at 50% 0%, rgba(255, 255, 255, 0.8) 0%, rgba(255, 255, 255, 0) 60%);
       pointer-events: none;
       z-index: 0;
     }
@@ -189,7 +216,7 @@
       font-weight: 900;
       letter-spacing: -0.03em;
       color: #064e3b;
-      text-shadow: 0 2px 10px rgba(255,255,255,0.8);
+      text-shadow: 0 2px 10px rgba(255, 255, 255, 0.8);
     }
 
     .grid {
@@ -224,10 +251,21 @@
       animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) backwards;
     }
 
-    .card:nth-child(1) { animation-delay: 0.1s; }
-    .card:nth-child(2) { animation-delay: 0.2s; }
-    .card:nth-child(3) { animation-delay: 0.3s; }
-    .card:nth-child(4) { animation-delay: 0.4s; }
+    .card:nth-child(1) {
+      animation-delay: 0.1s;
+    }
+
+    .card:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+
+    .card:nth-child(3) {
+      animation-delay: 0.3s;
+    }
+
+    .card:nth-child(4) {
+      animation-delay: 0.4s;
+    }
 
     .card:hover {
       transform: translateY(-10px) scale(1.02);
@@ -276,7 +314,7 @@
       color: white;
       box-shadow: 0 8px 16px rgba(6, 78, 59, 0.25), inset 0 2px 4px rgba(255, 255, 255, 0.5);
       border: 2px solid rgba(255, 255, 255, 0.6);
-      text-shadow: 0 2px 4px rgba(0,0,0,0.15);
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.15);
       transition: transform 0.3s ease;
     }
 
@@ -366,30 +404,92 @@
       min-height: 20px;
     }
 
-    .pre11 .badge { background: linear-gradient(135deg, #10b981, #047857); }
-    .pre12 .badge { background: linear-gradient(135deg, #34d399, #059669); }
-    .pre2 .badge { background: linear-gradient(135deg, #6ee7b7, #10b981); }
-    .pre3 .badge { background: linear-gradient(135deg, #a7f3d0, #34d399); }
+    .pre11 .badge {
+      background: linear-gradient(135deg, #10b981, #047857);
+    }
+
+    .pre12 .badge {
+      background: linear-gradient(135deg, #34d399, #059669);
+    }
+
+    .pre2 .badge {
+      background: linear-gradient(135deg, #6ee7b7, #10b981);
+    }
+
+    .pre3 .badge {
+      background: linear-gradient(135deg, #a7f3d0, #34d399);
+    }
 
     @media (max-width: 1024px) {
-      .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
     }
 
     @media (max-width: 640px) {
-      .page { padding: 16px 12px; }
-      .shell { border-radius: 28px; padding: 20px 12px; }
-      .back-button { top: 12px; left: 12px; padding: 8px 12px; font-size: 12px; }
-      h1 { font-size: 1.75rem; margin: 16px 0 8px; }
-      .brand-logo { width: 160px; margin-bottom: 16px; }
-      .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 24px; }
-      .card { min-height: 140px; padding: 16px 12px; border-radius: 24px; gap: 12px; }
-      .title { padding: 8px 10px; border-radius: 16px; font-size: clamp(1rem, 3.5vw, 1.25rem); }
-      .badge { width: 44px; height: 44px; font-size: 20px; border-radius: 14px; }
-      .footer { align-items: stretch; }
-      .continue { width: 100%; }
+      .page {
+        padding: 16px 12px;
+      }
+
+      .shell {
+        border-radius: 28px;
+        padding: 20px 12px;
+      }
+
+      .back-button {
+        top: 12px;
+        left: 12px;
+        padding: 8px 12px;
+        font-size: 12px;
+      }
+
+      h1 {
+        font-size: 1.75rem;
+        margin: 16px 0 8px;
+      }
+
+      .brand-logo {
+        width: 160px;
+        margin-bottom: 16px;
+      }
+
+      .grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 12px;
+        margin-top: 24px;
+      }
+
+      .card {
+        min-height: 140px;
+        padding: 16px 12px;
+        border-radius: 24px;
+        gap: 12px;
+      }
+
+      .title {
+        padding: 8px 10px;
+        border-radius: 16px;
+        font-size: clamp(1rem, 3.5vw, 1.25rem);
+      }
+
+      .badge {
+        width: 44px;
+        height: 44px;
+        font-size: 20px;
+        border-radius: 14px;
+      }
+
+      .footer {
+        align-items: stretch;
+      }
+
+      .continue {
+        width: 100%;
+      }
     }
   </style>
 </head>
+
 <body>
   <main class="page">
     <section class="shell">
@@ -399,7 +499,8 @@
       </button>
       <div class="hero">
         <div class="brand-mark">
-          <img src="https://drive.google.com/thumbnail?id=1GxMPO-OPxB0WuJrD9iJK1J4Jp6UaTtT6&sz=w800" alt="AnSchool Logo" class="brand-logo">
+          <img src="https://drive.google.com/thumbnail?id=1GxMPO-OPxB0WuJrD9iJK1J4Jp6UaTtT6&sz=w800" alt="AnSchool Logo"
+            class="brand-logo">
         </div>
         <div class="eyebrow">AnSchool</div>
         <h1>Chọn cấp bậc để vào game</h1>
@@ -439,9 +540,15 @@
 
   <script>
     const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyD2G7ROY58fHoKM6aPlZ9V9SqZ4g61Gf6-hS1kj2pf1uBNwRRw3A_x4We3av3ojyK_/exec';
+    const GAME_STORAGE_KEY = 'WW_SELECTED_GAME';
     const LEVEL_STORAGE_KEY = 'WW_SELECTED_LEVEL';
     const WEEK_STORAGE_KEY = 'WW_SELECTED_WEEK';
     let currentWeekKey = '';
+    let currentGameKey = '';
+    const GAME_OPTIONS = {
+      kindergarten: { title: 'Kindergarten' },
+      starters: { title: 'Starters' }
+    };
     const LEVELS = {
       pre11: { title: 'Pre 1.1', ageLabel: '2 tuổi' },
       pre12: { title: 'Pre 1.2', ageLabel: '3 tuổi' },
@@ -464,6 +571,26 @@
 
     function normalizeWeekKey(value) {
       return String(value || '').trim().toLowerCase().replace(/\s+/g, '').replace(/[^a-z0-9]/g, '');
+    }
+
+    function normalizeGameKey(value) {
+      return String(value || '').trim().toLowerCase().replace(/\s+/g, '').replace(/[^a-z0-9]/g, '');
+    }
+
+    function getStoredGame() {
+      try {
+        const queryGame = new URLSearchParams(window.location.search).get('game') || '';
+        const normalizedQueryGame = normalizeGameKey(queryGame);
+        if (normalizedQueryGame && GAME_OPTIONS[normalizedQueryGame]) {
+          localStorage.setItem(GAME_STORAGE_KEY, normalizedQueryGame);
+          return normalizedQueryGame;
+        }
+
+        const storedGame = normalizeGameKey(localStorage.getItem(GAME_STORAGE_KEY) || '');
+        return GAME_OPTIONS[storedGame] ? storedGame : '';
+      } catch (error) {
+        return '';
+      }
     }
 
     function getStoredLevel() {
@@ -503,9 +630,19 @@
       }
     }
 
+    function saveGame(gameKey) {
+      try {
+        localStorage.setItem(GAME_STORAGE_KEY, gameKey || '');
+      } catch (error) {
+      }
+    }
+
     function goBack() {
       const weekKey = currentWeekKey || getStoredWeek();
-      const target = weekKey ? `chooseweek.html?week=${encodeURIComponent(weekKey)}` : 'chooseweek.html';
+      const gameKey = currentGameKey || getStoredGame();
+      const target = gameKey
+        ? `chooseweek.html?game=${encodeURIComponent(gameKey)}${weekKey ? `&week=${encodeURIComponent(weekKey)}` : ''}`
+        : (weekKey ? `chooseweek.html?week=${encodeURIComponent(weekKey)}` : 'chooseweek.html');
       window.location.href = target;
     }
 
@@ -535,6 +672,15 @@
       const normalizedKey = normalizeLevelKey(levelKey);
       if (!LEVELS[normalizedKey]) return;
 
+      if (!currentGameKey) {
+        currentGameKey = getStoredGame();
+      }
+
+      if (!currentGameKey) {
+        window.location.replace('choosegame.html');
+        return;
+      }
+
       if (!currentWeekKey) {
         currentWeekKey = getStoredWeek();
       }
@@ -545,14 +691,22 @@
       }
 
       saveLevel(normalizedKey);
+      saveGame(currentGameKey);
       saveWeek(currentWeekKey);
       setActiveCard(normalizedKey);
-      window.location.href = `home.html?level=${encodeURIComponent(normalizedKey)}&week=${encodeURIComponent(currentWeekKey)}`;
+      window.location.href = `home.html?game=${encodeURIComponent(currentGameKey)}&level=${encodeURIComponent(normalizedKey)}&week=${encodeURIComponent(currentWeekKey)}`;
     }
 
     function continueToGame() {
       const selectedLevel = getStoredLevel();
       if (!LEVELS[selectedLevel]) return;
+      if (!currentGameKey) {
+        currentGameKey = getStoredGame();
+      }
+      if (!currentGameKey) {
+        window.location.replace('choosegame.html');
+        return;
+      }
       if (!currentWeekKey) {
         currentWeekKey = getStoredWeek();
       }
@@ -562,10 +716,18 @@
         return;
       }
 
-      window.location.href = `home.html?level=${encodeURIComponent(selectedLevel)}&week=${encodeURIComponent(currentWeekKey)}`;
+      window.location.href = `home.html?game=${encodeURIComponent(currentGameKey)}&level=${encodeURIComponent(selectedLevel)}&week=${encodeURIComponent(currentWeekKey)}`;
     }
 
     document.addEventListener('DOMContentLoaded', () => {
+      currentGameKey = getStoredGame();
+      if (!currentGameKey) {
+        window.location.replace('choosegame.html');
+        return;
+      }
+
+      saveGame(currentGameKey);
+
       currentWeekKey = getStoredWeek();
       if (!currentWeekKey) {
         window.location.replace('chooseweek.html');
@@ -585,7 +747,7 @@
 
       bgPromise.then(data => {
         if (data && data.success) {
-          try { localStorage.setItem('WW_BOOTSTRAP', JSON.stringify(data)); } catch (error) {}
+          try { localStorage.setItem('WW_BOOTSTRAP', JSON.stringify(data)); } catch (error) { }
           if (data.gameBgImageUrl) {
             applyGameBackground(data.gameBgImageUrl);
           }
@@ -600,4 +762,5 @@
     });
   </script>
 </body>
+
 </html>
