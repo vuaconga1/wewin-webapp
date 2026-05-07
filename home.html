@@ -795,12 +795,13 @@
       });
     }
 
-    const GAME_DATA_CACHE_VERSION = 'class-week-v1';
+    const GAME_DATA_CACHE_VERSION = 'class-week-game-v2';
 
     function buildLevelScopedCacheKey(gameKey, slug, levelKey) {
       const normalizedLevelKey = normalizeLevelKeyClient(levelKey) || 'all';
       const normalizedWeekKey = String(currentWeekValue || '').trim().toLowerCase() || 'all';
-      return GAME_DATA_CACHE_VERSION + '::' + normalizedWeekKey + '::' + normalizedLevelKey + '::' + String(slug || '');
+      const normalizedGameKey = normalizeGameKeyClient(currentGameKey || loadSelectedGame() || 'kindergarten') || 'kindergarten';
+      return GAME_DATA_CACHE_VERSION + '::' + normalizedGameKey + '::' + normalizedWeekKey + '::' + normalizedLevelKey + '::' + String(slug || '');
     }
 
     function runServerMethod(methodName, slug, levelKey) {
@@ -811,7 +812,7 @@
         else if (methodName === 'getPronunciationData') apiParam = 'game.pronunciation';
         else apiParam = methodName;
 
-        const url = SCRIPT_URL + '?api=' + apiParam + '&slug=' + encodeURIComponent(slug || '') + '&level=' + encodeURIComponent(normalizeLevelKeyClient(levelKey) || '') + '&week=' + encodeURIComponent(currentWeekValue || '');
+        const url = SCRIPT_URL + '?api=' + apiParam + '&slug=' + encodeURIComponent(slug || '') + '&level=' + encodeURIComponent(normalizeLevelKeyClient(levelKey) || '') + '&week=' + encodeURIComponent(currentWeekValue || '') + '&game=' + encodeURIComponent(getSelectedGameKeyForRequests());
 
         fetch(url)
           .then(res => res.json())
@@ -889,7 +890,7 @@
       } catch(e) {}
 
       const warm = () => {
-        fetch(SCRIPT_URL + '?api=game.all&slug=' + encodeURIComponent(unitSlug) + '&level=' + encodeURIComponent(normalizeLevelKeyClient(levelKey) || '') + '&week=' + encodeURIComponent(currentWeekValue || ''))
+        fetch(SCRIPT_URL + '?api=game.all&slug=' + encodeURIComponent(unitSlug) + '&level=' + encodeURIComponent(normalizeLevelKeyClient(levelKey) || '') + '&week=' + encodeURIComponent(currentWeekValue || '') + '&game=' + encodeURIComponent(getSelectedGameKeyForRequests()))
           .then(res => res.json())
           .then(response => {
             if (response && response.success && response.data) {
@@ -1408,8 +1409,10 @@
     let currentUnitSlug = "";
     let currentUnitOrder = "";
     let currentWeekValue = "";
+    let currentGameKey = "";
 const LEVEL_STORAGE_KEY = 'WW_SELECTED_LEVEL';
 const WEEK_STORAGE_KEY = 'WW_SELECTED_WEEK';
+    const GAME_STORAGE_KEY = 'WW_SELECTED_GAME';
 const LEVEL_OPTIONS = [
   { key: 'pre11', title: 'Pre 1.1', ageLabel: '2 tuổi' },
   { key: 'pre12', title: 'Pre 1.2', ageLabel: '3 tuổi' },
@@ -1560,6 +1563,14 @@ function normalizeLevelKeyClient(value) {
     .replace(/[^a-z0-9]/g, '');
 }
 
+function normalizeGameKeyClient(value) {
+  return String(value || '')
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, '')
+    .replace(/[^a-z0-9]/g, '');
+}
+
 function getLevelOption(levelKey) {
   const normalizedKey = normalizeLevelKeyClient(levelKey);
   return LEVEL_OPTION_MAP[normalizedKey] || null;
@@ -1618,6 +1629,10 @@ function updateHomeUrlForUnit(unit, weekKey, unitValue) {
 
   try {
     const url = new URL(window.location.href);
+    const selectedGameKey = getSelectedGameKeyForRequests();
+    if (selectedGameKey) {
+      url.searchParams.set('game', selectedGameKey);
+    }
     if (currentLevelKey) {
       url.searchParams.set('level', currentLevelKey);
     }
@@ -1768,7 +1783,12 @@ function updateLevelBreadcrumb() {
 }
 
 function openLevelSelector() {
-  window.location.href = 'chooselevel.html';
+  const selectedGameKey = getSelectedGameKeyForRequests();
+  const selectedWeekKey = normalizeWeekKey(currentWeekValue || loadSelectedWeek() || '');
+  const targetUrl = selectedGameKey
+    ? `chooselevel.html?game=${encodeURIComponent(selectedGameKey)}${selectedWeekKey ? `&week=${encodeURIComponent(selectedWeekKey)}` : ''}`
+    : 'chooselevel.html';
+  window.location.href = targetUrl;
 }
 
 function loadSelectedWeek() {
@@ -1802,6 +1822,18 @@ function loadSelectedWeek() {
   }
 }
 
+function loadSelectedGame() {
+  try {
+    const queryGame = new URLSearchParams(window.location.search).get('game') || '';
+    const normalizedQueryGame = normalizeGameKeyClient(queryGame);
+    if (normalizedQueryGame === 'kindergarten' || normalizedQueryGame === 'starters') return normalizedQueryGame;
+    const storedGame = normalizeGameKeyClient(localStorage.getItem(GAME_STORAGE_KEY) || '');
+    return (storedGame === 'kindergarten' || storedGame === 'starters') ? storedGame : '';
+  } catch (error) {
+    return '';
+  }
+}
+
 function loadSelectedLevel() {
   try {
     const queryLevel = new URLSearchParams(window.location.search).get('level') || '';
@@ -1813,6 +1845,16 @@ function loadSelectedLevel() {
   } catch (error) {
     return '';
   }
+}
+
+function getBootstrapCacheKey(gameKey) {
+  const normalizedGameKey = normalizeGameKeyClient(gameKey) || 'kindergarten';
+  return `WW_BOOTSTRAP_${normalizedGameKey}`;
+}
+
+function getSelectedGameKeyForRequests() {
+  const selectedGameKey = normalizeGameKeyClient(currentGameKey || loadSelectedGame() || 'kindergarten');
+  return selectedGameKey === 'starters' ? 'starters' : 'kindergarten';
 }
 
     function purgeStaleGameCaches() {
@@ -2779,7 +2821,9 @@ function logout() {
 }
 
 // [1] Khởi chạy fetch ngay lập tức khi browser bắt đầu đọc JS (Không chờ tới lúc DOM load xong)
-const bootstrapPromise = fetch(SCRIPT_URL + '?api=app.bootstrap').then(res => res.json()).catch(() => null);
+const bootstrapGameKey = getSelectedGameKeyForRequests();
+const bootstrapCacheKey = getBootstrapCacheKey(bootstrapGameKey);
+const bootstrapPromise = fetch(SCRIPT_URL + '?api=app.bootstrap&game=' + encodeURIComponent(bootstrapGameKey)).then(res => res.json()).catch(() => null);
 
 document.addEventListener('DOMContentLoaded', function() {
   applyGameBackground(GAME_BG_IMAGE_URL);
@@ -2799,6 +2843,19 @@ document.addEventListener('DOMContentLoaded', function() {
     return;
   }
 
+  const savedGameValue = loadSelectedGame();
+  if (savedGameValue) {
+    currentGameKey = savedGameValue;
+  } else {
+    window.location.replace('choosegame.html');
+    return;
+  }
+
+  try {
+    localStorage.setItem(GAME_STORAGE_KEY, currentGameKey);
+  } catch (error) {
+  }
+
   const savedLevelKey = loadSelectedLevel();
   const savedLevel = getLevelOption(savedLevelKey);
   if (savedLevel) {
@@ -2816,7 +2873,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Thử nạp giao diện từ Cache nếu có
   try {
-    const localBoot = localStorage.getItem('WW_BOOTSTRAP');
+    const localBoot = localStorage.getItem(bootstrapCacheKey);
     if (localBoot) {
        const cachedRes = JSON.parse(localBoot);
        if (cachedRes.gameBgImageUrl) {
@@ -2837,7 +2894,7 @@ document.addEventListener('DOMContentLoaded', function() {
   // Lấy dữ liệu từ request đã bắn từ sớm
   bootstrapPromise.then(function(response) {
       if (response && response.success) {
-        try { localStorage.setItem('WW_BOOTSTRAP', JSON.stringify(response)); } catch(e) {}
+        try { localStorage.setItem(bootstrapCacheKey, JSON.stringify(response)); } catch(e) {}
         
         if (response.gameBgImageUrl && GAME_BG_IMAGE_URL !== response.gameBgImageUrl) {
           GAME_BG_IMAGE_URL = response.gameBgImageUrl;
