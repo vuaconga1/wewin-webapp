@@ -4,7 +4,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="AnSchool - Nền tảng học tiếng Anh qua trò chơi tương tác dành cho trẻ em. Học vui, sáng tạo cùng AnSchool!">
+  <meta name="description"
+    content="AnSchool - Nền tảng học tiếng Anh qua trò chơi tương tác dành cho trẻ em. Học vui, sáng tạo cùng AnSchool!">
   <title>AnSchool - Matching Game</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,7 +15,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;600;800&display=swap" rel="stylesheet">
   <style>
     :root {
-      --game-bg-image: url("Background.png"), linear-gradient(180deg, rgba(229, 255, 214, 0.98), rgba(200, 245, 179, 0.96));
+      --game-bg-image: linear-gradient(180deg, rgba(229, 255, 214, 0.98), rgba(200, 245, 179, 0.96));
     }
 
     @keyframes float-up {
@@ -23,10 +24,12 @@
         opacity: 1;
         text-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
       }
+
       50% {
         transform: translateY(-50px) scale(1.4) rotate(-3deg);
         opacity: 0.8;
       }
+
       100% {
         transform: translateY(-100px) scale(1.6) rotate(3deg);
         opacity: 0;
@@ -108,7 +111,7 @@
       pointer-events: none;
     }
 
-    .game-bg-frame > * {
+    .game-bg-frame>* {
       position: relative;
       z-index: 1;
     }
@@ -248,26 +251,37 @@
 
     /* Sky gradient background for game area */
     .catch-sky-bg {
-      background: linear-gradient(180deg, 
-        #87CEEB 0%, 
-        #B0E0FF 30%, 
-        #D4F1FF 55%,
-        #E8F8FF 70%,
-        #c8e6c9 82%,
-        #a5d6a7 90%,
-        #81c784 100%);
+      background: linear-gradient(180deg,
+          #87CEEB 0%,
+          #B0E0FF 30%,
+          #D4F1FF 55%,
+          #E8F8FF 70%,
+          #c8e6c9 82%,
+          #a5d6a7 90%,
+          #81c784 100%);
     }
 
     .catch-basket-glow {
-      filter: drop-shadow(0 4px 12px rgba(249,115,22,0.25));
+      filter: drop-shadow(0 4px 12px rgba(249, 115, 22, 0.25));
     }
 
     /* Basket bounce on catch */
     @keyframes basketBounceIcon {
-      0% { transform: translateY(0) scale(1); }
-      30% { transform: translateY(-6px) scale(1.15); }
-      60% { transform: translateY(2px) scale(0.95); }
-      100% { transform: translateY(0) scale(1); }
+      0% {
+        transform: translateY(0) scale(1);
+      }
+
+      30% {
+        transform: translateY(-6px) scale(1.15);
+      }
+
+      60% {
+        transform: translateY(2px) scale(0.95);
+      }
+
+      100% {
+        transform: translateY(0) scale(1);
+      }
     }
 
     .catch-basket-icon {
@@ -282,9 +296,18 @@
 
     /* Score pop animation */
     @keyframes scorePop {
-      0% { transform: scale(1); }
-      40% { transform: scale(1.3); color: #f59e0b; }
-      100% { transform: scale(1); }
+      0% {
+        transform: scale(1);
+      }
+
+      40% {
+        transform: scale(1.3);
+        color: #f59e0b;
+      }
+
+      100% {
+        transform: scale(1);
+      }
     }
 
     .catch-score-pop {
@@ -295,9 +318,20 @@
 
     /* Sparkle effect on catch */
     @keyframes sparkle {
-      0% { transform: scale(0) rotate(0deg); opacity: 1; }
-      50% { transform: scale(1.2) rotate(180deg); opacity: 0.8; }
-      100% { transform: scale(0) rotate(360deg); opacity: 0; }
+      0% {
+        transform: scale(0) rotate(0deg);
+        opacity: 1;
+      }
+
+      50% {
+        transform: scale(1.2) rotate(180deg);
+        opacity: 0.8;
+      }
+
+      100% {
+        transform: scale(0) rotate(360deg);
+        opacity: 0;
+      }
     }
 
     .catch-sparkle {
@@ -327,18 +361,18 @@
 
     /* Stats card glass effect */
     .catch-stat-card {
-      background: rgba(255,255,255,0.82);
+      background: rgba(255, 255, 255, 0.82);
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
-      border: 2px solid rgba(255,255,255,0.6);
+      border: 2px solid rgba(255, 255, 255, 0.6);
       border-radius: 20px;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.06), inset 0 1px 0 rgba(255,255,255,0.8);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.8);
       transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
 
     .catch-stat-card:hover {
       transform: translateY(-2px);
-      box-shadow: 0 8px 24px rgba(0,0,0,0.1), inset 0 1px 0 rgba(255,255,255,0.8);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.8);
     }
 
     /* Ground grass effect */
@@ -360,16 +394,23 @@
       left: 0;
       right: 0;
       height: 16px;
-      background: repeating-linear-gradient(90deg, 
-        transparent 0px, transparent 12px, 
-        #66bb6a 12px, #66bb6a 14px);
+      background: repeating-linear-gradient(90deg,
+          transparent 0px, transparent 12px,
+          #66bb6a 12px, #66bb6a 14px);
       opacity: 0.5;
     }
 
     /* Sun decoration */
     @keyframes sunPulse {
-      0%, 100% { box-shadow: 0 0 40px 15px rgba(255,235,59,0.3), 0 0 80px 30px rgba(255,235,59,0.1); }
-      50% { box-shadow: 0 0 50px 20px rgba(255,235,59,0.4), 0 0 100px 40px rgba(255,235,59,0.15); }
+
+      0%,
+      100% {
+        box-shadow: 0 0 40px 15px rgba(255, 235, 59, 0.3), 0 0 80px 30px rgba(255, 235, 59, 0.1);
+      }
+
+      50% {
+        box-shadow: 0 0 50px 20px rgba(255, 235, 59, 0.4), 0 0 100px 40px rgba(255, 235, 59, 0.15);
+      }
     }
 
     .catch-sun {
@@ -393,21 +434,21 @@
       font-size: clamp(1.4rem, 3.5vw, 2.2rem);
       padding: 1rem 2.5rem;
       border-radius: 9999px;
-      border: 4px solid rgba(255,255,255,0.7);
-      box-shadow: 0 12px 32px rgba(245,124,0,0.45), 0 4px 12px rgba(0,0,0,0.1);
-      outline: 5px solid rgba(255,152,0,0.3);
+      border: 4px solid rgba(255, 255, 255, 0.7);
+      box-shadow: 0 12px 32px rgba(245, 124, 0, 0.45), 0 4px 12px rgba(0, 0, 0, 0.1);
+      outline: 5px solid rgba(255, 152, 0, 0.3);
       outline-offset: 4px;
       cursor: pointer;
       transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
       display: flex;
       align-items: center;
       gap: 0.75rem;
-      text-shadow: 0 2px 6px rgba(0,0,0,0.15);
+      text-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
     }
 
     .catch-start-btn:hover {
       transform: scale(1.08) translateY(-4px);
-      box-shadow: 0 18px 40px rgba(245,124,0,0.5), 0 6px 16px rgba(0,0,0,0.12);
+      box-shadow: 0 18px 40px rgba(245, 124, 0, 0.5), 0 6px 16px rgba(0, 0, 0, 0.12);
     }
 
     .catch-start-btn:active {
@@ -415,8 +456,15 @@
     }
 
     @keyframes startBtnPulse {
-      0%, 100% { outline-color: rgba(255,152,0,0.3); }
-      50% { outline-color: rgba(255,152,0,0.6); }
+
+      0%,
+      100% {
+        outline-color: rgba(255, 152, 0, 0.3);
+      }
+
+      50% {
+        outline-color: rgba(255, 152, 0, 0.6);
+      }
     }
 
     .catch-start-btn {
@@ -425,50 +473,95 @@
 
     /* Responsive catch game adjustments */
     @media (max-width: 480px) {
-      .catch-stat-card { padding: 0.5rem 0.25rem; border-radius: 14px; }
-      .catch-stat-label { font-size: 0.6rem; }
-      .catch-stat-value { font-size: 1.1rem; }
-      .catch-stat-icon { font-size: 1.1rem; }
-      .catch-sun { width: 35px; height: 35px; top: 4%; right: 5%; }
-      .catch-ground { height: 10%; }
+      .catch-stat-card {
+        padding: 0.5rem 0.25rem;
+        border-radius: 14px;
+      }
+
+      .catch-stat-label {
+        font-size: 0.6rem;
+      }
+
+      .catch-stat-value {
+        font-size: 1.1rem;
+      }
+
+      .catch-stat-icon {
+        font-size: 1.1rem;
+      }
+
+      .catch-sun {
+        width: 35px;
+        height: 35px;
+        top: 4%;
+        right: 5%;
+      }
+
+      .catch-ground {
+        height: 10%;
+      }
     }
 
     @media (min-width: 481px) and (max-width: 767px) {
-      .catch-stat-card { padding: 0.65rem 0.5rem; }
-      .catch-stat-label { font-size: 0.7rem; }
-      .catch-stat-value { font-size: 1.3rem; }
+      .catch-stat-card {
+        padding: 0.65rem 0.5rem;
+      }
+
+      .catch-stat-label {
+        font-size: 0.7rem;
+      }
+
+      .catch-stat-value {
+        font-size: 1.3rem;
+      }
     }
 
     @media (min-width: 768px) {
-      .catch-stat-card { padding: 0.85rem 1rem; }
-      .catch-stat-label { font-size: 0.75rem; }
-      .catch-stat-value { font-size: 1.5rem; }
+      .catch-stat-card {
+        padding: 0.85rem 1rem;
+      }
+
+      .catch-stat-label {
+        font-size: 0.75rem;
+      }
+
+      .catch-stat-value {
+        font-size: 1.5rem;
+      }
     }
 
     @media (min-width: 1024px) {
-      .catch-stat-card { padding: 1rem 1.25rem; border-radius: 24px; }
-      .catch-stat-value { font-size: 1.75rem; }
+      .catch-stat-card {
+        padding: 1rem 1.25rem;
+        border-radius: 24px;
+      }
+
+      .catch-stat-value {
+        font-size: 1.75rem;
+      }
     }
   </style>
 </head>
 
 <body class="bg-pink-50 text-gray-900 flex flex-col min-h-screen">
 
-    <nav
-      class="fixed top-0 left-0 right-0 z-50 h-20 bg-gradient-to-r from-[#16a34a] via-[#15803d] to-[#16a34a] flex items-center px-4 sm:px-6 shadow-lg">
-      <div class="flex items-center justify-between w-full max-w-8xl mx-auto gap-3">
-        <div class="flex items-center gap-3 min-w-0">
-          <button type="button" onclick="toggleSidebarDrawer()" aria-label="Mở menu unit"
-            class="md:hidden inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-white/15 text-white text-2xl font-black shadow-sm transition active:scale-95">
-            ☰
-          </button>
-          <img src="https://drive.google.com/thumbnail?id=1GxMPO-OPxB0WuJrD9iJK1J4Jp6UaTtT6&sz=w800" alt="AnSchool Logo" class="h-14 sm:h-16 w-auto object-contain" width="224" height="64" fetchpriority="high">
-        </div>
-       
+  <nav
+    class="fixed top-0 left-0 right-0 z-50 h-20 bg-gradient-to-r from-[#16a34a] via-[#15803d] to-[#16a34a] flex items-center px-4 sm:px-6 shadow-lg">
+    <div class="flex items-center justify-between w-full max-w-8xl mx-auto gap-3">
+      <div class="flex items-center gap-3 min-w-0">
+        <button type="button" onclick="toggleSidebarDrawer()" aria-label="Mở menu unit"
+          class="md:hidden inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-white/15 text-white text-2xl font-black shadow-sm transition active:scale-95">
+          ☰
+        </button>
+        <img src="https://drive.google.com/thumbnail?id=1GxMPO-OPxB0WuJrD9iJK1J4Jp6UaTtT6&sz=w800" alt="AnSchool Logo"
+          class="h-14 sm:h-16 w-auto object-contain" width="224" height="64" fetchpriority="high">
       </div>
-    </nav>
 
-  <div id="sidebar-backdrop" class="fixed inset-0 z-40 hidden bg-slate-900/35 backdrop-blur-[2px] md:hidden" onclick="closeSidebarDrawer()" aria-hidden="true"></div>
+    </div>
+  </nav>
+
+  <div id="sidebar-backdrop" class="fixed inset-0 z-40 hidden bg-slate-900/35 backdrop-blur-[2px] md:hidden"
+    onclick="closeSidebarDrawer()" aria-hidden="true"></div>
 
   <div class="flex flex-1 pt-20 min-h-[calc(100vh-5rem)] overflow-x-hidden app-shell">
     <aside id="unit-sidebar"
@@ -501,14 +594,14 @@
       </button>
     </aside>
 
-    <main class="flex-1 min-w-0 bg-green-50 p-4 sm:p-6 md:p-10 game-bg-frame">
+    <main class="flex-1 min-w-0 bg-gradient-to-b from-green-50 to-emerald-100 p-4 sm:p-6 md:p-10 game-bg-frame">
       <div class="flex justify-center mb-8">
         <nav
           class="inline-flex flex-wrap items-center gap-2 px-5 py-2 bg-white/80 backdrop-blur rounded-2xl border border-gray-200 shadow-sm text-sm font-semibold">
           <span id="breadcrumb-level" class="text-amber-600 uppercase">🎯 Chọn cấp bậc</span>
           <span class="text-gray-300">•</span>
           <span id="breadcrumb-unit" class="text-green-600 uppercase">📖 Loading...</span>
-          
+
         </nav>
       </div>
 
@@ -519,104 +612,126 @@
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-8 md:gap-10 max-w-6xl mx-auto px-4 lg:px-8">
-          <button onclick="startCatchGame()" data-menu-key="catching" aria-label="Catch Vocabulary" class="menu-game-card game-card group relative rounded-[24px] sm:rounded-[36px] shadow-xl border-4 border-transparent hover:border-amber-400 transition-all text-center aspect-[21/9] w-full overflow-hidden" style="background: linear-gradient(135deg, #fffbeb, #fef3c7);">
-            <div class="absolute inset-0 flex flex-col items-center justify-center gap-1 sm:gap-2 z-10 rounded-[20px] sm:rounded-[32px] bg-white/60 backdrop-blur-[2px] group-hover:bg-white/40 transition-all">
-              <span class="text-3xl sm:text-5xl drop-shadow-sm">🧺</span>
-              <h3 class="text-base sm:text-xl font-extrabold text-amber-700 uppercase tracking-wide drop-shadow-sm">Catch Vocabulary</h3>
-              <p class="text-[10px] sm:text-xs text-amber-600 font-bold">Hứng từ vựng rơi xuống!</p>
-            </div>
+          <button onclick="startCatchGame()" data-menu-key="catching" aria-label="Catch Vocabulary"
+            class="menu-game-card game-card group relative bg-white rounded-[24px] sm:rounded-[36px] shadow-xl border-4 border-transparent hover:border-amber-400 transition-all text-center aspect-[21/9] w-full overflow-hidden">
+            <span class="sr-only">Catch Vocabulary</span>
           </button>
-          <button onclick="startListenChoose()" data-menu-key="listenchoose" aria-label="Listen and Choose" class="menu-game-card game-card group relative rounded-[24px] sm:rounded-[36px] shadow-xl border-4 border-transparent hover:border-blue-400 transition-all text-center aspect-[21/9] w-full overflow-hidden" style="background: linear-gradient(135deg, #eff6ff, #dbeafe);">
-            <div class="absolute inset-0 flex flex-col items-center justify-center gap-1 sm:gap-2 z-10 rounded-[20px] sm:rounded-[32px] bg-white/60 backdrop-blur-[2px] group-hover:bg-white/40 transition-all">
-              <span class="text-3xl sm:text-5xl drop-shadow-sm">🔊</span>
-              <h3 class="text-base sm:text-xl font-extrabold text-blue-700 uppercase tracking-wide drop-shadow-sm">Listen & Choose</h3>
-              <p class="text-[10px] sm:text-xs text-blue-600 font-bold">Nghe và chọn hình đúng!</p>
-            </div>
+          <button onclick="startListenChoose()" data-menu-key="listenchoose" aria-label="Listen and Choose"
+            class="menu-game-card game-card group bg-white rounded-[24px] sm:rounded-[36px] shadow-xl border-4 border-transparent hover:border-blue-400 transition-all text-center aspect-[21/9] w-full overflow-hidden">
+            <span class="sr-only">Listen & Choose</span>
           </button>
-          <button onclick="startLookChoose()" data-menu-key="lookchoose" aria-label="Look and Choose" class="menu-game-card game-card group relative rounded-[24px] sm:rounded-[36px] shadow-xl border-4 border-transparent hover:border-purple-400 transition-all text-center aspect-[21/9] w-full overflow-hidden" style="background: linear-gradient(135deg, #f5f3ff, #ddd6fe);">
-            <div class="absolute inset-0 flex flex-col items-center justify-center gap-1 sm:gap-2 z-10 rounded-[20px] sm:rounded-[32px] bg-white/60 backdrop-blur-[2px] group-hover:bg-white/40 transition-all">
-              <span class="text-3xl sm:text-5xl drop-shadow-sm">👀</span>
-              <h3 class="text-base sm:text-xl font-extrabold text-purple-700 uppercase tracking-wide drop-shadow-sm">Look & Choose</h3>
-              <p class="text-[10px] sm:text-xs text-purple-600 font-bold">Nhìn hình và chọn đáp án!</p>
-            </div>
+          <button onclick="startLookChoose()" data-menu-key="lookchoose" aria-label="Look and Choose"
+            class="menu-game-card game-card group bg-white rounded-[24px] sm:rounded-[36px] shadow-xl border-4 border-transparent hover:border-purple-400 transition-all text-center aspect-[21/9] w-full overflow-hidden">
+            <span class="sr-only">Look & Choose</span>
           </button>
-          <button onclick="startPronunciationGame()" data-menu-key="pronunciation" aria-label="Pronunciation" class="menu-game-card game-card group relative rounded-[24px] sm:rounded-[36px] shadow-xl border-4 border-transparent hover:border-green-400 transition-all text-center aspect-[21/9] w-full overflow-hidden" style="background: linear-gradient(135deg, #f0fdf4, #dcfce7);">
-            <div class="absolute inset-0 flex flex-col items-center justify-center gap-1 sm:gap-2 z-10 rounded-[20px] sm:rounded-[32px] bg-white/60 backdrop-blur-[2px] group-hover:bg-white/40 transition-all">
-              <span class="text-3xl sm:text-5xl drop-shadow-sm">🎤</span>
-              <h3 class="text-base sm:text-xl font-extrabold text-green-700 uppercase tracking-wide drop-shadow-sm">Pronunciation</h3>
-              <p class="text-[10px] sm:text-xs text-green-600 font-bold">Luyện phát âm cùng bé!</p>
-            </div>
+          <button onclick="startPronunciationGame()" data-menu-key="pronunciation" aria-label="Pronunciation"
+            class="menu-game-card game-card group bg-white rounded-[24px] sm:rounded-[36px] shadow-xl border-4 border-transparent hover:border-green-400 transition-all text-center aspect-[21/9] w-full overflow-hidden">
+            <span class="sr-only">Pronunciation</span>
           </button>
-        </div>  
+        </div>
       </div>
       <div id="pronunciation-game-view" class="hidden animate-slide-up w-full">
         <div class="w-full mx-auto px-2 sm:px-4">
-          <button onclick="backToMenu()" class="mb-4 sm:mb-6 inline-flex items-center gap-2 bg-white border-4 border-green-400 text-green-800 font-black text-base sm:text-lg px-6 py-3 rounded-full shadow-[0_8px_20px_rgba(34,197,94,0.28)] hover:bg-green-50 hover:border-green-500 hover:shadow-[0_12px_25px_rgba(34,197,94,0.34)] transform hover:-translate-y-1 transition-all active:scale-95 group w-fit relative z-[70]">
-            <span class="inline-block group-hover:-translate-x-1 transition-transform text-xl sm:text-2xl leading-none">←</span> Quay lại Menu Game
+          <button onclick="backToMenu()"
+            class="mb-4 sm:mb-6 inline-flex items-center gap-2 bg-white border-4 border-green-400 text-green-800 font-black text-base sm:text-lg px-6 py-3 rounded-full shadow-[0_8px_20px_rgba(34,197,94,0.28)] hover:bg-green-50 hover:border-green-500 hover:shadow-[0_12px_25px_rgba(34,197,94,0.34)] transform hover:-translate-y-1 transition-all active:scale-95 group w-fit relative z-[70]">
+            <span
+              class="inline-block group-hover:-translate-x-1 transition-transform text-xl sm:text-2xl leading-none">←</span>
+            Quay lại Menu Game
           </button>
 
-          <section class="bg-white/95 rounded-[36px] sm:rounded-[48px] md:rounded-[60px] border border-blue-100 shadow-2xl overflow-hidden w-full flex flex-col relative game-section">
-            <div id="speech-loading" role="status" aria-live="polite" class="min-h-[30vh] sm:min-h-[40vh] flex flex-col items-center justify-center gap-4 px-6 py-14 sm:py-16 text-center">
+          <section
+            class="bg-white/95 rounded-[36px] sm:rounded-[48px] md:rounded-[60px] border border-blue-100 shadow-2xl overflow-hidden w-full flex flex-col relative game-section">
+            <div id="speech-loading" role="status" aria-live="polite"
+              class="min-h-[30vh] sm:min-h-[40vh] flex flex-col items-center justify-center gap-4 px-6 py-14 sm:py-16 text-center">
               <div class="h-16 w-16 rounded-full border-4 border-green-200 border-t-green-500 animate-spin"></div>
-              <div class="text-green-600 font-black text-lg sm:text-xl md:text-2xl animate-pulse">Đang chuẩn bị câu hỏi...</div>
+              <div class="text-green-600 font-black text-lg sm:text-xl md:text-2xl animate-pulse">Đang chuẩn bị câu
+                hỏi...</div>
             </div>
 
             <div id="speech-content" class="hidden flex flex-col">
               <!-- Stats Header -->
-              <div class="grid grid-cols-3 gap-2 sm:gap-4 p-4 sm:p-6 md:p-8 bg-gradient-to-b from-green-50/50 to-transparent text-center font-black text-sm sm:text-lg md:text-xl">
-                <div class="bg-white/80 backdrop-blur border border-green-100 py-3 sm:py-4 rounded-2xl text-green-700 shadow-sm">⭐ <span id="speech-score" class="text-xl sm:text-2xl drop-shadow-sm">0</span></div>
-                <div class="bg-white/80 backdrop-blur border border-emerald-100 py-3 sm:py-4 rounded-2xl text-emerald-700 shadow-sm">📚 <span id="speech-progress" class="text-xl sm:text-2xl drop-shadow-sm">1/8</span></div>
-                <div class="bg-white/80 backdrop-blur border border-green-100 py-3 sm:py-4 rounded-2xl text-green-700 shadow-sm">✅ <span id="speech-correct-count" class="text-xl sm:text-2xl drop-shadow-sm">0</span></div>
+              <div
+                class="grid grid-cols-3 gap-2 sm:gap-4 p-4 sm:p-6 md:p-8 bg-gradient-to-b from-green-50/50 to-transparent text-center font-black text-sm sm:text-lg md:text-xl">
+                <div
+                  class="bg-white/80 backdrop-blur border border-green-100 py-3 sm:py-4 rounded-2xl text-green-700 shadow-sm">
+                  ⭐ <span id="speech-score" class="text-xl sm:text-2xl drop-shadow-sm">0</span></div>
+                <div
+                  class="bg-white/80 backdrop-blur border border-emerald-100 py-3 sm:py-4 rounded-2xl text-emerald-700 shadow-sm">
+                  📚 <span id="speech-progress" class="text-xl sm:text-2xl drop-shadow-sm">1/8</span></div>
+                <div
+                  class="bg-white/80 backdrop-blur border border-green-100 py-3 sm:py-4 rounded-2xl text-green-700 shadow-sm">
+                  ✅ <span id="speech-correct-count" class="text-xl sm:text-2xl drop-shadow-sm">0</span></div>
               </div>
 
               <!-- Main Content Area -->
-              <div class="flex-1 p-4 sm:p-6 md:p-8 text-center flex flex-col justify-center items-center relative overflow-hidden min-h-[30vh] sm:min-h-[40vh]">
+              <div
+                class="flex-1 p-4 sm:p-6 md:p-8 text-center flex flex-col justify-center items-center relative overflow-hidden min-h-[30vh] sm:min-h-[40vh]">
                 <!-- Animated blobs behind the image -->
                 <div class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-50 z-0">
-                  <div class="absolute w-40 h-40 sm:w-64 sm:h-64 bg-green-300 rounded-full mix-blend-multiply filter blur-[40px] animate-pulse"></div>
-                  <div class="absolute w-40 h-40 sm:w-64 sm:h-64 bg-emerald-300 rounded-full mix-blend-multiply filter blur-[40px] animate-pulse" style="animation-delay: 2s; transform: translateX(30px);"></div>
+                  <div
+                    class="absolute w-40 h-40 sm:w-64 sm:h-64 bg-green-300 rounded-full mix-blend-multiply filter blur-[40px] animate-pulse">
+                  </div>
+                  <div
+                    class="absolute w-40 h-40 sm:w-64 sm:h-64 bg-emerald-300 rounded-full mix-blend-multiply filter blur-[40px] animate-pulse"
+                    style="animation-delay: 2s; transform: translateX(30px);"></div>
                 </div>
-                
+
                 <div class="relative z-10 mb-6 sm:mb-8 md:mb-10 group">
-                  <div class="absolute inset-0 bg-green-100/50 rounded-[32px] sm:rounded-[44px] transform rotate-3 scale-105 transition-transform group-hover:rotate-6"></div>
-                  <img id="speech-img" src="" class="relative w-48 h-48 sm:w-64 sm:h-64 md:w-72 md:h-72 object-contain bg-white rounded-[32px] sm:rounded-[44px] p-4 sm:p-6 md:p-8 shadow-[0_20px_50px_rgba(59,130,246,0.15)] border-4 border-white transition-transform hover:-translate-y-2">
+                  <div
+                    class="absolute inset-0 bg-green-100/50 rounded-[32px] sm:rounded-[44px] transform rotate-3 scale-105 transition-transform group-hover:rotate-6">
+                  </div>
+                  <img id="speech-img" src=""
+                    class="relative w-48 h-48 sm:w-64 sm:h-64 md:w-72 md:h-72 object-contain bg-white rounded-[32px] sm:rounded-[44px] p-4 sm:p-6 md:p-8 shadow-[0_20px_50px_rgba(59,130,246,0.15)] border-4 border-white transition-transform hover:-translate-y-2">
                 </div>
-                
-                <h2 id="speech-en" class="relative z-10 text-4xl sm:text-5xl md:text-7xl font-black mb-4 sm:mb-6 tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-green-700 to-emerald-600 drop-shadow-sm uppercase">Teacher</h2>
-                
-                <div class="relative z-10 px-8 sm:px-10 py-3 bg-white/70 backdrop-blur-md rounded-full text-lg md:text-2xl font-bold border-2 border-green-50 shadow-inner text-gray-600 inline-block">
+
+                <h2 id="speech-en"
+                  class="relative z-10 text-4xl sm:text-5xl md:text-7xl font-black mb-4 sm:mb-6 tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-green-700 to-emerald-600 drop-shadow-sm uppercase">
+                  Teacher</h2>
+
+                <div
+                  class="relative z-10 px-8 sm:px-10 py-3 bg-white/70 backdrop-blur-md rounded-full text-lg md:text-2xl font-bold border-2 border-green-50 shadow-inner text-gray-600 inline-block">
                   <span id="speech-vi">Giáo viên</span>
                 </div>
               </div>
 
               <!-- Controls Area -->
-              <div class="p-4 sm:p-6 md:p-8 flex flex-wrap justify-center items-center gap-3 sm:gap-6 bg-gradient-to-t from-gray-50 to-white relative z-20">
-                  <button onclick="listenSample()" class="flex items-center justify-center gap-2 sm:gap-3 px-6 sm:px-8 py-3 sm:py-4 bg-white text-green-600 rounded-[24px] text-lg sm:text-xl font-black border-4 border-green-100 shadow-md hover:bg-green-50 hover:border-green-300 transition-all active:scale-95 group">
-                      <span class="text-2xl sm:text-3xl group-hover:scale-110 transition-transform">🔊</span> Nghe
-                  </button>
-                <button id="btn-record" onclick="startRecording()" class="flex items-center justify-center gap-3 sm:gap-4 px-8 sm:px-12 py-4 sm:py-5 bg-gradient-to-r from-red-500 to-rose-500 text-white rounded-[28px] sm:rounded-[32px] text-xl sm:text-2xl font-black shadow-[0_15px_30px_rgba(225,29,72,0.3)] hover:-translate-y-1 hover:shadow-xl transition-all animate-pulse active:scale-95 group">
-                      <span class="text-3xl sm:text-4xl group-hover:scale-110 transition-transform">🎤</span> Ghi âm
-                  </button>
-                <button onclick="nextSpeechQuestion()" class="flex items-center justify-center gap-2 sm:gap-3 px-6 sm:px-8 py-3 sm:py-4 bg-white text-green-600 rounded-[24px] text-lg sm:text-xl font-black border-4 border-green-100 shadow-md hover:bg-green-50 hover:border-green-300 transition-all active:scale-95 group">
-                      Tới ➜
-                  </button>
+              <div
+                class="p-4 sm:p-6 md:p-8 flex flex-wrap justify-center items-center gap-3 sm:gap-6 bg-gradient-to-t from-gray-50 to-white relative z-20">
+                <button onclick="listenSample()"
+                  class="flex items-center justify-center gap-2 sm:gap-3 px-6 sm:px-8 py-3 sm:py-4 bg-white text-green-600 rounded-[24px] text-lg sm:text-xl font-black border-4 border-green-100 shadow-md hover:bg-green-50 hover:border-green-300 transition-all active:scale-95 group">
+                  <span class="text-2xl sm:text-3xl group-hover:scale-110 transition-transform">🔊</span> Nghe
+                </button>
+                <button id="btn-record" onclick="startRecording()"
+                  class="flex items-center justify-center gap-3 sm:gap-4 px-8 sm:px-12 py-4 sm:py-5 bg-gradient-to-r from-red-500 to-rose-500 text-white rounded-[28px] sm:rounded-[32px] text-xl sm:text-2xl font-black shadow-[0_15px_30px_rgba(225,29,72,0.3)] hover:-translate-y-1 hover:shadow-xl transition-all animate-pulse active:scale-95 group">
+                  <span class="text-3xl sm:text-4xl group-hover:scale-110 transition-transform">🎤</span> Ghi âm
+                </button>
+                <button onclick="nextSpeechQuestion()"
+                  class="flex items-center justify-center gap-2 sm:gap-3 px-6 sm:px-8 py-3 sm:py-4 bg-white text-green-600 rounded-[24px] text-lg sm:text-xl font-black border-4 border-green-100 shadow-md hover:bg-green-50 hover:border-green-300 transition-all active:scale-95 group">
+                  Tới ➜
+                </button>
               </div>
 
               <!-- Microphone Permission -->
-              <div id="speech-mic-panel" class="mx-4 sm:mx-6 md:mx-8 mb-4 sm:mb-6 rounded-[28px] border-2 border-amber-200 bg-amber-50/95 px-4 py-4 sm:px-6 sm:py-5 shadow-lg hidden">
+              <div id="speech-mic-panel"
+                class="mx-4 sm:mx-6 md:mx-8 mb-4 sm:mb-6 rounded-[28px] border-2 border-amber-200 bg-amber-50/95 px-4 py-4 sm:px-6 sm:py-5 shadow-lg hidden">
                 <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                   <div class="text-left">
-                    <p id="speech-mic-title" class="text-amber-900 font-black text-lg sm:text-xl">Cần quyền micro để chơi game phát âm</p>
-                    <p id="speech-mic-detail" class="text-amber-800 text-sm sm:text-base font-semibold">Bấm Cấp quyền micro để trình duyệt cho phép dùng micro. Sau đó đọc to để kiểm tra xem máy có nghe được không.</p>
+                    <p id="speech-mic-title" class="text-amber-900 font-black text-lg sm:text-xl">Cần quyền micro để
+                      chơi game phát âm</p>
+                    <p id="speech-mic-detail" class="text-amber-800 text-sm sm:text-base font-semibold">Bấm Cấp quyền
+                      micro để trình duyệt cho phép dùng micro. Sau đó đọc to để kiểm tra xem máy có nghe được không.
+                    </p>
                   </div>
-                  <button id="btn-enable-mic" onclick="requestPronunciationMicrophoneAccess()" class="self-start sm:self-center px-5 py-3 rounded-[20px] bg-amber-500 text-white font-black text-base sm:text-lg shadow-lg hover:bg-amber-600 transition-all active:scale-95">
+                  <button id="btn-enable-mic" onclick="requestPronunciationMicrophoneAccess()"
+                    class="self-start sm:self-center px-5 py-3 rounded-[20px] bg-amber-500 text-white font-black text-base sm:text-lg shadow-lg hover:bg-amber-600 transition-all active:scale-95">
                     Cấp quyền micro
                   </button>
                 </div>
               </div>
 
               <!-- Feedback Status -->
-              <div id="speech-status" role="status" aria-live="polite" class="px-4 py-5 sm:py-6 bg-gradient-to-r from-green-100 via-emerald-50 to-green-100 text-green-800 text-center font-black text-lg sm:text-xl md:text-2xl border-t border-green-100 relative z-20 shadow-inner">
+              <div id="speech-status" role="status" aria-live="polite"
+                class="px-4 py-5 sm:py-6 bg-gradient-to-r from-green-100 via-emerald-50 to-green-100 text-green-800 text-center font-black text-lg sm:text-xl md:text-2xl border-t border-green-100 relative z-20 shadow-inner">
                 Lắng nghe thật kỹ và đọc to nhé! 👂
               </div>
             </div>
@@ -625,12 +740,16 @@
       </div>
       <div id="catch-game-view" class="hidden animate-slide-up w-full h-full">
         <div class="w-full mx-auto px-2 sm:px-4 h-full flex flex-col">
-          <button onclick="backToMenu()" class="mb-4 sm:mb-6 inline-flex items-center gap-2 bg-white border-4 border-green-400 text-green-800 font-black text-base sm:text-lg px-6 py-3 rounded-full shadow-[0_8px_20px_rgba(34,197,94,0.28)] hover:bg-green-50 hover:border-green-500 hover:shadow-[0_12px_25px_rgba(34,197,94,0.34)] transform hover:-translate-y-1 transition-all active:scale-95 group w-fit relative z-[70]">
-            <span class="inline-block group-hover:-translate-x-1 transition-transform text-xl sm:text-2xl leading-none">←</span> Quay lại Menu Game
+          <button onclick="backToMenu()"
+            class="mb-4 sm:mb-6 inline-flex items-center gap-2 bg-white border-4 border-green-400 text-green-800 font-black text-base sm:text-lg px-6 py-3 rounded-full shadow-[0_8px_20px_rgba(34,197,94,0.28)] hover:bg-green-50 hover:border-green-500 hover:shadow-[0_12px_25px_rgba(34,197,94,0.34)] transform hover:-translate-y-1 transition-all active:scale-95 group w-fit relative z-[70]">
+            <span
+              class="inline-block group-hover:-translate-x-1 transition-transform text-xl sm:text-2xl leading-none">←</span>
+            Quay lại Menu Game
           </button>
 
-          <section class="bg-white/90 backdrop-blur-sm rounded-[20px] sm:rounded-[28px] md:rounded-[36px] border-2 border-green-100/80 shadow-[0_8px_40px_rgba(34,197,94,0.10),0_2px_8px_rgba(0,0,0,0.05)] p-2.5 sm:p-4 md:p-5 text-center game-section relative flex flex-col overflow-hidden min-h-[calc(100vh-12rem)] sm:min-h-[calc(100vh-14rem)]">
-            
+          <section
+            class="bg-white/90 backdrop-blur-sm rounded-[20px] sm:rounded-[28px] md:rounded-[36px] border-2 border-green-100/80 shadow-[0_8px_40px_rgba(34,197,94,0.10),0_2px_8px_rgba(0,0,0,0.05)] p-2.5 sm:p-4 md:p-5 text-center game-section relative flex flex-col overflow-hidden min-h-[calc(100vh-12rem)] sm:min-h-[calc(100vh-14rem)]">
+
             <!-- Stats Header - Glassmorphism -->
             <div id="catch-stats" class="grid grid-cols-2 gap-2 sm:gap-3 md:gap-4 mb-2 sm:mb-3 shrink-0 z-10 w-full">
               <div class="catch-stat-card flex flex-col items-center justify-center gap-0.5">
@@ -644,19 +763,24 @@
                   <span id="catch-timer" class="catch-stat-value font-black text-emerald-600 tabular-nums">60</span>
                   <span class="text-xs font-bold text-emerald-500">s</span>
                 </div>
-                <span class="catch-stat-label text-xs font-bold text-emerald-800/60 uppercase tracking-wider">Thời gian</span>
+                <span class="catch-stat-label text-xs font-bold text-emerald-800/60 uppercase tracking-wider">Thời
+                  gian</span>
               </div>
             </div>
 
             <!-- Loading State -->
             <div id="catch-loading" class="flex-1 flex flex-col items-center justify-center gap-4 py-12 sm:py-16">
-              <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full border-4 border-green-200 border-t-green-500 animate-spin"></div>
+              <div
+                class="w-16 h-16 sm:w-20 sm:h-20 rounded-full border-4 border-green-200 border-t-green-500 animate-spin">
+              </div>
               <p class="text-green-500 font-bold text-base sm:text-lg">Đang chuẩn bị màn chơi...</p>
             </div>
 
             <!-- Game Area -->
-              <div id="catch-game-area" class="hidden relative flex-1 w-full catch-sky-bg rounded-[14px] sm:rounded-[20px] md:rounded-[24px] border-2 border-green-200/60 overflow-hidden cursor-crosshair touch-none shadow-inner" style="min-height: max(45vh, 280px);">
-              
+            <div id="catch-game-area"
+              class="hidden relative flex-1 w-full catch-sky-bg rounded-[14px] sm:rounded-[20px] md:rounded-[24px] border-2 border-green-200/60 overflow-hidden cursor-crosshair touch-none shadow-inner"
+              style="min-height: max(45vh, 280px);">
+
               <!-- Sun -->
               <div class="catch-sun"></div>
 
@@ -664,7 +788,8 @@
               <div class="catch-ground"></div>
 
               <!-- Overlay Start Game -->
-              <div id="catch-start-overlay" class="absolute inset-0 bg-gradient-to-b from-white/30 via-white/20 to-green-50/30 backdrop-blur-[1px] z-[100] flex flex-col items-center justify-center gap-4 sm:gap-6">
+              <div id="catch-start-overlay"
+                class="absolute inset-0 bg-gradient-to-b from-white/30 via-white/20 to-green-50/30 backdrop-blur-[1px] z-[100] flex flex-col items-center justify-center gap-4 sm:gap-6">
                 <div class="text-4xl sm:text-5xl md:text-6xl mb-2 animate-bounce">🧺</div>
                 <button onclick="runCatchGame()" class="catch-start-btn">
                   <span class="text-2xl sm:text-3xl">▶</span> BẮT ĐẦU
@@ -673,70 +798,98 @@
               </div>
 
               <!-- Basket -->
-              <div id="catch-basket" class="absolute bottom-[12%] left-0 w-20 h-20 sm:w-28 sm:h-28 md:w-36 md:h-36 select-none flex items-center justify-center catch-basket-glow" style="touch-action: none; pointer-events: none; z-index: 50;">
-                <span class="catch-basket-icon text-5xl sm:text-7xl md:text-8xl leading-none" style="pointer-events: none;">🧺</span>
+              <div id="catch-basket"
+                class="absolute bottom-[12%] left-0 w-20 h-20 sm:w-28 sm:h-28 md:w-36 md:h-36 select-none flex items-center justify-center catch-basket-glow"
+                style="touch-action: none; pointer-events: none; z-index: 50;">
+                <span class="catch-basket-icon text-5xl sm:text-7xl md:text-8xl leading-none"
+                  style="pointer-events: none;">🧺</span>
               </div>
-              
+
             </div>
           </section>
         </div>
       </div>
       <div id="game-play-view" class="hidden animate-slide-up">
         <div class="w-full mx-auto px-2 sm:px-4">
-          <button onclick="backToMenu()" class="mb-4 sm:mb-6 inline-flex items-center gap-2 bg-white border-4 border-green-400 text-green-800 font-black text-base sm:text-lg px-6 py-3 rounded-full shadow-[0_8px_20px_rgba(34,197,94,0.28)] hover:bg-green-50 hover:border-green-500 hover:shadow-[0_12px_25px_rgba(34,197,94,0.34)] transform hover:-translate-y-1 transition-all active:scale-95 group w-fit relative z-[70]">
-            <span class="inline-block group-hover:-translate-x-1 transition-transform text-xl sm:text-2xl leading-none">←</span> Quay lại Menu Game
+          <button onclick="backToMenu()"
+            class="mb-4 sm:mb-6 inline-flex items-center gap-2 bg-white border-4 border-green-400 text-green-800 font-black text-base sm:text-lg px-6 py-3 rounded-full shadow-[0_8px_20px_rgba(34,197,94,0.28)] hover:bg-green-50 hover:border-green-500 hover:shadow-[0_12px_25px_rgba(34,197,94,0.34)] transform hover:-translate-y-1 transition-all active:scale-95 group w-fit relative z-[70]">
+            <span
+              class="inline-block group-hover:-translate-x-1 transition-transform text-xl sm:text-2xl leading-none">←</span>
+            Quay lại Menu Game
           </button>
 
-          <section class="bg-white/95 rounded-[28px] sm:rounded-[36px] md:rounded-[40px] border border-green-100 shadow-2xl p-4 sm:p-6 md:p-8 text-center game-section relative">
-            <div id="game-stats" class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-4 sm:mb-6 text-center font-black text-lg sm:text-xl">
-              <div class="bg-green-50 py-4 rounded-3xl text-green-700 shadow-sm">⭐ Điểm: <span id="game-score">0</span></div>
-              <div class="bg-emerald-50 py-4 rounded-3xl text-emerald-700 shadow-sm">📚 Từ: <span id="game-progress">1/1</span></div>
-              <div class="bg-lime-50 py-4 rounded-3xl text-lime-700 shadow-sm">✅ Đúng: <span id="game-correct-count">0</span></div>
+          <section
+            class="bg-white/95 rounded-[28px] sm:rounded-[36px] md:rounded-[40px] border border-green-100 shadow-2xl p-4 sm:p-6 md:p-8 text-center game-section relative">
+            <div id="game-stats"
+              class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 mb-4 sm:mb-6 text-center font-black text-lg sm:text-xl">
+              <div class="bg-green-50 py-4 rounded-3xl text-green-700 shadow-sm">⭐ Điểm: <span id="game-score">0</span>
+              </div>
+              <div class="bg-emerald-50 py-4 rounded-3xl text-emerald-700 shadow-sm">📚 Từ: <span
+                  id="game-progress">1/1</span></div>
+              <div class="bg-lime-50 py-4 rounded-3xl text-lime-700 shadow-sm">✅ Đúng: <span
+                  id="game-correct-count">0</span></div>
             </div>
 
-            <div id="game-loading" class="py-16 sm:py-20 text-green-500 font-bold text-lg sm:text-xl animate-pulse">Đang chuẩn bị câu hỏi...</div>
+            <div id="game-loading" class="py-16 sm:py-20 text-green-500 font-bold text-lg sm:text-xl animate-pulse">Đang
+              chuẩn bị câu hỏi...</div>
 
             <div id="game-content" class="hidden">
               <h2 class="text-xl sm:text-2xl font-bold text-gray-800 mb-6 sm:mb-8">Nghe và chọn hình đúng</h2>
 
-              <button onclick="playTargetAudio()" class="w-24 h-24 sm:w-32 sm:h-32 bg-green-500 hover:bg-green-600 text-white rounded-full shadow-2xl transition-transform active:scale-90 flex items-center justify-center mx-auto mb-8 sm:mb-12">
-                        <span class="text-4xl sm:text-5xl">🔊</span>
-                    </button>
+              <button onclick="playTargetAudio()"
+                class="w-24 h-24 sm:w-32 sm:h-32 bg-green-500 hover:bg-green-600 text-white rounded-full shadow-2xl transition-transform active:scale-90 flex items-center justify-center mx-auto mb-8 sm:mb-12">
+                <span class="text-4xl sm:text-5xl">🔊</span>
+              </button>
 
               <div id="options-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 max-w-2xl mx-auto">
               </div>
             </div>
 
-            <div id="game-feedback-layer" class="hidden absolute inset-0 z-50 flex items-center justify-center pointer-events-none px-6"></div>
+            <div id="game-feedback-layer"
+              class="hidden absolute inset-0 z-50 flex items-center justify-center pointer-events-none px-6"></div>
           </section>
         </div>
       </div>
       <div id="game-summary-view" class="hidden animate-slide-up w-full">
         <div class="w-full max-w-2xl mx-auto px-4 mt-8 sm:mt-12">
-          <section class="bg-white/95 rounded-[36px] sm:rounded-[48px] border border-yellow-200 shadow-2xl p-6 sm:p-10 text-center relative overflow-hidden">
-            <div class="absolute -top-20 -left-20 w-40 h-40 bg-yellow-300 rounded-full mix-blend-multiply filter blur-2xl opacity-50 animate-pulse"></div>
-            <div class="absolute -bottom-20 -right-20 w-40 h-40 bg-green-300 rounded-full mix-blend-multiply filter blur-2xl opacity-50 animate-pulse" style="animation-delay: 2s;"></div>
-            
-            <h2 class="text-3xl sm:text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-yellow-500 mb-6 drop-shadow-sm uppercase">Chúc mừng bé!</h2>
-            <p class="text-lg sm:text-xl text-gray-600 font-bold mb-8">Bé đã hoàn thành xuất sắc trò chơi 🏆</p>
-            
-            <div class="bg-yellow-50 border-4 border-yellow-200 rounded-3xl p-6 mb-8 shadow-inner max-w-sm mx-auto">
-               <div class="text-5xl sm:text-7xl font-black text-yellow-500 mb-2 drop-shadow-md" id="summary-score">0</div>
-               <div class="text-sm sm:text-base font-bold text-yellow-700 uppercase tracking-wide">Điểm Khám Phá</div>
+          <section
+            class="bg-white/95 rounded-[36px] sm:rounded-[48px] border border-yellow-200 shadow-2xl p-6 sm:p-10 text-center relative overflow-hidden">
+            <div
+              class="absolute -top-20 -left-20 w-40 h-40 bg-yellow-300 rounded-full mix-blend-multiply filter blur-2xl opacity-50 animate-pulse">
             </div>
-            
+            <div
+              class="absolute -bottom-20 -right-20 w-40 h-40 bg-green-300 rounded-full mix-blend-multiply filter blur-2xl opacity-50 animate-pulse"
+              style="animation-delay: 2s;"></div>
+
+            <h2
+              class="text-3xl sm:text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-orange-500 to-yellow-500 mb-6 drop-shadow-sm uppercase">
+              Chúc mừng bé!</h2>
+            <p class="text-lg sm:text-xl text-gray-600 font-bold mb-8">Bé đã hoàn thành xuất sắc trò chơi 🏆</p>
+
+            <div class="bg-yellow-50 border-4 border-yellow-200 rounded-3xl p-6 mb-8 shadow-inner max-w-sm mx-auto">
+              <div class="text-5xl sm:text-7xl font-black text-yellow-500 mb-2 drop-shadow-md" id="summary-score">0
+              </div>
+              <div class="text-sm sm:text-base font-bold text-yellow-700 uppercase tracking-wide">Điểm Khám Phá</div>
+            </div>
+
             <div class="flex justify-center gap-4 sm:gap-6 mb-10 text-sm sm:text-lg font-bold">
-              <div class="bg-green-100 text-green-700 px-4 sm:px-6 py-3 rounded-2xl shadow-sm border border-green-200 flex items-center gap-2">
+              <div
+                class="bg-green-100 text-green-700 px-4 sm:px-6 py-3 rounded-2xl shadow-sm border border-green-200 flex items-center gap-2">
                 <span class="text-xl">✅</span> <span id="summary-correct">0</span> Đúng
               </div>
-              <div class="bg-green-100 text-green-700 px-4 sm:px-6 py-3 rounded-2xl shadow-sm border border-green-200 flex items-center gap-2">
+              <div
+                class="bg-green-100 text-green-700 px-4 sm:px-6 py-3 rounded-2xl shadow-sm border border-green-200 flex items-center gap-2">
                 <span class="text-xl">🎯</span> <span id="summary-total">0</span> Câu
               </div>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <button onclick="playAgain()" class="py-4 px-6 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-[24px] text-lg sm:text-xl font-black shadow-[0_10px_20px_rgba(34,197,94,0.28)] hover:-translate-y-1 hover:shadow-xl transition-all active:scale-95 flex items-center justify-center gap-2">🔄 Chơi lại nhé</button>
-              <button onclick="backToMenu()" class="py-4 px-6 bg-white text-green-600 border-4 border-green-100 rounded-[24px] text-lg sm:text-xl font-black shadow-lg hover:border-green-300 hover:bg-green-50 transition-all active:scale-95 flex items-center justify-center gap-2">🎮 Chọn Game Khác</button>
+              <button onclick="playAgain()"
+                class="py-4 px-6 bg-gradient-to-r from-green-500 to-emerald-500 text-white rounded-[24px] text-lg sm:text-xl font-black shadow-[0_10px_20px_rgba(34,197,94,0.28)] hover:-translate-y-1 hover:shadow-xl transition-all active:scale-95 flex items-center justify-center gap-2">🔄
+                Chơi lại nhé</button>
+              <button onclick="backToMenu()"
+                class="py-4 px-6 bg-white text-green-600 border-4 border-green-100 rounded-[24px] text-lg sm:text-xl font-black shadow-lg hover:border-green-300 hover:bg-green-50 transition-all active:scale-95 flex items-center justify-center gap-2">🎮
+                Chọn Game Khác</button>
             </div>
           </section>
         </div>
@@ -748,7 +901,9 @@
   <footer class="bg-gradient-to-br from-[#16a34a] to-[#15803d] text-white p-8">
     <div class="max-w-7xl mx-auto grid md:grid-cols-3 gap-8 text-center md:text-left">
       <div>
-        <img src="https://drive.google.com/thumbnail?id=1GxMPO-OPxB0WuJrD9iJK1J4Jp6UaTtT6&sz=w800" alt="AnSchool Logo" class="h-12 w-auto bg-white p-1 rounded mb-4 mx-auto md:mx-0 object-contain" width="192" height="48" loading="lazy">
+        <img src="https://drive.google.com/thumbnail?id=1GxMPO-OPxB0WuJrD9iJK1J4Jp6UaTtT6&sz=w800" alt="AnSchool Logo"
+          class="h-12 w-auto bg-white p-1 rounded mb-4 mx-auto md:mx-0 object-contain" width="192" height="48"
+          loading="lazy">
         <p class="text-xs text-blue-100 uppercase font-bold">An's School Education</p>
         <p class="text-[10px] text-blue-200 mt-2 italic">AN'S SCHOOL BỨT PHÁ TIẾNG ANH – VƯƠN TẦM THẾ GIỚI 🌏</p>
       </div>
@@ -788,30 +943,26 @@
     };
 
     function applyGameBackground(imageUrl) {
-      if (imageUrl && imageUrl.trim()) {
-        // Use Drive image with local Background.png as fallback
-        const value = `url("${imageUrl.trim()}"), url("Background.png"), linear-gradient(180deg, rgba(229, 255, 214, 0.98), rgba(200, 245, 179, 0.96))`;
-        document.documentElement.style.setProperty('--game-bg-image', value);
-      } else {
-        // No Drive URL, use local file then gradient fallback
-        const value = 'url("Background.png"), linear-gradient(180deg, rgba(229, 255, 214, 0.98), rgba(200, 245, 179, 0.96))';
-        document.documentElement.style.setProperty('--game-bg-image', value);
-      }
+      const value = imageUrl && imageUrl.trim() ? `url("${imageUrl.trim()}")` : 'linear-gradient(180deg, rgba(229, 255, 214, 0.98), rgba(200, 245, 179, 0.96))';
+      document.documentElement.style.setProperty('--game-bg-image', value);
     }
 
     function applyMenuBackgrounds() {
+      const fallbackBackgrounds = {
+        catching: 'linear-gradient(135deg, rgba(255,251,235,0.98), rgba(254,243,199,0.98))',
+        listenchoose: 'linear-gradient(135deg, rgba(255,255,255,0.98), rgba(219,234,254,0.98))',
+        lookchoose: 'linear-gradient(135deg, rgba(255,255,255,0.98), rgba(221,214,254,0.98))',
+        pronunciation: 'linear-gradient(135deg, rgba(255,255,255,0.98), rgba(220,252,231,0.98))'
+      };
+
       document.querySelectorAll('.menu-game-card').forEach(card => {
         const key = String(card.dataset.menuKey || '').toLowerCase();
         const matchedImage = GAME_MENU_BG_MAP[key];
-        if (matchedImage) {
-          card.style.backgroundImage = `url("${matchedImage}")`;
-          card.style.backgroundSize = '100% 100%';
-          card.style.backgroundPosition = 'center';
-          card.style.backgroundRepeat = 'no-repeat';
-          // Hide the overlay text when we have a real background image
-          const overlay = card.querySelector('.menu-card-overlay');
-          if (overlay) overlay.style.opacity = '0';
-        }
+        card.style.backgroundImage = matchedImage ? `url("${matchedImage}")` : fallbackBackgrounds[key] || 'linear-gradient(135deg, rgba(255,255,255,0.98), rgba(226,232,240,0.98))';
+        card.style.backgroundSize = matchedImage ? '100% 100%' : 'cover';
+        card.style.backgroundPosition = 'center';
+        card.style.backgroundRepeat = 'no-repeat';
+        card.style.backgroundColor = 'transparent';
       });
     }
 
@@ -836,12 +987,12 @@
 
         fetch(url)
           .then(res => res.json())
-          .then(function(resData) {
-              if(resData.success) {
-                  resolve(resData.data || resData.units);
-              } else {
-                  reject(resData.message);
-              }
+          .then(function (resData) {
+            if (resData.success) {
+              resolve(resData.data || resData.units);
+            } else {
+              reject(resData.message);
+            }
           })
           .catch(err => reject(err));
       });
@@ -864,7 +1015,7 @@
         .then(data => {
           const normalized = Array.isArray(data) ? data : [];
           cacheBucket[cacheKey] = normalized;
-          try { localStorage.setItem(localKey, JSON.stringify({t: Date.now(), data: normalized})); } catch(e) {}
+          try { localStorage.setItem(localKey, JSON.stringify({ t: Date.now(), data: normalized })); } catch (e) { }
           return normalized;
         })
         .catch(error => {
@@ -907,17 +1058,17 @@
           gameDataCache['lookchoose'][cacheKey] = parsed.lookchoose || [];
           gameDataCache['pronunciation'][cacheKey] = parsed.pronunciation || [];
         }
-      } catch(e) {}
+      } catch (e) { }
 
       const warm = () => {
         fetch(SCRIPT_URL + '?api=game.all&slug=' + encodeURIComponent(unitSlug) + '&level=' + encodeURIComponent(normalizeLevelKeyClient(levelKey) || '') + '&week=' + encodeURIComponent(currentWeekValue || '') + '&game=' + encodeURIComponent(getSelectedGameKeyForRequests()))
           .then(res => res.json())
           .then(response => {
             if (response && response.success && response.data) {
-               gameDataCache['listenchoose'][cacheKey] = response.data.listenchoose || [];
-               gameDataCache['lookchoose'][cacheKey] = response.data.lookchoose || [];
-               gameDataCache['pronunciation'][cacheKey] = response.data.pronunciation || [];
-               try { localStorage.setItem(localKey, JSON.stringify(response.data)); } catch(e){}
+              gameDataCache['listenchoose'][cacheKey] = response.data.listenchoose || [];
+              gameDataCache['lookchoose'][cacheKey] = response.data.lookchoose || [];
+              gameDataCache['pronunciation'][cacheKey] = response.data.pronunciation || [];
+              try { localStorage.setItem(localKey, JSON.stringify(response.data)); } catch (e) { }
             }
           })
           .catch(console.error);
@@ -1084,7 +1235,7 @@
       stopCatchGameLoop();
       resetCatchGameState();
 
-      fetchGameDataset('pronunciation', 'getPronunciationData', currentUnitSlug, currentLevelKey).then(function(questions) {
+      fetchGameDataset('pronunciation', 'getPronunciationData', currentUnitSlug, currentLevelKey).then(function (questions) {
         if (!questions || questions.length === 0) {
           alert("Unit này chưa có hình ảnh!");
           backToMenu();
@@ -1185,7 +1336,7 @@
       window.addEventListener('resize', handleCatchResize);
 
       // Event listeners
-      area.addEventListener('pointermove', handleCatchMove, {passive: true});
+      area.addEventListener('pointermove', handleCatchMove, { passive: true });
     }
 
     function runCatchGame() {
@@ -1359,7 +1510,7 @@
     function handleCatchSuccess(item, index) {
       currentGameScore += 10;
       currentGameCorrectCount++;
-      
+
       const scoreEl = document.getElementById('catch-score');
       scoreEl.innerText = currentGameScore;
       scoreEl.classList.remove('catch-score-pop');
@@ -1430,39 +1581,39 @@
     let currentUnitOrder = "";
     let currentWeekValue = "";
     let currentGameKey = "";
-const LEVEL_STORAGE_KEY = 'WW_SELECTED_LEVEL';
-const WEEK_STORAGE_KEY = 'WW_SELECTED_WEEK';
+    const LEVEL_STORAGE_KEY = 'WW_SELECTED_LEVEL';
+    const WEEK_STORAGE_KEY = 'WW_SELECTED_WEEK';
     const GAME_STORAGE_KEY = 'WW_SELECTED_GAME';
-const LEVEL_OPTIONS = [
-  { key: 'pre11', title: 'Pre 1.1', ageLabel: '2 tuổi' },
-  { key: 'pre12', title: 'Pre 1.2', ageLabel: '3 tuổi' },
-  { key: 'pre2', title: 'Pre 2', ageLabel: '4-5 tuổi' },
-  { key: 'pre3', title: 'Pre 3', ageLabel: '6 tuổi' }
-];
-const LEVEL_OPTION_MAP = LEVEL_OPTIONS.reduce((map, level) => {
-  map[level.key] = level;
-  return map;
-}, {});
-let gameQuestions = [];
-let currentQuestionIndex = 0;
-let currentGameAudio = new Audio();
-currentGameAudio.preload = 'auto';
-currentGameAudio.playsInline = true;
-  let currentGameTotalQuestions = 0;
-  let currentGameScore = 0;
-  let currentGameCorrectCount = 0;
-  let isQuestionLocked = false;
+    const LEVEL_OPTIONS = [
+      { key: 'pre11', title: 'Pre 1.1', ageLabel: '2 tuổi' },
+      { key: 'pre12', title: 'Pre 1.2', ageLabel: '3 tuổi' },
+      { key: 'pre2', title: 'Pre 2', ageLabel: '4-5 tuổi' },
+      { key: 'pre3', title: 'Pre 3', ageLabel: '6 tuổi' }
+    ];
+    const LEVEL_OPTION_MAP = LEVEL_OPTIONS.reduce((map, level) => {
+      map[level.key] = level;
+      return map;
+    }, {});
+    let gameQuestions = [];
+    let currentQuestionIndex = 0;
+    let currentGameAudio = new Audio();
+    currentGameAudio.preload = 'auto';
+    currentGameAudio.playsInline = true;
+    let currentGameTotalQuestions = 0;
+    let currentGameScore = 0;
+    let currentGameCorrectCount = 0;
+    let isQuestionLocked = false;
     let pendingGameAdvanceTimer = null;
     let isSidebarCollapsed = false;
     let currentGameType = "";
     let currentLevelKey = '';
     let currentLevelLabel = '';
     let allUnitsData = [];
-  let speechRecognitionActive = false;
-  let speechRecognitionHadResponse = false;
-  let speechMicrophoneReady = false;
-  let speechMicrophonePermission = 'unknown';
-  let speechRecognitionAvailable = false;
+    let speechRecognitionActive = false;
+    let speechRecognitionHadResponse = false;
+    let speechMicrophoneReady = false;
+    let speechMicrophonePermission = 'unknown';
+    let speechRecognitionAvailable = false;
 
     const GAME_SUCCESS_MESSAGES = [
       'Excellent!',
@@ -1473,433 +1624,433 @@ currentGameAudio.playsInline = true;
       'Super!'
     ];
 
-function getSidebarElement() {
-  return document.getElementById('unit-sidebar');
-}
-
-function getSidebarBackdropElement() {
-  return document.getElementById('sidebar-backdrop');
-}
-
-function syncSidebarCollapseUI() {
-  const sidebar = getSidebarElement();
-  if (!sidebar) return;
-
-  sidebar.classList.toggle('sidebar-collapsed', isSidebarCollapsed);
-
-  const toggleLabels = document.querySelectorAll('.sidebar-toggle-label');
-  toggleLabels.forEach(label => {
-    label.innerText = isSidebarCollapsed ? 'Mở rộng' : 'Thu gọn';
-  });
-
-  const footerLabels = document.querySelectorAll('.sidebar-footer-text');
-  footerLabels.forEach(label => {
-    label.innerText = isSidebarCollapsed ? 'Mở rộng sidebar' : 'Thu gọn / mở rộng';
-  });
-
-  const toggleIcons = document.querySelectorAll('.sidebar-toggle-icon');
-  toggleIcons.forEach(icon => {
-    icon.innerText = isSidebarCollapsed ? '⟩' : '⟨⟩';
-  });
-}
-
-function closeSidebarDrawer() {
-  const sidebar = getSidebarElement();
-  const backdrop = getSidebarBackdropElement();
-
-  if (sidebar) {
-    sidebar.classList.add('-translate-x-full');
-    sidebar.classList.remove('translate-x-0');
-  }
-
-  if (backdrop) {
-    backdrop.classList.add('hidden');
-  }
-
-  document.body.classList.remove('overflow-hidden');
-}
-
-function openSidebarDrawer() {
-  const sidebar = getSidebarElement();
-  const backdrop = getSidebarBackdropElement();
-
-  if (sidebar) {
-    sidebar.classList.remove('-translate-x-full');
-    sidebar.classList.add('translate-x-0');
-  }
-
-  if (backdrop) {
-    backdrop.classList.remove('hidden');
-  }
-
-  document.body.classList.add('overflow-hidden');
-}
-
-function toggleSidebarDrawer() {
-  if (window.innerWidth >= 768) {
-    toggleSidebarCollapse();
-    return;
-  }
-
-  const sidebar = getSidebarElement();
-  if (!sidebar) return;
-
-  const isOpen = sidebar.classList.contains('translate-x-0');
-  if (isOpen) {
-    closeSidebarDrawer();
-  } else {
-    openSidebarDrawer();
-  }
-}
-
-function toggleSidebarCollapse() {
-  isSidebarCollapsed = !isSidebarCollapsed;
-  syncSidebarCollapseUI();
-}
-
-function syncResponsiveSidebarState() {
-  if (window.innerWidth >= 768) {
-    closeSidebarDrawer();
-  } else {
-    const backdrop = getSidebarBackdropElement();
-    if (backdrop) {
-      backdrop.classList.add('hidden');
-    }
-    document.body.classList.remove('overflow-hidden');
-
-    const sidebar = getSidebarElement();
-    if (sidebar) {
-      sidebar.classList.add('-translate-x-full');
-      sidebar.classList.remove('translate-x-0');
-    }
-  }
-}
-
-function normalizeLevelKeyClient(value) {
-  return String(value || '')
-    .trim()
-    .toLowerCase()
-    .replace(/\s+/g, '')
-    .replace(/[^a-z0-9]/g, '');
-}
-
-function normalizeGameKeyClient(value) {
-  return String(value || '')
-    .trim()
-    .toLowerCase()
-    .replace(/\s+/g, '')
-    .replace(/[^a-z0-9]/g, '');
-}
-
-function getLevelOption(levelKey) {
-  const normalizedKey = normalizeLevelKeyClient(levelKey);
-  return LEVEL_OPTION_MAP[normalizedKey] || null;
-}
-
-function getLevelDisplayText(levelKey) {
-  const level = getLevelOption(levelKey);
-  return level ? `${level.title}: ${level.ageLabel}` : '';
-}
-
-function getSelectedLevelText() {
-  return currentLevelLabel || getLevelDisplayText(currentLevelKey) || 'Chọn cấp bậc';
-}
-
-function normalizeUnitKey(value) {
-  return String(value || '')
-    .trim()
-    .toLowerCase()
-    .replace(/\s+/g, '')
-    .replace(/[^a-z0-9]/g, '');
-}
-
-function normalizeWeekKey(value) {
-  return String(value || '')
-    .trim()
-    .toLowerCase()
-    .replace(/\s+/g, '')
-    .replace(/[^a-z0-9]/g, '');
-}
-
-function getQueryParamValue(name) {
-  try {
-    return new URLSearchParams(window.location.search).get(name) || '';
-  } catch (error) {
-    return '';
-  }
-}
-
-function getRequestedWeekValue() {
-  return normalizeWeekKey(getQueryParamValue('week'));
-}
-
-function getDefaultWeekKeyForUnit(unitValue) {
-  return normalizeUnitKey(unitValue) === '5' ? '2' : '1';
-}
-
-function getSelectedUnitValue() {
-  try {
-    return getQueryParamValue('unit');
-  } catch (error) {
-    return '';
-  }
-}
-
-function getUnitOrderValue(unit, fallbackIndex) {
-  const orderValue = unit && unit.order != null ? String(unit.order).trim() : '';
-  if (orderValue) return orderValue;
-  const indexValue = Number(fallbackIndex);
-  return Number.isFinite(indexValue) ? String(indexValue + 1) : '';
-}
-
-function getPreferredWeekKeyForUnit(unitValue) {
-  return getDefaultWeekKeyForUnit(unitValue);
-}
-
-function getSelectedSidebarWeekKey() {
-  return normalizeWeekKey(currentWeekValue || loadSelectedWeek() || '1') || '1';
-}
-
-function updateHomeUrlForUnit(unit, weekKey, unitValue) {
-  if (!unit) return;
-
-  try {
-    const url = new URL(window.location.href);
-    const selectedGameKey = getSelectedGameKeyForRequests();
-    if (selectedGameKey) {
-      url.searchParams.set('game', selectedGameKey);
-    }
-    if (currentLevelKey) {
-      url.searchParams.set('level', currentLevelKey);
+    function getSidebarElement() {
+      return document.getElementById('unit-sidebar');
     }
 
-    const resolvedWeekKey = normalizeWeekKey(weekKey || currentWeekValue || loadSelectedWeek() || '1');
-    if (resolvedWeekKey) {
-      url.searchParams.set('week', resolvedWeekKey);
+    function getSidebarBackdropElement() {
+      return document.getElementById('sidebar-backdrop');
     }
 
-    const resolvedUnitValue = String(unitValue || getUnitOrderValue(unit) || '').trim();
-    if (resolvedUnitValue) {
-      url.searchParams.set('unit', resolvedUnitValue);
-    } else {
-      url.searchParams.delete('unit');
+    function syncSidebarCollapseUI() {
+      const sidebar = getSidebarElement();
+      if (!sidebar) return;
+
+      sidebar.classList.toggle('sidebar-collapsed', isSidebarCollapsed);
+
+      const toggleLabels = document.querySelectorAll('.sidebar-toggle-label');
+      toggleLabels.forEach(label => {
+        label.innerText = isSidebarCollapsed ? 'Mở rộng' : 'Thu gọn';
+      });
+
+      const footerLabels = document.querySelectorAll('.sidebar-footer-text');
+      footerLabels.forEach(label => {
+        label.innerText = isSidebarCollapsed ? 'Mở rộng sidebar' : 'Thu gọn / mở rộng';
+      });
+
+      const toggleIcons = document.querySelectorAll('.sidebar-toggle-icon');
+      toggleIcons.forEach(icon => {
+        icon.innerText = isSidebarCollapsed ? '⟩' : '⟨⟩';
+      });
     }
 
-    window.history.replaceState({}, '', url.toString());
-  } catch (error) {
-  }
-}
+    function closeSidebarDrawer() {
+      const sidebar = getSidebarElement();
+      const backdrop = getSidebarBackdropElement();
 
-function resolvePreferredUnitSlug(units) {
-  const source = Array.isArray(units) ? units : [];
-  if (currentUnitSlug) {
-    const existing = source.find(unit => unit && unit.slug === currentUnitSlug);
-    if (existing) return existing.slug;
-  }
+      if (sidebar) {
+        sidebar.classList.add('-translate-x-full');
+        sidebar.classList.remove('translate-x-0');
+      }
 
-  const queryUnit = normalizeUnitKey(getSelectedUnitValue());
-  if (queryUnit) {
-    const matched = source.find((unit, index) => {
-      if (!unit) return false;
-      return normalizeUnitKey(unit.slug) === queryUnit
-        || normalizeUnitKey(unit.order) === queryUnit
-        || normalizeUnitKey(getUnitOrderValue(unit, index)) === queryUnit;
-    });
-    if (matched) return matched.slug;
-  }
+      if (backdrop) {
+        backdrop.classList.add('hidden');
+      }
 
-  return source.length > 0 ? source[0].slug : '';
-}
-
-function buildSidebarUnitItems(units) {
-  const source = Array.isArray(units) ? filterUnitsForCurrentLevel(units) : [];
-  const queryUnitValue = normalizeUnitKey(getSelectedUnitValue());
-  const queryWeekValue = getRequestedWeekValue();
-  const selectedUnitValue = normalizeUnitKey(queryUnitValue || currentUnitOrder);
-  const fixedUnitOne = source.find((unit, index) => getUnitOrderValue(unit, index) === '1') || null;
-  const fixedUnitFive = source.find((unit, index) => getUnitOrderValue(unit, index) === '5') || null;
-  const currentUnit = source.find((unit, index) => {
-    if (!unit) return false;
-    const unitOrderKey = normalizeUnitKey(getUnitOrderValue(unit, index));
-    return queryUnitValue && (normalizeUnitKey(unit.slug) === queryUnitValue || unitOrderKey === queryUnitValue);
-  }) || source.find(unit => unit && unit.slug === currentUnitSlug) || null;
-
-  const fixedUnitOneWeekKey = getDefaultWeekKeyForUnit('1');
-  const fixedUnitFiveWeekKey = getDefaultWeekKeyForUnit('5');
-  const currentUnitWeekKey = queryWeekValue || getPreferredWeekKeyForUnit(selectedUnitValue || getUnitOrderValue(currentUnit, source.indexOf(currentUnit)));
-
-  const items = [];
-  if (fixedUnitOne) {
-    items.push({ unit: fixedUnitOne, unitValue: '1', weekKey: fixedUnitOneWeekKey, weekLabel: 'Tuần ' + fixedUnitOneWeekKey, fixed: true });
-  }
-  if (fixedUnitFive) {
-    items.push({ unit: fixedUnitFive, unitValue: '5', weekKey: fixedUnitFiveWeekKey, weekLabel: 'Tuần ' + fixedUnitFiveWeekKey, fixed: true });
-  }
-  if (currentUnit) {
-    items.push({
-      unit: currentUnit,
-      unitValue: queryUnitValue || getUnitOrderValue(currentUnit, source.indexOf(currentUnit)),
-      weekKey: currentUnitWeekKey,
-      weekLabel: 'Tuần ' + currentUnitWeekKey,
-      fixed: false
-    });
-  }
-
-  const uniqueItems = [];
-  const seen = {};
-  items.forEach(item => {
-    const key = `${item.unit && item.unit.slug ? item.unit.slug : ''}|${item.unitValue}|${item.weekKey}`;
-    if (seen[key]) return;
-    seen[key] = true;
-    uniqueItems.push(item);
-  });
-
-  return uniqueItems;
-}
-
-function syncUnitSelection(unit, weekKey, unitValue, navigateAfterSync) {
-  if (!ensureLevelSelected() || !unit) return null;
-
-  const resolvedUnitValue = String(unitValue || getUnitOrderValue(unit) || '').trim();
-  const resolvedWeekKey = normalizeWeekKey(weekKey) || getPreferredWeekKeyForUnit(resolvedUnitValue || getUnitOrderValue(unit)) || '1';
-
-  currentUnitSlug = unit.slug || '';
-  currentUnitOrder = resolvedUnitValue;
-  currentWeekValue = resolvedWeekKey;
-
-  try {
-    saveWeek(resolvedWeekKey);
-  } catch (error) {
-  }
-
-  const breadcrumbUnit = document.getElementById('breadcrumb-unit');
-  if (breadcrumbUnit) breadcrumbUnit.innerText = '📖 ' + unit.name;
-
-  const mainTitle = document.getElementById('main-title');
-  if (mainTitle) mainTitle.innerText = unit.name;
-
-  updateHomeUrlForUnit(unit, resolvedWeekKey, resolvedUnitValue);
-
-  if (navigateAfterSync !== false) {
-    warmUnitGameCache(unit.slug, currentLevelKey);
-    backToMenu();
-  }
-
-  return unit;
-}
-
-function applySelectedUnitFromUnits(units) {
-  const source = Array.isArray(units) ? filterUnitsForCurrentLevel(units) : [];
-  const sidebarItems = buildSidebarUnitItems(source);
-  const queryUnitValue = normalizeUnitKey(getSelectedUnitValue() || currentUnitOrder);
-  const queryWeekValue = getRequestedWeekValue();
-  const preferredWeekKey = queryWeekValue || getPreferredWeekKeyForUnit(queryUnitValue);
-  const activeItem = sidebarItems.find(item => item.unit && (
-    queryUnitValue &&
-    (normalizeUnitKey(item.unitValue) === queryUnitValue || normalizeUnitKey(item.unit.slug) === queryUnitValue) &&
-    normalizeWeekKey(item.weekKey) === normalizeWeekKey(preferredWeekKey)
-  )) || sidebarItems.find(item => item.unit && currentUnitSlug && item.unit.slug === currentUnitSlug && normalizeWeekKey(item.weekKey) === normalizeWeekKey(preferredWeekKey)) || (!queryUnitValue ? sidebarItems.find(item => item.unit && normalizeUnitKey(item.unitValue) === '1' && normalizeWeekKey(item.weekKey) === '1') || sidebarItems.find(item => item.unit && normalizeUnitKey(item.unitValue) === '5' && normalizeWeekKey(item.weekKey) === '2') || sidebarItems.find(item => item.unit) : null);
-
-  if (!activeItem || !activeItem.unit) {
-    currentUnitSlug = '';
-    currentUnitOrder = '';
-    const breadcrumbUnit = document.getElementById('breadcrumb-unit');
-    if (breadcrumbUnit) breadcrumbUnit.innerText = '📖 Loading...';
-    const mainTitle = document.getElementById('main-title');
-    if (mainTitle) mainTitle.innerText = 'UNIT NAME';
-    return null;
-  }
-
-  syncUnitSelection(activeItem.unit, activeItem.weekKey, activeItem.unitValue, false);
-  return activeItem.unit;
-}
-
-function updateLevelBreadcrumb() {
-  const levelEl = document.getElementById('breadcrumb-level');
-  if (levelEl) {
-    levelEl.innerText = currentLevelKey ? `🎯 ${getSelectedLevelText()}` : '🎯 Chọn cấp bậc';
-  }
-}
-
-function openLevelSelector() {
-  const selectedGameKey = getSelectedGameKeyForRequests();
-  const selectedWeekKey = normalizeWeekKey(currentWeekValue || loadSelectedWeek() || '');
-  const targetUrl = selectedGameKey
-    ? `chooselevel.html?game=${encodeURIComponent(selectedGameKey)}${selectedWeekKey ? `&week=${encodeURIComponent(selectedWeekKey)}` : ''}`
-    : 'chooselevel.html';
-  window.location.href = targetUrl;
-}
-
-function loadSelectedWeek() {
-  try {
-    const queryWeek = new URLSearchParams(window.location.search).get('week') || '';
-    if (queryWeek) return queryWeek;
-    return localStorage.getItem(WEEK_STORAGE_KEY) || '';
-  } catch (error) {
-    return '';
-  }
-}
-
-function updateLevelBreadcrumb() {
-  const levelEl = document.getElementById('breadcrumb-level');
-  if (levelEl) {
-    levelEl.innerText = currentLevelKey ? `🎯 ${getSelectedLevelText()}` : '🎯 Chọn cấp bậc';
-  }
-}
-
-function openLevelSelector() {
-  const selectedGameKey = getSelectedGameKeyForRequests();
-  const selectedWeekKey = normalizeWeekKey(currentWeekValue || loadSelectedWeek() || '');
-  const targetUrl = selectedGameKey
-    ? `chooselevel.html?game=${encodeURIComponent(selectedGameKey)}${selectedWeekKey ? `&week=${encodeURIComponent(selectedWeekKey)}` : ''}`
-    : 'chooselevel.html';
-  window.location.href = targetUrl;
-}
-
-function loadSelectedWeek() {
-  try {
-    const queryWeek = new URLSearchParams(window.location.search).get('week') || '';
-    if (queryWeek) return queryWeek;
-    return localStorage.getItem(WEEK_STORAGE_KEY) || '';
-  } catch (error) {
-    return '';
-  }
-}
-
-function loadSelectedGame() {
-  try {
-    const queryGame = new URLSearchParams(window.location.search).get('game') || '';
-    const normalizedQueryGame = normalizeGameKeyClient(queryGame);
-    if (normalizedQueryGame === 'kindergarten' || normalizedQueryGame === 'starters') return normalizedQueryGame;
-    const storedGame = normalizeGameKeyClient(localStorage.getItem(GAME_STORAGE_KEY) || '');
-    return (storedGame === 'kindergarten' || storedGame === 'starters') ? storedGame : '';
-  } catch (error) {
-    return '';
-  }
-}
-
-function loadSelectedLevel() {
-  try {
-    const queryLevel = new URLSearchParams(window.location.search).get('level') || '';
-    const normalizedQueryLevel = normalizeLevelKeyClient(queryLevel);
-    if (normalizedQueryLevel) {
-      return normalizedQueryLevel;
+      document.body.classList.remove('overflow-hidden');
     }
-    return localStorage.getItem(LEVEL_STORAGE_KEY) || '';
-  } catch (error) {
-    return '';
-  }
-}
 
-function getBootstrapCacheKey(gameKey) {
-  const normalizedGameKey = normalizeGameKeyClient(gameKey) || 'kindergarten';
-  return `WW_BOOTSTRAP_${normalizedGameKey}`;
-}
+    function openSidebarDrawer() {
+      const sidebar = getSidebarElement();
+      const backdrop = getSidebarBackdropElement();
 
-function getSelectedGameKeyForRequests() {
-  const selectedGameKey = normalizeGameKeyClient(currentGameKey || loadSelectedGame() || 'kindergarten');
-  return selectedGameKey === 'starters' ? 'starters' : 'kindergarten';
-}
+      if (sidebar) {
+        sidebar.classList.remove('-translate-x-full');
+        sidebar.classList.add('translate-x-0');
+      }
+
+      if (backdrop) {
+        backdrop.classList.remove('hidden');
+      }
+
+      document.body.classList.add('overflow-hidden');
+    }
+
+    function toggleSidebarDrawer() {
+      if (window.innerWidth >= 768) {
+        toggleSidebarCollapse();
+        return;
+      }
+
+      const sidebar = getSidebarElement();
+      if (!sidebar) return;
+
+      const isOpen = sidebar.classList.contains('translate-x-0');
+      if (isOpen) {
+        closeSidebarDrawer();
+      } else {
+        openSidebarDrawer();
+      }
+    }
+
+    function toggleSidebarCollapse() {
+      isSidebarCollapsed = !isSidebarCollapsed;
+      syncSidebarCollapseUI();
+    }
+
+    function syncResponsiveSidebarState() {
+      if (window.innerWidth >= 768) {
+        closeSidebarDrawer();
+      } else {
+        const backdrop = getSidebarBackdropElement();
+        if (backdrop) {
+          backdrop.classList.add('hidden');
+        }
+        document.body.classList.remove('overflow-hidden');
+
+        const sidebar = getSidebarElement();
+        if (sidebar) {
+          sidebar.classList.add('-translate-x-full');
+          sidebar.classList.remove('translate-x-0');
+        }
+      }
+    }
+
+    function normalizeLevelKeyClient(value) {
+      return String(value || '')
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, '')
+        .replace(/[^a-z0-9]/g, '');
+    }
+
+    function normalizeGameKeyClient(value) {
+      return String(value || '')
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, '')
+        .replace(/[^a-z0-9]/g, '');
+    }
+
+    function getLevelOption(levelKey) {
+      const normalizedKey = normalizeLevelKeyClient(levelKey);
+      return LEVEL_OPTION_MAP[normalizedKey] || null;
+    }
+
+    function getLevelDisplayText(levelKey) {
+      const level = getLevelOption(levelKey);
+      return level ? `${level.title}: ${level.ageLabel}` : '';
+    }
+
+    function getSelectedLevelText() {
+      return currentLevelLabel || getLevelDisplayText(currentLevelKey) || 'Chọn cấp bậc';
+    }
+
+    function normalizeUnitKey(value) {
+      return String(value || '')
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, '')
+        .replace(/[^a-z0-9]/g, '');
+    }
+
+    function normalizeWeekKey(value) {
+      return String(value || '')
+        .trim()
+        .toLowerCase()
+        .replace(/\s+/g, '')
+        .replace(/[^a-z0-9]/g, '');
+    }
+
+    function getQueryParamValue(name) {
+      try {
+        return new URLSearchParams(window.location.search).get(name) || '';
+      } catch (error) {
+        return '';
+      }
+    }
+
+    function getRequestedWeekValue() {
+      return normalizeWeekKey(getQueryParamValue('week'));
+    }
+
+    function getDefaultWeekKeyForUnit(unitValue) {
+      return normalizeUnitKey(unitValue) === '5' ? '2' : '1';
+    }
+
+    function getSelectedUnitValue() {
+      try {
+        return getQueryParamValue('unit');
+      } catch (error) {
+        return '';
+      }
+    }
+
+    function getUnitOrderValue(unit, fallbackIndex) {
+      const orderValue = unit && unit.order != null ? String(unit.order).trim() : '';
+      if (orderValue) return orderValue;
+      const indexValue = Number(fallbackIndex);
+      return Number.isFinite(indexValue) ? String(indexValue + 1) : '';
+    }
+
+    function getPreferredWeekKeyForUnit(unitValue) {
+      return getDefaultWeekKeyForUnit(unitValue);
+    }
+
+    function getSelectedSidebarWeekKey() {
+      return normalizeWeekKey(currentWeekValue || loadSelectedWeek() || '1') || '1';
+    }
+
+    function updateHomeUrlForUnit(unit, weekKey, unitValue) {
+      if (!unit) return;
+
+      try {
+        const url = new URL(window.location.href);
+        const selectedGameKey = getSelectedGameKeyForRequests();
+        if (selectedGameKey) {
+          url.searchParams.set('game', selectedGameKey);
+        }
+        if (currentLevelKey) {
+          url.searchParams.set('level', currentLevelKey);
+        }
+
+        const resolvedWeekKey = normalizeWeekKey(weekKey || currentWeekValue || loadSelectedWeek() || '1');
+        if (resolvedWeekKey) {
+          url.searchParams.set('week', resolvedWeekKey);
+        }
+
+        const resolvedUnitValue = String(unitValue || getUnitOrderValue(unit) || '').trim();
+        if (resolvedUnitValue) {
+          url.searchParams.set('unit', resolvedUnitValue);
+        } else {
+          url.searchParams.delete('unit');
+        }
+
+        window.history.replaceState({}, '', url.toString());
+      } catch (error) {
+      }
+    }
+
+    function resolvePreferredUnitSlug(units) {
+      const source = Array.isArray(units) ? units : [];
+      if (currentUnitSlug) {
+        const existing = source.find(unit => unit && unit.slug === currentUnitSlug);
+        if (existing) return existing.slug;
+      }
+
+      const queryUnit = normalizeUnitKey(getSelectedUnitValue());
+      if (queryUnit) {
+        const matched = source.find((unit, index) => {
+          if (!unit) return false;
+          return normalizeUnitKey(unit.slug) === queryUnit
+            || normalizeUnitKey(unit.order) === queryUnit
+            || normalizeUnitKey(getUnitOrderValue(unit, index)) === queryUnit;
+        });
+        if (matched) return matched.slug;
+      }
+
+      return source.length > 0 ? source[0].slug : '';
+    }
+
+    function buildSidebarUnitItems(units) {
+      const source = Array.isArray(units) ? filterUnitsForCurrentLevel(units) : [];
+      const queryUnitValue = normalizeUnitKey(getSelectedUnitValue());
+      const queryWeekValue = getRequestedWeekValue();
+      const selectedUnitValue = normalizeUnitKey(queryUnitValue || currentUnitOrder);
+      const fixedUnitOne = source.find((unit, index) => getUnitOrderValue(unit, index) === '1') || null;
+      const fixedUnitFive = source.find((unit, index) => getUnitOrderValue(unit, index) === '5') || null;
+      const currentUnit = source.find((unit, index) => {
+        if (!unit) return false;
+        const unitOrderKey = normalizeUnitKey(getUnitOrderValue(unit, index));
+        return queryUnitValue && (normalizeUnitKey(unit.slug) === queryUnitValue || unitOrderKey === queryUnitValue);
+      }) || source.find(unit => unit && unit.slug === currentUnitSlug) || null;
+
+      const fixedUnitOneWeekKey = getDefaultWeekKeyForUnit('1');
+      const fixedUnitFiveWeekKey = getDefaultWeekKeyForUnit('5');
+      const currentUnitWeekKey = queryWeekValue || getPreferredWeekKeyForUnit(selectedUnitValue || getUnitOrderValue(currentUnit, source.indexOf(currentUnit)));
+
+      const items = [];
+      if (fixedUnitOne) {
+        items.push({ unit: fixedUnitOne, unitValue: '1', weekKey: fixedUnitOneWeekKey, weekLabel: 'Tuần ' + fixedUnitOneWeekKey, fixed: true });
+      }
+      if (fixedUnitFive) {
+        items.push({ unit: fixedUnitFive, unitValue: '5', weekKey: fixedUnitFiveWeekKey, weekLabel: 'Tuần ' + fixedUnitFiveWeekKey, fixed: true });
+      }
+      if (currentUnit) {
+        items.push({
+          unit: currentUnit,
+          unitValue: queryUnitValue || getUnitOrderValue(currentUnit, source.indexOf(currentUnit)),
+          weekKey: currentUnitWeekKey,
+          weekLabel: 'Tuần ' + currentUnitWeekKey,
+          fixed: false
+        });
+      }
+
+      const uniqueItems = [];
+      const seen = {};
+      items.forEach(item => {
+        const key = `${item.unit && item.unit.slug ? item.unit.slug : ''}|${item.unitValue}|${item.weekKey}`;
+        if (seen[key]) return;
+        seen[key] = true;
+        uniqueItems.push(item);
+      });
+
+      return uniqueItems;
+    }
+
+    function syncUnitSelection(unit, weekKey, unitValue, navigateAfterSync) {
+      if (!ensureLevelSelected() || !unit) return null;
+
+      const resolvedUnitValue = String(unitValue || getUnitOrderValue(unit) || '').trim();
+      const resolvedWeekKey = normalizeWeekKey(weekKey) || getPreferredWeekKeyForUnit(resolvedUnitValue || getUnitOrderValue(unit)) || '1';
+
+      currentUnitSlug = unit.slug || '';
+      currentUnitOrder = resolvedUnitValue;
+      currentWeekValue = resolvedWeekKey;
+
+      try {
+        saveWeek(resolvedWeekKey);
+      } catch (error) {
+      }
+
+      const breadcrumbUnit = document.getElementById('breadcrumb-unit');
+      if (breadcrumbUnit) breadcrumbUnit.innerText = '📖 ' + unit.name;
+
+      const mainTitle = document.getElementById('main-title');
+      if (mainTitle) mainTitle.innerText = unit.name;
+
+      updateHomeUrlForUnit(unit, resolvedWeekKey, resolvedUnitValue);
+
+      if (navigateAfterSync !== false) {
+        warmUnitGameCache(unit.slug, currentLevelKey);
+        backToMenu();
+      }
+
+      return unit;
+    }
+
+    function applySelectedUnitFromUnits(units) {
+      const source = Array.isArray(units) ? filterUnitsForCurrentLevel(units) : [];
+      const sidebarItems = buildSidebarUnitItems(source);
+      const queryUnitValue = normalizeUnitKey(getSelectedUnitValue() || currentUnitOrder);
+      const queryWeekValue = getRequestedWeekValue();
+      const preferredWeekKey = queryWeekValue || getPreferredWeekKeyForUnit(queryUnitValue);
+      const activeItem = sidebarItems.find(item => item.unit && (
+        queryUnitValue &&
+        (normalizeUnitKey(item.unitValue) === queryUnitValue || normalizeUnitKey(item.unit.slug) === queryUnitValue) &&
+        normalizeWeekKey(item.weekKey) === normalizeWeekKey(preferredWeekKey)
+      )) || sidebarItems.find(item => item.unit && currentUnitSlug && item.unit.slug === currentUnitSlug && normalizeWeekKey(item.weekKey) === normalizeWeekKey(preferredWeekKey)) || (!queryUnitValue ? sidebarItems.find(item => item.unit && normalizeUnitKey(item.unitValue) === '1' && normalizeWeekKey(item.weekKey) === '1') || sidebarItems.find(item => item.unit && normalizeUnitKey(item.unitValue) === '5' && normalizeWeekKey(item.weekKey) === '2') || sidebarItems.find(item => item.unit) : null);
+
+      if (!activeItem || !activeItem.unit) {
+        currentUnitSlug = '';
+        currentUnitOrder = '';
+        const breadcrumbUnit = document.getElementById('breadcrumb-unit');
+        if (breadcrumbUnit) breadcrumbUnit.innerText = '📖 Loading...';
+        const mainTitle = document.getElementById('main-title');
+        if (mainTitle) mainTitle.innerText = 'UNIT NAME';
+        return null;
+      }
+
+      syncUnitSelection(activeItem.unit, activeItem.weekKey, activeItem.unitValue, false);
+      return activeItem.unit;
+    }
+
+    function updateLevelBreadcrumb() {
+      const levelEl = document.getElementById('breadcrumb-level');
+      if (levelEl) {
+        levelEl.innerText = currentLevelKey ? `🎯 ${getSelectedLevelText()}` : '🎯 Chọn cấp bậc';
+      }
+    }
+
+    function openLevelSelector() {
+      const selectedGameKey = getSelectedGameKeyForRequests();
+      const selectedWeekKey = normalizeWeekKey(currentWeekValue || loadSelectedWeek() || '');
+      const targetUrl = selectedGameKey
+        ? `chooselevel.html?game=${encodeURIComponent(selectedGameKey)}${selectedWeekKey ? `&week=${encodeURIComponent(selectedWeekKey)}` : ''}`
+        : 'chooselevel.html';
+      window.location.href = targetUrl;
+    }
+
+    function loadSelectedWeek() {
+      try {
+        const queryWeek = new URLSearchParams(window.location.search).get('week') || '';
+        if (queryWeek) return queryWeek;
+        return localStorage.getItem(WEEK_STORAGE_KEY) || '';
+      } catch (error) {
+        return '';
+      }
+    }
+
+    function updateLevelBreadcrumb() {
+      const levelEl = document.getElementById('breadcrumb-level');
+      if (levelEl) {
+        levelEl.innerText = currentLevelKey ? `🎯 ${getSelectedLevelText()}` : '🎯 Chọn cấp bậc';
+      }
+    }
+
+    function openLevelSelector() {
+      const selectedGameKey = getSelectedGameKeyForRequests();
+      const selectedWeekKey = normalizeWeekKey(currentWeekValue || loadSelectedWeek() || '');
+      const targetUrl = selectedGameKey
+        ? `chooselevel.html?game=${encodeURIComponent(selectedGameKey)}${selectedWeekKey ? `&week=${encodeURIComponent(selectedWeekKey)}` : ''}`
+        : 'chooselevel.html';
+      window.location.href = targetUrl;
+    }
+
+    function loadSelectedWeek() {
+      try {
+        const queryWeek = new URLSearchParams(window.location.search).get('week') || '';
+        if (queryWeek) return queryWeek;
+        return localStorage.getItem(WEEK_STORAGE_KEY) || '';
+      } catch (error) {
+        return '';
+      }
+    }
+
+    function loadSelectedGame() {
+      try {
+        const queryGame = new URLSearchParams(window.location.search).get('game') || '';
+        const normalizedQueryGame = normalizeGameKeyClient(queryGame);
+        if (normalizedQueryGame === 'kindergarten' || normalizedQueryGame === 'starters') return normalizedQueryGame;
+        const storedGame = normalizeGameKeyClient(localStorage.getItem(GAME_STORAGE_KEY) || '');
+        return (storedGame === 'kindergarten' || storedGame === 'starters') ? storedGame : '';
+      } catch (error) {
+        return '';
+      }
+    }
+
+    function loadSelectedLevel() {
+      try {
+        const queryLevel = new URLSearchParams(window.location.search).get('level') || '';
+        const normalizedQueryLevel = normalizeLevelKeyClient(queryLevel);
+        if (normalizedQueryLevel) {
+          return normalizedQueryLevel;
+        }
+        return localStorage.getItem(LEVEL_STORAGE_KEY) || '';
+      } catch (error) {
+        return '';
+      }
+    }
+
+    function getBootstrapCacheKey(gameKey) {
+      const normalizedGameKey = normalizeGameKeyClient(gameKey) || 'kindergarten';
+      return `WW_BOOTSTRAP_${normalizedGameKey}`;
+    }
+
+    function getSelectedGameKeyForRequests() {
+      const selectedGameKey = normalizeGameKeyClient(currentGameKey || loadSelectedGame() || 'kindergarten');
+      return selectedGameKey === 'starters' ? 'starters' : 'kindergarten';
+    }
 
     function purgeStaleGameCaches() {
       try {
@@ -1921,99 +2072,99 @@ function getSelectedGameKeyForRequests() {
       }
     }
 
-function ensureLevelSelected() {
-  if (currentLevelKey) return true;
-  openLevelSelector();
-  return false;
-}
+    function ensureLevelSelected() {
+      if (currentLevelKey) return true;
+      openLevelSelector();
+      return false;
+    }
 
-function filterUnitsForCurrentLevel(units) {
-  const source = Array.isArray(units) ? units : [];
-  if (!currentLevelKey) return source;
+    function filterUnitsForCurrentLevel(units) {
+      const source = Array.isArray(units) ? units : [];
+      if (!currentLevelKey) return source;
 
-  return source.filter(unit => {
-    const unitLevels = Array.isArray(unit && unit.levels) ? unit.levels : [];
-    if (!unitLevels.length) return true;
-    return unitLevels.indexOf(currentLevelKey) !== -1;
-  });
-}
+      return source.filter(unit => {
+        const unitLevels = Array.isArray(unit && unit.levels) ? unit.levels : [];
+        if (!unitLevels.length) return true;
+        return unitLevels.indexOf(currentLevelKey) !== -1;
+      });
+    }
 
-function renderSidebarForCurrentLevel() {
-  loadSidebarWithUnits(allUnitsData);
-}
+    function renderSidebarForCurrentLevel() {
+      loadSidebarWithUnits(allUnitsData);
+    }
 
-// 1. Tải danh sách Sidebar
-function loadSidebarWithUnits(units) {
-        const source = Array.isArray(units) ? filterUnitsForCurrentLevel(units) : [];
-        const items = buildSidebarUnitItems(source);
-        const container = document.getElementById('sidebar-menu');
-        if (!container) return;
-        container.innerHTML = '';
-        updateLevelBreadcrumb();
+    // 1. Tải danh sách Sidebar
+    function loadSidebarWithUnits(units) {
+      const source = Array.isArray(units) ? filterUnitsForCurrentLevel(units) : [];
+      const items = buildSidebarUnitItems(source);
+      const container = document.getElementById('sidebar-menu');
+      if (!container) return;
+      container.innerHTML = '';
+      updateLevelBreadcrumb();
 
-        if (!currentLevelKey) {
-          currentUnitSlug = '';
-          container.innerHTML = '<div class="p-4 text-center text-blue-500 text-sm font-semibold">Chọn cấp bậc để xem danh sách unit.</div>';
-          return;
-        }
+      if (!currentLevelKey) {
+        currentUnitSlug = '';
+        container.innerHTML = '<div class="p-4 text-center text-blue-500 text-sm font-semibold">Chọn cấp bậc để xem danh sách unit.</div>';
+        return;
+      }
 
-        if (items.length === 0) {
-          currentUnitSlug = '';
-          container.innerHTML = '<div class="p-4 text-center text-amber-600 text-sm font-semibold">Chưa có unit phù hợp với cấp bậc này.</div>';
-          return;
-        }
+      if (items.length === 0) {
+        currentUnitSlug = '';
+        container.innerHTML = '<div class="p-4 text-center text-amber-600 text-sm font-semibold">Chưa có unit phù hợp với cấp bậc này.</div>';
+        return;
+      }
 
-        const queryUnitValue = normalizeUnitKey(getSelectedUnitValue() || currentUnitOrder);
-        const queryWeekValue = getRequestedWeekValue();
-        const preferredWeekKey = queryWeekValue || getPreferredWeekKeyForUnit(queryUnitValue);
-        const activeItem = items.find(item => item.unit && queryUnitValue && (
-          normalizeUnitKey(item.unitValue) === queryUnitValue || normalizeUnitKey(item.unit.slug) === queryUnitValue
-        ) && normalizeWeekKey(item.weekKey) === normalizeWeekKey(preferredWeekKey)) || items.find(item => item.unit && currentUnitSlug && item.unit.slug === currentUnitSlug && normalizeWeekKey(item.weekKey) === normalizeWeekKey(preferredWeekKey)) || (!queryUnitValue ? items.find(item => item.unit && normalizeUnitKey(item.unitValue) === '1' && normalizeWeekKey(item.weekKey) === '1') || items.find(item => item.unit && normalizeUnitKey(item.unitValue) === '5' && normalizeWeekKey(item.weekKey) === '2') || items.find(item => item.unit) : null);
+      const queryUnitValue = normalizeUnitKey(getSelectedUnitValue() || currentUnitOrder);
+      const queryWeekValue = getRequestedWeekValue();
+      const preferredWeekKey = queryWeekValue || getPreferredWeekKeyForUnit(queryUnitValue);
+      const activeItem = items.find(item => item.unit && queryUnitValue && (
+        normalizeUnitKey(item.unitValue) === queryUnitValue || normalizeUnitKey(item.unit.slug) === queryUnitValue
+      ) && normalizeWeekKey(item.weekKey) === normalizeWeekKey(preferredWeekKey)) || items.find(item => item.unit && currentUnitSlug && item.unit.slug === currentUnitSlug && normalizeWeekKey(item.weekKey) === normalizeWeekKey(preferredWeekKey)) || (!queryUnitValue ? items.find(item => item.unit && normalizeUnitKey(item.unitValue) === '1' && normalizeWeekKey(item.weekKey) === '1') || items.find(item => item.unit && normalizeUnitKey(item.unitValue) === '5' && normalizeWeekKey(item.weekKey) === '2') || items.find(item => item.unit) : null);
 
-        items.forEach((item) => {
-            const unit = item.unit;
-            const a = document.createElement('a');
-            a.href = "#";
-            const baseClass = "sidebar-item flex items-center gap-3 p-3 rounded-xl transition-all border border-transparent";
-            const inactiveClass = "hover:bg-white/40 text-green-700 text-sm";
-            const isActive = activeItem && unit.slug === activeItem.unit.slug && normalizeWeekKey(item.weekKey) === normalizeWeekKey(activeItem.weekKey) && String(item.unitValue || '') === String(activeItem.unitValue || '');
-            a.className = baseClass + " " + (isActive ? "active-unit" : inactiveClass);
-          a.innerHTML = `<span class="sidebar-unit-icon shrink-0">${unit.icon || '📘'}</span><div class="min-w-0 flex-1"><span class="sidebar-unit-label line-clamp-2 block">${unit.name}</span><span class="block text-[10px] font-bold text-green-500 mt-1 uppercase tracking-wide">${item.weekLabel || ''}</span></div>`;
+      items.forEach((item) => {
+        const unit = item.unit;
+        const a = document.createElement('a');
+        a.href = "#";
+        const baseClass = "sidebar-item flex items-center gap-3 p-3 rounded-xl transition-all border border-transparent";
+        const inactiveClass = "hover:bg-white/40 text-green-700 text-sm";
+        const isActive = activeItem && unit.slug === activeItem.unit.slug && normalizeWeekKey(item.weekKey) === normalizeWeekKey(activeItem.weekKey) && String(item.unitValue || '') === String(activeItem.unitValue || '');
+        a.className = baseClass + " " + (isActive ? "active-unit" : inactiveClass);
+        a.innerHTML = `<span class="sidebar-unit-icon shrink-0">${unit.icon || '📘'}</span><div class="min-w-0 flex-1"><span class="sidebar-unit-label line-clamp-2 block">${unit.name}</span><span class="block text-[10px] font-bold text-green-500 mt-1 uppercase tracking-wide">${item.weekLabel || ''}</span></div>`;
 
-            a.onclick = function(event) {
-                if (event) event.preventDefault();
-                document.querySelectorAll('.sidebar-item').forEach(el => {
-                    el.classList.remove('active-unit');
-                  el.classList.add('hover:bg-white/40', 'text-green-700', 'text-sm');
-                });
-                this.classList.add('active-unit');
-                this.classList.remove('hover:bg-white/40', 'text-green-700', 'text-sm');
-                updateUIForUnit(unit, item.weekKey, item.unitValue);
-            };
-            container.appendChild(a);
-        });
+        a.onclick = function (event) {
+          if (event) event.preventDefault();
+          document.querySelectorAll('.sidebar-item').forEach(el => {
+            el.classList.remove('active-unit');
+            el.classList.add('hover:bg-white/40', 'text-green-700', 'text-sm');
+          });
+          this.classList.add('active-unit');
+          this.classList.remove('hover:bg-white/40', 'text-green-700', 'text-sm');
+          updateUIForUnit(unit, item.weekKey, item.unitValue);
+        };
+        container.appendChild(a);
+      });
 
-        if (activeItem && activeItem.unit) {
-          syncUnitSelection(activeItem.unit, activeItem.weekKey, activeItem.unitValue, false);
-        }
-}
+      if (activeItem && activeItem.unit) {
+        syncUnitSelection(activeItem.unit, activeItem.weekKey, activeItem.unitValue, false);
+      }
+    }
 
-function updateUIForUnit(unit, weekKey, unitValue) {
-    const selectedUnit = syncUnitSelection(unit, weekKey, unitValue, false);
-    if (!selectedUnit) return;
-    warmUnitGameCache(selectedUnit.slug, currentLevelKey);
-    backToMenu(); // Luôn quay về menu khi đổi Unit
-}
+    function updateUIForUnit(unit, weekKey, unitValue) {
+      const selectedUnit = syncUnitSelection(unit, weekKey, unitValue, false);
+      if (!selectedUnit) return;
+      warmUnitGameCache(selectedUnit.slug, currentLevelKey);
+      backToMenu(); // Luôn quay về menu khi đổi Unit
+    }
 
-// 2. Chuyển đổi màn hình
-// --- SỬA LẠI HÀM START CỦA GAME 1 ---
-function startListenChoose() {
-  if (!ensureLevelSelected()) return;
-    currentGameType = 'listenchoose';
-    switchView('game-play-view'); // Hiện màn chơi chung
-    
-    // Khôi phục cấu trúc HTML chuẩn cho Game 1 (vì có thể bị Game 2 xóa)
-    document.getElementById('game-content').innerHTML = `
+    // 2. Chuyển đổi màn hình
+    // --- SỬA LẠI HÀM START CỦA GAME 1 ---
+    function startListenChoose() {
+      if (!ensureLevelSelected()) return;
+      currentGameType = 'listenchoose';
+      switchView('game-play-view'); // Hiện màn chơi chung
+
+      // Khôi phục cấu trúc HTML chuẩn cho Game 1 (vì có thể bị Game 2 xóa)
+      document.getElementById('game-content').innerHTML = `
     <h2 class="text-xl sm:text-2xl font-bold text-gray-800 mb-6 sm:mb-8">Nghe và chọn hình đúng</h2>
     <button onclick="playTargetAudio()" class="w-20 h-20 sm:w-24 sm:h-24 bg-blue-500 hover:bg-blue-600 text-white rounded-full shadow-2xl flex items-center justify-center mx-auto mb-6 sm:mb-8">
       <span class="text-3xl sm:text-4xl">🔊</span>
@@ -2021,203 +2172,203 @@ function startListenChoose() {
   <div id="options-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 md:gap-6 max-w-4xl mx-auto"></div>
     `;
 
-    document.getElementById('game-loading').classList.remove('hidden');
-    document.getElementById('game-content').classList.add('hidden');
+      document.getElementById('game-loading').classList.remove('hidden');
+      document.getElementById('game-content').classList.add('hidden');
 
-    fetchGameDataset('listenchoose', 'getGameData', currentUnitSlug, currentLevelKey).then(function(questions) {
+      fetchGameDataset('listenchoose', 'getGameData', currentUnitSlug, currentLevelKey).then(function (questions) {
         gameQuestions = prepareGameQuestions(questions, true);
         currentQuestionIndex = 0;
-      initializeGameStats(questions.length);
+        initializeGameStats(questions.length);
         document.getElementById('game-loading').classList.add('hidden');
-        renderQuestion(); 
-    });
-}
-
-function backToMenu() {
-    const sidebar = getSidebarElement();
-    if (sidebar) {
-      sidebar.classList.remove('hidden');
-      syncSidebarCollapseUI();
+        renderQuestion();
+      });
     }
-    if (typeof stopCatchGameLoop === 'function') {
-      stopCatchGameLoop();
+
+    function backToMenu() {
+      const sidebar = getSidebarElement();
+      if (sidebar) {
+        sidebar.classList.remove('hidden');
+        syncSidebarCollapseUI();
+      }
+      if (typeof stopCatchGameLoop === 'function') {
+        stopCatchGameLoop();
+      }
+      switchView('menu-game-view');
     }
-    switchView('menu-game-view');
-}
 
-function initializeGameStats(totalQuestions) {
-  currentGameTotalQuestions = totalQuestions || 0;
-  currentGameScore = 0;
-  currentGameCorrectCount = 0;
-  isQuestionLocked = false;
-  updateGameStats();
-}
-
-function updateGameStats() {
-  const scoreEl = document.getElementById('game-score');
-  const progressEl = document.getElementById('game-progress');
-  const correctEl = document.getElementById('game-correct-count');
-
-  if (scoreEl) {
-    scoreEl.innerText = currentGameScore;
-  }
-
-  if (progressEl) {
-    const total = currentGameTotalQuestions || gameQuestions.length || 0;
-    const current = total ? Math.min(currentQuestionIndex + 1, total) : 0;
-    progressEl.innerText = total ? `${current}/${total}` : '0/0';
-  }
-
-  if (correctEl) {
-    correctEl.innerText = currentGameCorrectCount;
-  }
-}
-
-function getGameSuccessText() {
-  const praiseIndex = Math.max(0, currentGameCorrectCount - 1) % GAME_SUCCESS_MESSAGES.length;
-  return GAME_SUCCESS_MESSAGES[praiseIndex];
-}
-
-function hideGameFeedback() {
-  const layer = document.getElementById('game-feedback-layer');
-  if (!layer) return;
-
-  layer.classList.add('hidden');
-  layer.innerHTML = '';
-}
-
-function clearGameTransitionTimers() {
-  if (pendingGameAdvanceTimer) {
-    clearTimeout(pendingGameAdvanceTimer);
-    pendingGameAdvanceTimer = null;
-  }
-
-  hideGameFeedback();
-  isQuestionLocked = false;
-}
-
-function showGameSuccessFeedback(text) {
-  const layer = document.getElementById('game-feedback-layer');
-  if (!layer) return;
-
-  layer.innerHTML = '';
-  const badge = document.createElement('div');
-  badge.className = 'game-success-badge';
-  badge.textContent = `✨ ${text || 'Excellent!'} ✨`;
-  layer.appendChild(badge);
-  layer.classList.remove('hidden');
-}
-
-function setOptionsDisabled(disabled) {
-  document.querySelectorAll('#options-grid button').forEach(button => {
-    button.disabled = disabled;
-  });
-}
-
-function getBestVoice(localePrefix) {
-  if (!window.speechSynthesis) return null;
-
-  const voices = window.speechSynthesis.getVoices();
-  if (voices.length === 0) return null;
-
-  const matchedVoices = voices.filter(voice =>
-    voice.lang && voice.lang.toLowerCase().startsWith(localePrefix.toLowerCase())
-  );
-
-  return matchedVoices.find(voice => /google|microsoft|samantha|zira|female|child|kid/i.test(voice.name))
-    || matchedVoices[0]
-    || voices[0]
-    || null;
-}
-
-function playChildFeedback(isCorrect, text) {
-  if (!('speechSynthesis' in window)) return;
-
-  window.speechSynthesis.cancel();
-  const msg = isCorrect ? (text || 'Excellent!') : 'Oops!';
-  const utterance = new SpeechSynthesisUtterance(msg);
-  utterance.lang = 'en-US';
-  utterance.pitch = isCorrect ? 2 : 1.8;
-  utterance.rate = 1.08;
-  utterance.volume = 1;
-
-  const voice = getBestVoice('en');
-  if (voice) {
-    utterance.voice = voice;
-  }
-
-  window.speechSynthesis.speak(utterance);
-}
-
-function handleSuccessAction(element, text) {
-  if (!element) return;
-  element.classList.add('border-green-500', 'bg-green-50', 'ring-4', 'ring-green-200');
-  playChildFeedback(true, text);
-}
-
-function handleErrorAction(element) {
-  if (!element) return;
-  element.classList.add('animate-shake', 'border-red-500', 'bg-red-50');
-  playChildFeedback(false);
-
-  setTimeout(() => {
-    element.classList.remove('animate-shake', 'border-red-500', 'bg-red-50');
-  }, 500);
-}
-
-
-
-function advanceGameQuestion(renderNextQuestion, delay = 800) {
-  if (pendingGameAdvanceTimer) {
-    clearTimeout(pendingGameAdvanceTimer);
-  }
-
-  pendingGameAdvanceTimer = setTimeout(() => {
-    pendingGameAdvanceTimer = null;
-    currentQuestionIndex++;
-    isQuestionLocked = false;
-    hideGameFeedback();
-
-    if (currentQuestionIndex < gameQuestions.length) {
-      renderNextQuestion();
-    } else {
-      showGameSummary();
+    function initializeGameStats(totalQuestions) {
+      currentGameTotalQuestions = totalQuestions || 0;
+      currentGameScore = 0;
+      currentGameCorrectCount = 0;
+      isQuestionLocked = false;
+      updateGameStats();
     }
-  }, delay);
-}
+
+    function updateGameStats() {
+      const scoreEl = document.getElementById('game-score');
+      const progressEl = document.getElementById('game-progress');
+      const correctEl = document.getElementById('game-correct-count');
+
+      if (scoreEl) {
+        scoreEl.innerText = currentGameScore;
+      }
+
+      if (progressEl) {
+        const total = currentGameTotalQuestions || gameQuestions.length || 0;
+        const current = total ? Math.min(currentQuestionIndex + 1, total) : 0;
+        progressEl.innerText = total ? `${current}/${total}` : '0/0';
+      }
+
+      if (correctEl) {
+        correctEl.innerText = currentGameCorrectCount;
+      }
+    }
+
+    function getGameSuccessText() {
+      const praiseIndex = Math.max(0, currentGameCorrectCount - 1) % GAME_SUCCESS_MESSAGES.length;
+      return GAME_SUCCESS_MESSAGES[praiseIndex];
+    }
+
+    function hideGameFeedback() {
+      const layer = document.getElementById('game-feedback-layer');
+      if (!layer) return;
+
+      layer.classList.add('hidden');
+      layer.innerHTML = '';
+    }
+
+    function clearGameTransitionTimers() {
+      if (pendingGameAdvanceTimer) {
+        clearTimeout(pendingGameAdvanceTimer);
+        pendingGameAdvanceTimer = null;
+      }
+
+      hideGameFeedback();
+      isQuestionLocked = false;
+    }
+
+    function showGameSuccessFeedback(text) {
+      const layer = document.getElementById('game-feedback-layer');
+      if (!layer) return;
+
+      layer.innerHTML = '';
+      const badge = document.createElement('div');
+      badge.className = 'game-success-badge';
+      badge.textContent = `✨ ${text || 'Excellent!'} ✨`;
+      layer.appendChild(badge);
+      layer.classList.remove('hidden');
+    }
+
+    function setOptionsDisabled(disabled) {
+      document.querySelectorAll('#options-grid button').forEach(button => {
+        button.disabled = disabled;
+      });
+    }
+
+    function getBestVoice(localePrefix) {
+      if (!window.speechSynthesis) return null;
+
+      const voices = window.speechSynthesis.getVoices();
+      if (voices.length === 0) return null;
+
+      const matchedVoices = voices.filter(voice =>
+        voice.lang && voice.lang.toLowerCase().startsWith(localePrefix.toLowerCase())
+      );
+
+      return matchedVoices.find(voice => /google|microsoft|samantha|zira|female|child|kid/i.test(voice.name))
+        || matchedVoices[0]
+        || voices[0]
+        || null;
+    }
+
+    function playChildFeedback(isCorrect, text) {
+      if (!('speechSynthesis' in window)) return;
+
+      window.speechSynthesis.cancel();
+      const msg = isCorrect ? (text || 'Excellent!') : 'Oops!';
+      const utterance = new SpeechSynthesisUtterance(msg);
+      utterance.lang = 'en-US';
+      utterance.pitch = isCorrect ? 2 : 1.8;
+      utterance.rate = 1.08;
+      utterance.volume = 1;
+
+      const voice = getBestVoice('en');
+      if (voice) {
+        utterance.voice = voice;
+      }
+
+      window.speechSynthesis.speak(utterance);
+    }
+
+    function handleSuccessAction(element, text) {
+      if (!element) return;
+      element.classList.add('border-green-500', 'bg-green-50', 'ring-4', 'ring-green-200');
+      playChildFeedback(true, text);
+    }
+
+    function handleErrorAction(element) {
+      if (!element) return;
+      element.classList.add('animate-shake', 'border-red-500', 'bg-red-50');
+      playChildFeedback(false);
+
+      setTimeout(() => {
+        element.classList.remove('animate-shake', 'border-red-500', 'bg-red-50');
+      }, 500);
+    }
 
 
-// 3. Logic Game
 
-function renderQuestion() {
-    if (gameQuestions.length === 0) {
+    function advanceGameQuestion(renderNextQuestion, delay = 800) {
+      if (pendingGameAdvanceTimer) {
+        clearTimeout(pendingGameAdvanceTimer);
+      }
+
+      pendingGameAdvanceTimer = setTimeout(() => {
+        pendingGameAdvanceTimer = null;
+        currentQuestionIndex++;
+        isQuestionLocked = false;
+        hideGameFeedback();
+
+        if (currentQuestionIndex < gameQuestions.length) {
+          renderNextQuestion();
+        } else {
+          showGameSummary();
+        }
+      }, delay);
+    }
+
+
+    // 3. Logic Game
+
+    function renderQuestion() {
+      if (gameQuestions.length === 0) {
         alert("Unit này chưa có dữ liệu game!");
         backToMenu();
         return;
-    }
-  clearGameTransitionTimers();
-    const q = gameQuestions[currentQuestionIndex];
-    preloadQuestionAssets(q);
-    const grid = document.getElementById('options-grid');
-    const cardBackgrounds = ['game-option-tone-1', 'game-option-tone-2', 'game-option-tone-3', 'game-option-tone-4'];
-    grid.innerHTML = '';
-    grid.className = 'grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 md:gap-8 max-w-5xl mx-auto';
-  isQuestionLocked = false;
-  setOptionsDisabled(false);
-  document.getElementById('game-loading').classList.add('hidden');
-  document.getElementById('game-content').classList.remove('hidden');
-  updateGameStats();
+      }
+      clearGameTransitionTimers();
+      const q = gameQuestions[currentQuestionIndex];
+      preloadQuestionAssets(q);
+      const grid = document.getElementById('options-grid');
+      const cardBackgrounds = ['game-option-tone-1', 'game-option-tone-2', 'game-option-tone-3', 'game-option-tone-4'];
+      grid.innerHTML = '';
+      grid.className = 'grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 md:gap-8 max-w-5xl mx-auto';
+      isQuestionLocked = false;
+      setOptionsDisabled(false);
+      document.getElementById('game-loading').classList.add('hidden');
+      document.getElementById('game-content').classList.remove('hidden');
+      updateGameStats();
 
-    q.options.forEach((imgUrl, index) => {
+      q.options.forEach((imgUrl, index) => {
         const btn = document.createElement('button');
         btn.className = `group ${cardBackgrounds[index % cardBackgrounds.length]} p-2 sm:p-3 md:p-4 rounded-[20px] sm:rounded-[28px] border-4 border-white/90 shadow-[0_16px_40px_rgba(15,23,42,0.10)] hover:shadow-2xl hover:-translate-y-1 transition-all active:scale-95 min-h-[8rem] sm:min-h-[10rem] md:min-h-[12rem] flex items-center justify-center`;
         btn.innerHTML = `<img src="${imgUrl}" class="w-full h-24 sm:h-32 md:h-40 object-contain rounded-2xl" loading="eager" decoding="async" fetchpriority="high">`;
-      btn.onclick = function() { checkAnswer(imgUrl, q.correct, this); };
+        btn.onclick = function () { checkAnswer(imgUrl, q.correct, this); };
         grid.appendChild(btn);
-    });
+      });
 
-    scheduleQuestionPreload(gameQuestions[currentQuestionIndex + 1]);
-}
+      scheduleQuestionPreload(gameQuestions[currentQuestionIndex + 1]);
+    }
 
 
 
@@ -2296,63 +2447,63 @@ function renderQuestion() {
       }
     }
 
-function playTargetAudio() {
+    function playTargetAudio() {
       const question = gameQuestions[currentQuestionIndex];
       if (!question) return;
 
       playPreferredAudio(question.audio, question.text || question.correct);
-}
-function checkAnswer(selected, correct, element) {
-  if (isQuestionLocked) return;
-
-  isQuestionLocked = true;
-  setOptionsDisabled(true);
-  stopWordPlayback();
-
-    if (selected === correct) {
-    currentGameScore += 100;
-    currentGameCorrectCount += 1;
-    updateGameStats();
-    const successText = getGameSuccessText();
-    handleSuccessAction(element, successText);
-    showGameSuccessFeedback(successText);
-    advanceGameQuestion(renderQuestion, 1000);
-
-    } else {
-    handleErrorAction(element);
-    advanceGameQuestion(renderQuestion);
     }
-}
+    function checkAnswer(selected, correct, element) {
+      if (isQuestionLocked) return;
 
-/** game 2**/
-function startLookChoose() {
-    if (!ensureLevelSelected()) return;
-    currentGameType = 'lookchoose';
-    switchView('game-play-view'); // Hiện màn chơi chung
-    document.getElementById('game-loading').classList.remove('hidden');
-  document.getElementById('game-content').classList.add('hidden');
-    
-  fetchGameDataset('lookchoose', 'getGameLookChooseData', currentUnitSlug, currentLevelKey).then(function(questions) {
-      gameQuestions = prepareGameQuestions(questions, true);
+      isQuestionLocked = true;
+      setOptionsDisabled(true);
+      stopWordPlayback();
+
+      if (selected === correct) {
+        currentGameScore += 100;
+        currentGameCorrectCount += 1;
+        updateGameStats();
+        const successText = getGameSuccessText();
+        handleSuccessAction(element, successText);
+        showGameSuccessFeedback(successText);
+        advanceGameQuestion(renderQuestion, 1000);
+
+      } else {
+        handleErrorAction(element);
+        advanceGameQuestion(renderQuestion);
+      }
+    }
+
+    /** game 2**/
+    function startLookChoose() {
+      if (!ensureLevelSelected()) return;
+      currentGameType = 'lookchoose';
+      switchView('game-play-view'); // Hiện màn chơi chung
+      document.getElementById('game-loading').classList.remove('hidden');
+      document.getElementById('game-content').classList.add('hidden');
+
+      fetchGameDataset('lookchoose', 'getGameLookChooseData', currentUnitSlug, currentLevelKey).then(function (questions) {
+        gameQuestions = prepareGameQuestions(questions, true);
         currentQuestionIndex = 0;
-    initializeGameStats(questions.length);
+        initializeGameStats(questions.length);
         renderLookChooseQuestion();
-  });
-}
-function renderLookChooseQuestion() {
-  if (gameQuestions.length === 0) {
-    alert("Unit này chưa có dữ liệu game!");
-    backToMenu();
-    return;
-  }
+      });
+    }
+    function renderLookChooseQuestion() {
+      if (gameQuestions.length === 0) {
+        alert("Unit này chưa có dữ liệu game!");
+        backToMenu();
+        return;
+      }
 
-    clearGameTransitionTimers();
-    const q = gameQuestions[currentQuestionIndex];
-    preloadQuestionAssets(q);
-    const content = document.getElementById('game-content');
-  isQuestionLocked = false;
-  setOptionsDisabled(false);
-    content.innerHTML = `
+      clearGameTransitionTimers();
+      const q = gameQuestions[currentQuestionIndex];
+      preloadQuestionAssets(q);
+      const content = document.getElementById('game-content');
+      isQuestionLocked = false;
+      setOptionsDisabled(false);
+      content.innerHTML = `
         <h2 class="text-xl sm:text-2xl font-bold text-gray-800 mb-5 sm:mb-6">Nhìn hình và chọn từ đúng</h2>
         
       <div class="mb-6 animate-fade-in">
@@ -2368,219 +2519,201 @@ function renderLookChooseQuestion() {
             `).join('')}
         </div>
     `;
-    document.getElementById('game-loading').classList.add('hidden');
-    content.classList.remove('hidden');
-    updateGameStats();
-
-    scheduleQuestionPreload(gameQuestions[currentQuestionIndex + 1]);
-}
-
-// --- SỬA LẠI HÀM CHECK CỦA GAME 2 ---
-function checkLookChooseAnswer(selected, correct, element) {
-    if (isQuestionLocked) return;
-
-    isQuestionLocked = true;
-    setOptionsDisabled(true);
-    if (typeof stopWordPlayback === 'function') {
-      stopWordPlayback();
-    }
-    const question = gameQuestions[currentQuestionIndex];
-
-    if (selected === correct) {
-      currentGameScore += 100;
-      currentGameCorrectCount += 1;
+      document.getElementById('game-loading').classList.add('hidden');
+      content.classList.remove('hidden');
       updateGameStats();
-      const successText = getGameSuccessText();
-      handleSuccessAction(element, successText);
-      showGameSuccessFeedback(successText);
-      advanceGameQuestion(renderLookChooseQuestion, 1000);
-    } else {
-      handleErrorAction(element);
-      advanceGameQuestion(renderLookChooseQuestion);
-    }
-}  
 
-/** game 3**/
-// --- LOGIC CHO GAME 3 ---
-function startPronunciationGame() {
-  if (!ensureLevelSelected()) return;
-    currentGameType = 'pronunciation';
-  speechRecognitionActive = false;
-  speechRecognitionHadResponse = false;
-  speechMicrophoneReady = false;
-  speechMicrophonePermission = 'unknown';
-  setPronunciationLoadingState(true);
-    // 1. Sử dụng hàm switchView (đã hướng dẫn ở trên) để ẩn hết các màn hình khác
-    switchView('pronunciation-game-view');
-
-    if (speechRecognitionAvailable) {
-      updateSpeechMicPanel('granted');
-    } else {
-      updateSpeechMicPanel('unsupported');
+      scheduleQuestionPreload(gameQuestions[currentQuestionIndex + 1]);
     }
 
-    // 3. Hiển thị trạng thái đang tải dữ liệu (tùy chọn: bạn có thể tạo 1 div loading riêng trong Game 3)
-    updateSpeechStatus("Đang chuẩn bị câu hỏi...", "text-blue-500 animate-pulse");
+    // --- SỬA LẠI HÀM CHECK CỦA GAME 2 ---
+    function checkLookChooseAnswer(selected, correct, element) {
+      if (isQuestionLocked) return;
 
-    // 4. Gọi dữ liệu từ Google Sheets
-    fetchGameDataset('pronunciation', 'getPronunciationData', currentUnitSlug, currentLevelKey).then(function(questions) {
+      isQuestionLocked = true;
+      setOptionsDisabled(true);
+      if (typeof stopWordPlayback === 'function') {
+        stopWordPlayback();
+      }
+      const question = gameQuestions[currentQuestionIndex];
+
+      if (selected === correct) {
+        currentGameScore += 100;
+        currentGameCorrectCount += 1;
+        updateGameStats();
+        const successText = getGameSuccessText();
+        handleSuccessAction(element, successText);
+        showGameSuccessFeedback(successText);
+        advanceGameQuestion(renderLookChooseQuestion, 1000);
+      } else {
+        handleErrorAction(element);
+        advanceGameQuestion(renderLookChooseQuestion);
+      }
+    }
+
+    /** game 3**/
+    // --- LOGIC CHO GAME 3 ---
+    function startPronunciationGame() {
+      if (!ensureLevelSelected()) return;
+      currentGameType = 'pronunciation';
+      speechRecognitionActive = false;
+      speechRecognitionHadResponse = false;
+      speechMicrophoneReady = false;
+      speechMicrophonePermission = 'unknown';
+      setPronunciationLoadingState(true);
+      // 1. Sử dụng hàm switchView (đã hướng dẫn ở trên) để ẩn hết các màn hình khác
+      switchView('pronunciation-game-view');
+
+      if (speechRecognitionAvailable) {
+        updateSpeechMicPanel('granted');
+      } else {
+        updateSpeechMicPanel('unsupported');
+      }
+
+      // 3. Hiển thị trạng thái đang tải dữ liệu (tùy chọn: bạn có thể tạo 1 div loading riêng trong Game 3)
+      updateSpeechStatus("Đang chuẩn bị câu hỏi...", "text-blue-500 animate-pulse");
+
+      // 4. Gọi dữ liệu từ Google Sheets
+      fetchGameDataset('pronunciation', 'getPronunciationData', currentUnitSlug, currentLevelKey).then(function (questions) {
         if (!questions || questions.length === 0) {
-            alert("Unit này chưa có dữ liệu cho Game phát âm!");
-            backToMenu();
-            return;
+          alert("Unit này chưa có dữ liệu cho Game phát âm!");
+          backToMenu();
+          return;
         }
-        
-      gameQuestions = prepareGameQuestions(questions, false);
+
+        gameQuestions = prepareGameQuestions(questions, false);
         currentQuestionIndex = 0;
         initializeGameStats(gameQuestions.length);
         const speechScore = document.getElementById('speech-score');
         if (speechScore) speechScore.innerText = '0';
         const speechCorrect = document.getElementById('speech-correct-count');
         if (speechCorrect) speechCorrect.innerText = '0';
-        
+
         // 5. Vẽ câu hỏi đầu tiên
         renderSpeechQuestion();
       });
-}
+    }
 
-function renderSpeechQuestion() {
-    if (gameQuestions.length === 0) {
+    function renderSpeechQuestion() {
+      if (gameQuestions.length === 0) {
         alert("Chưa có dữ liệu cho game này!");
         backToMenu();
         return;
+      }
+      setPronunciationLoadingState(false);
+      const q = gameQuestions[currentQuestionIndex];
+      preloadQuestionAssets(q);
+      isQuestionLocked = false;
+      const speechImage = document.getElementById('speech-img');
+      if (speechImage) {
+        speechImage.loading = 'eager';
+        speechImage.decoding = 'async';
+        speechImage.fetchPriority = 'high';
+        speechImage.src = q.image;
+      }
+      document.getElementById('speech-en').innerText = q.en;
+      document.getElementById('speech-vi').innerText = q.vi;
+      document.getElementById('speech-progress').innerText = `${currentQuestionIndex + 1}/${gameQuestions.length}`;
+
+      updateSpeechStatus("Bấm Ghi âm để kiểm tra xem bé có nghe được không.", "text-blue-700");
+
+      scheduleQuestionPreload(gameQuestions[currentQuestionIndex + 1]);
     }
-  setPronunciationLoadingState(false);
-    const q = gameQuestions[currentQuestionIndex];
-    preloadQuestionAssets(q);
-    isQuestionLocked = false;
-  const speechImage = document.getElementById('speech-img');
-  if (speechImage) {
-    speechImage.loading = 'eager';
-    speechImage.decoding = 'async';
-    speechImage.fetchPriority = 'high';
-    speechImage.src = q.image;
-  }
-    document.getElementById('speech-en').innerText = q.en;
-    document.getElementById('speech-vi').innerText = q.vi;
-    document.getElementById('speech-progress').innerText = `${currentQuestionIndex + 1}/${gameQuestions.length}`;
 
-    updateSpeechStatus("Bấm Ghi âm để kiểm tra xem bé có nghe được không.", "text-blue-700");
-
-  scheduleQuestionPreload(gameQuestions[currentQuestionIndex + 1]);
-}
-
-function nextSpeechQuestion() {
-    stopWordPlayback();
-    currentQuestionIndex++;
-    if (currentQuestionIndex < gameQuestions.length) {
+    function nextSpeechQuestion() {
+      stopWordPlayback();
+      currentQuestionIndex++;
+      if (currentQuestionIndex < gameQuestions.length) {
         renderSpeechQuestion();
-    } else {
+      } else {
         showGameSummary();
+      }
     }
-}
-let recognition;
-const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-speechRecognitionAvailable = typeof SpeechRecognition !== "undefined";
+    let recognition;
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    speechRecognitionAvailable = typeof SpeechRecognition !== "undefined";
 
-function getSpeechMicPanelElements() {
-  return {
-    panel: document.getElementById('speech-mic-panel'),
-    title: document.getElementById('speech-mic-title'),
-    detail: document.getElementById('speech-mic-detail'),
-    button: document.getElementById('btn-enable-mic'),
-    recordButton: document.getElementById('btn-record')
-  };
-}
+    function getSpeechMicPanelElements() {
+      return {
+        panel: document.getElementById('speech-mic-panel'),
+        title: document.getElementById('speech-mic-title'),
+        detail: document.getElementById('speech-mic-detail'),
+        button: document.getElementById('btn-enable-mic'),
+        recordButton: document.getElementById('btn-record')
+      };
+    }
 
-function updateSpeechMicPanel(state, detailText) {
-  const elements = getSpeechMicPanelElements();
-  const panel = elements.panel;
-  const title = elements.title;
-  const detail = elements.detail;
-  const button = elements.button;
-  const recordButton = elements.recordButton;
+    function updateSpeechMicPanel(state, detailText) {
+      const elements = getSpeechMicPanelElements();
+      const panel = elements.panel;
+      const title = elements.title;
+      const detail = elements.detail;
+      const button = elements.button;
+      const recordButton = elements.recordButton;
 
-  if (recordButton) {
-    const isSupported = state !== 'unsupported';
-    recordButton.disabled = !isSupported;
-    recordButton.classList.toggle('opacity-60', !isSupported);
-    recordButton.classList.toggle('cursor-not-allowed', !isSupported);
-  }
+      if (recordButton) {
+        const isSupported = state !== 'unsupported';
+        recordButton.disabled = !isSupported;
+        recordButton.classList.toggle('opacity-60', !isSupported);
+        recordButton.classList.toggle('cursor-not-allowed', !isSupported);
+      }
 
-  if (!panel || !title || !detail || !button) return;
+      if (!panel || !title || !detail || !button) return;
 
-  if (state === 'granted') {
-    panel.classList.add('hidden');
-    button.disabled = false;
-    button.classList.remove('opacity-60', 'cursor-not-allowed');
-    button.innerText = 'Cấp quyền micro';
-    return;
-  }
+      if (state === 'granted') {
+        panel.classList.add('hidden');
+        button.disabled = false;
+        button.classList.remove('opacity-60', 'cursor-not-allowed');
+        button.innerText = 'Cấp quyền micro';
+        return;
+      }
 
-  panel.classList.remove('hidden');
+      panel.classList.remove('hidden');
 
-  let titleText = 'Cần quyền micro để chơi game phát âm';
-  let detailValue = detailText || 'Bấm Cấp quyền micro để trình duyệt cho phép dùng micro. Sau đó đọc to để kiểm tra xem máy có nghe được không.';
-  let buttonText = 'Cấp quyền micro';
-  let buttonDisabled = false;
+      let titleText = 'Cần quyền micro để chơi game phát âm';
+      let detailValue = detailText || 'Bấm Cấp quyền micro để trình duyệt cho phép dùng micro. Sau đó đọc to để kiểm tra xem máy có nghe được không.';
+      let buttonText = 'Cấp quyền micro';
+      let buttonDisabled = false;
 
-  if (state === 'denied') {
-    titleText = 'Quyền micro đang bị chặn';
-    detailValue = detailText || 'Hãy mở quyền micro trong biểu tượng ổ khóa của trình duyệt, rồi bấm Cấp quyền micro lại.';
-    buttonText = 'Mở quyền micro';
-  } else if (state === 'unsupported') {
-    titleText = 'Trình duyệt chưa hỗ trợ game phát âm';
-    detailValue = detailText || 'Hãy mở game bằng Chrome hoặc Edge trên máy có micro để kiểm tra phát âm.';
-    buttonText = 'Không hỗ trợ';
-    buttonDisabled = true;
-  } else if (state === 'checking') {
-    titleText = 'Đang kiểm tra micro...';
-    detailValue = detailText || 'Đợi một chút để trình duyệt xác nhận quyền micro.';
-    buttonText = 'Đang kiểm tra...';
-    buttonDisabled = true;
-  }
+      if (state === 'denied') {
+        titleText = 'Quyền micro đang bị chặn';
+        detailValue = detailText || 'Hãy mở quyền micro trong biểu tượng ổ khóa của trình duyệt, rồi bấm Cấp quyền micro lại.';
+        buttonText = 'Mở quyền micro';
+      } else if (state === 'unsupported') {
+        titleText = 'Trình duyệt chưa hỗ trợ game phát âm';
+        detailValue = detailText || 'Hãy mở game bằng Chrome hoặc Edge trên máy có micro để kiểm tra phát âm.';
+        buttonText = 'Không hỗ trợ';
+        buttonDisabled = true;
+      } else if (state === 'checking') {
+        titleText = 'Đang kiểm tra micro...';
+        detailValue = detailText || 'Đợi một chút để trình duyệt xác nhận quyền micro.';
+        buttonText = 'Đang kiểm tra...';
+        buttonDisabled = true;
+      }
 
-  title.innerText = titleText;
-  detail.innerText = detailValue;
-  button.innerText = buttonText;
-  button.disabled = buttonDisabled;
-  button.classList.toggle('opacity-60', buttonDisabled);
-  button.classList.toggle('cursor-not-allowed', buttonDisabled);
-}
+      title.innerText = titleText;
+      detail.innerText = detailValue;
+      button.innerText = buttonText;
+      button.disabled = buttonDisabled;
+      button.classList.toggle('opacity-60', buttonDisabled);
+      button.classList.toggle('cursor-not-allowed', buttonDisabled);
+    }
 
-async function refreshSpeechMicState(requestAccess) {
-  if (!speechRecognitionAvailable) {
-    speechMicrophoneReady = false;
-    speechMicrophonePermission = 'unsupported';
-    updateSpeechMicPanel('unsupported');
-    updateSpeechStatus('Trình duyệt này chưa hỗ trợ game phát âm. Hãy dùng Chrome hoặc Edge.', 'text-red-600');
-    return false;
-  }
+    async function refreshSpeechMicState(requestAccess) {
+      if (!speechRecognitionAvailable) {
+        speechMicrophoneReady = false;
+        speechMicrophonePermission = 'unsupported';
+        updateSpeechMicPanel('unsupported');
+        updateSpeechStatus('Trình duyệt này chưa hỗ trợ game phát âm. Hãy dùng Chrome hoặc Edge.', 'text-red-600');
+        return false;
+      }
 
-  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-    speechMicrophoneReady = false;
-    speechMicrophonePermission = 'unsupported';
-    updateSpeechMicPanel('unsupported', 'Trình duyệt chưa cho phép truy cập micro theo cách này. Hãy dùng Chrome hoặc Edge.');
-    updateSpeechStatus('Trình duyệt chưa hỗ trợ kiểm tra micro. Hãy dùng Chrome hoặc Edge.', 'text-red-600');
-    return false;
-  }
-
-  if (speechMicrophoneReady) {
-    updateSpeechMicPanel('granted');
-    updateSpeechStatus('✅ Micro đã sẵn sàng. Bấm Ghi âm để kiểm tra xem bé có nghe được không.', 'text-green-600');
-    return true;
-  }
-
-  if (!requestAccess && navigator.permissions && navigator.permissions.query) {
-    try {
-      const permissionStatus = await navigator.permissions.query({ name: 'microphone' });
-      speechMicrophonePermission = permissionStatus.state || 'prompt';
-      speechMicrophoneReady = speechMicrophonePermission === 'granted';
-
-      if (permissionStatus.onchange !== undefined) {
-        permissionStatus.onchange = function () {
-          refreshSpeechMicState(false);
-        };
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        speechMicrophoneReady = false;
+        speechMicrophonePermission = 'unsupported';
+        updateSpeechMicPanel('unsupported', 'Trình duyệt chưa cho phép truy cập micro theo cách này. Hãy dùng Chrome hoặc Edge.');
+        updateSpeechStatus('Trình duyệt chưa hỗ trợ kiểm tra micro. Hãy dùng Chrome hoặc Edge.', 'text-red-600');
+        return false;
       }
 
       if (speechMicrophoneReady) {
@@ -2588,366 +2721,384 @@ async function refreshSpeechMicState(requestAccess) {
         updateSpeechStatus('✅ Micro đã sẵn sàng. Bấm Ghi âm để kiểm tra xem bé có nghe được không.', 'text-green-600');
         return true;
       }
-      speechMicrophonePermission = speechMicrophonePermission || 'prompt';
-      return false;
-    } catch (error) {
-      speechMicrophonePermission = 'prompt';
-      speechMicrophoneReady = false;
-      return false;
+
+      if (!requestAccess && navigator.permissions && navigator.permissions.query) {
+        try {
+          const permissionStatus = await navigator.permissions.query({ name: 'microphone' });
+          speechMicrophonePermission = permissionStatus.state || 'prompt';
+          speechMicrophoneReady = speechMicrophonePermission === 'granted';
+
+          if (permissionStatus.onchange !== undefined) {
+            permissionStatus.onchange = function () {
+              refreshSpeechMicState(false);
+            };
+          }
+
+          if (speechMicrophoneReady) {
+            updateSpeechMicPanel('granted');
+            updateSpeechStatus('✅ Micro đã sẵn sàng. Bấm Ghi âm để kiểm tra xem bé có nghe được không.', 'text-green-600');
+            return true;
+          }
+          speechMicrophonePermission = speechMicrophonePermission || 'prompt';
+          return false;
+        } catch (error) {
+          speechMicrophonePermission = 'prompt';
+          speechMicrophoneReady = false;
+          return false;
+        }
+      }
+
+      updateSpeechMicPanel('checking');
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        if (stream && typeof stream.getTracks === 'function') {
+          stream.getTracks().forEach(track => track.stop());
+        }
+        speechMicrophoneReady = true;
+        speechMicrophonePermission = 'granted';
+        updateSpeechMicPanel('granted');
+        updateSpeechStatus('✅ Micro đã sẵn sàng. Bấm Ghi âm để kiểm tra xem bé có nghe được không.', 'text-green-600');
+        return true;
+      } catch (error) {
+        speechMicrophoneReady = false;
+        if (error && (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError' || error.name === 'SecurityError')) {
+          speechMicrophonePermission = 'denied';
+          updateSpeechMicPanel('denied', '⚠️ Chưa cấp quyền micro. Hãy mở quyền trong trình duyệt rồi thử lại.');
+          updateSpeechStatus('⚠️ Chưa cấp quyền micro. Bấm Cấp quyền micro để mở quyền.', 'text-red-600');
+        } else if (error && (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError')) {
+          speechMicrophonePermission = 'prompt';
+          updateSpeechMicPanel('prompt', '⚠️ Không tìm thấy micro trên thiết bị này. Hãy kiểm tra micro rồi thử lại.');
+          updateSpeechStatus('⚠️ Không tìm thấy micro trên thiết bị này.', 'text-red-600');
+        } else {
+          speechMicrophonePermission = 'prompt';
+          updateSpeechMicPanel('prompt', '⚠️ Không thể mở micro. Hãy kiểm tra quyền trình duyệt rồi thử lại.');
+          updateSpeechStatus('⚠️ Không thể mở micro. Hãy thử lại sau khi kiểm tra quyền và thiết bị.', 'text-red-600');
+        }
+        return false;
+      }
     }
-  }
 
-  updateSpeechMicPanel('checking');
-  try {
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    if (stream && typeof stream.getTracks === 'function') {
-      stream.getTracks().forEach(track => track.stop());
+    function requestPronunciationMicrophoneAccess() {
+      return refreshSpeechMicState(true);
     }
-    speechMicrophoneReady = true;
-    speechMicrophonePermission = 'granted';
-    updateSpeechMicPanel('granted');
-    updateSpeechStatus('✅ Micro đã sẵn sàng. Bấm Ghi âm để kiểm tra xem bé có nghe được không.', 'text-green-600');
-    return true;
-  } catch (error) {
-    speechMicrophoneReady = false;
-    if (error && (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError' || error.name === 'SecurityError')) {
-      speechMicrophonePermission = 'denied';
-      updateSpeechMicPanel('denied', '⚠️ Chưa cấp quyền micro. Hãy mở quyền trong trình duyệt rồi thử lại.');
-      updateSpeechStatus('⚠️ Chưa cấp quyền micro. Bấm Cấp quyền micro để mở quyền.', 'text-red-600');
-    } else if (error && (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError')) {
-      speechMicrophonePermission = 'prompt';
-      updateSpeechMicPanel('prompt', '⚠️ Không tìm thấy micro trên thiết bị này. Hãy kiểm tra micro rồi thử lại.');
-      updateSpeechStatus('⚠️ Không tìm thấy micro trên thiết bị này.', 'text-red-600');
-    } else {
-      speechMicrophonePermission = 'prompt';
-      updateSpeechMicPanel('prompt', '⚠️ Không thể mở micro. Hãy kiểm tra quyền trình duyệt rồi thử lại.');
-      updateSpeechStatus('⚠️ Không thể mở micro. Hãy thử lại sau khi kiểm tra quyền và thiết bị.', 'text-red-600');
-    }
-    return false;
-  }
-}
 
-function requestPronunciationMicrophoneAccess() {
-  return refreshSpeechMicState(true);
-}
+    function initSpeechRecognition() {
+      if (typeof SpeechRecognition === "undefined") return null;
 
-function initSpeechRecognition() {
-    if (typeof SpeechRecognition === "undefined") return null;
+      const rec = new SpeechRecognition();
+      rec.continuous = false;
+      rec.lang = 'en-US';
 
-    const rec = new SpeechRecognition();
-    rec.continuous = false;
-    rec.lang = 'en-US';
-
-    rec.onstart = () => {
+      rec.onstart = () => {
         if (isQuestionLocked) {
-            rec.stop();
-            return;
+          rec.stop();
+          return;
         }
         speechRecognitionActive = true;
         speechRecognitionHadResponse = false;
         updateSpeechStatus("🔴 Đang lắng nghe... Bé đọc đi!", "text-red-600");
         const btnRecord = document.getElementById('btn-record');
         if (btnRecord) {
-            btnRecord.classList.remove('animate-pulse');
-            btnRecord.classList.add('animate-bounce');
+          btnRecord.classList.remove('animate-pulse');
+          btnRecord.classList.add('animate-bounce');
         }
-    };
+      };
 
-    rec.onspeechstart = () => {
+      rec.onspeechstart = () => {
         if (isQuestionLocked) return;
         updateSpeechStatus("👂 Mình đã nghe thấy giọng nói, đang xử lý...", "text-blue-700");
-    };
+      };
 
-    rec.onresult = (event) => {
+      rec.onresult = (event) => {
         if (isQuestionLocked) return;
         speechRecognitionHadResponse = true;
-        
+
         let target = '';
         if (gameQuestions && gameQuestions[currentQuestionIndex] && gameQuestions[currentQuestionIndex].en) {
-            target = gameQuestions[currentQuestionIndex].en.toLowerCase().trim();
+          target = gameQuestions[currentQuestionIndex].en.toLowerCase().trim();
         }
-        
+
         const transcript = String(event.results[0][0].transcript || '').trim();
         const cleanResult = transcript.toLowerCase().trim().replace(/[.,!?]/g, "");
         const cleanTarget = target.replace(/[.,!?]/g, "");
 
         if (!transcript) {
-            updateSpeechStatus("⚠️ Mình nghe được âm thanh nhưng chưa nhận ra từ nào. Thử đọc lại nhé!", "text-orange-600");
-            handleErrorAction(document.getElementById('speech-en'));
-            return;
+          updateSpeechStatus("⚠️ Mình nghe được âm thanh nhưng chưa nhận ra từ nào. Thử đọc lại nhé!", "text-orange-600");
+          handleErrorAction(document.getElementById('speech-en'));
+          return;
         }
-        
-        if (cleanResult.includes(cleanTarget) || cleanTarget.includes(cleanResult) || cleanResult === cleanTarget) {
-            isQuestionLocked = true;
-            updateSpeechStatus(`🎉 Mình nghe được "${transcript}" và bé phát âm rất chuẩn!`, "text-green-600");
-            handleSuccessAction(document.getElementById('speech-en'), getGameSuccessText());
-            
-            currentGameScore += 100;
-            currentGameCorrectCount += 1;
-            
-            const speechScoreEl = document.getElementById('speech-score');
-            if (speechScoreEl) speechScoreEl.innerText = currentGameScore;
-            
-            const speechCorrectEl = document.getElementById('speech-correct-count');
-            if (speechCorrectEl) speechCorrectEl.innerText = currentGameCorrectCount;
-            
-            advanceGameQuestion(renderSpeechQuestion, 2000);
-        } else {
-            updateSpeechStatus(`👂 Mình nghe được "${transcript}", nhưng chưa khớp với từ mẫu. Thử lại nhé!`, "text-orange-600");
-            handleErrorAction(document.getElementById('speech-en'));
-        }
-    };
 
-    rec.onnomatch = () => {
+        if (cleanResult.includes(cleanTarget) || cleanTarget.includes(cleanResult) || cleanResult === cleanTarget) {
+          isQuestionLocked = true;
+          updateSpeechStatus(`🎉 Mình nghe được "${transcript}" và bé phát âm rất chuẩn!`, "text-green-600");
+          handleSuccessAction(document.getElementById('speech-en'), getGameSuccessText());
+
+          currentGameScore += 100;
+          currentGameCorrectCount += 1;
+
+          const speechScoreEl = document.getElementById('speech-score');
+          if (speechScoreEl) speechScoreEl.innerText = currentGameScore;
+
+          const speechCorrectEl = document.getElementById('speech-correct-count');
+          if (speechCorrectEl) speechCorrectEl.innerText = currentGameCorrectCount;
+
+          advanceGameQuestion(renderSpeechQuestion, 2000);
+        } else {
+          updateSpeechStatus(`👂 Mình nghe được "${transcript}", nhưng chưa khớp với từ mẫu. Thử lại nhé!`, "text-orange-600");
+          handleErrorAction(document.getElementById('speech-en'));
+        }
+      };
+
+      rec.onnomatch = () => {
         if (isQuestionLocked) return;
         speechRecognitionHadResponse = true;
         updateSpeechStatus("⚠️ Mình có nghe âm thanh nhưng chưa nhận ra từ nào. Thử đọc lại nhé!", "text-orange-600");
         handleErrorAction(document.getElementById('speech-en'));
-    };
+      };
 
-    rec.onerror = (event) => {
+      rec.onerror = (event) => {
         speechRecognitionHadResponse = true;
         if (event.error === 'aborted') return;
 
         const isMicrophoneGranted = speechMicrophoneReady || speechMicrophonePermission === 'granted';
 
         if (event.error === 'service-not-allowed') {
-            updateSpeechMicPanel('granted');
-            updateSpeechStatus("⚠️ Trình duyệt đang chặn dịch vụ nhận diện giọng nói, không phải quyền micro. Hãy thử lại bằng Chrome hoặc Edge.", "text-red-600");
+          updateSpeechMicPanel('granted');
+          updateSpeechStatus("⚠️ Trình duyệt đang chặn dịch vụ nhận diện giọng nói, không phải quyền micro. Hãy thử lại bằng Chrome hoặc Edge.", "text-red-600");
         } else if (event.error === 'not-allowed') {
-            if (isMicrophoneGranted) {
-                updateSpeechMicPanel('granted');
-                updateSpeechStatus("⚠️ Micro đã được cấp quyền nhưng trình duyệt chưa bật nhận diện. Hãy bấm nút Ghi âm một lần nữa.", "text-red-600");
-            } else {
-                speechMicrophoneReady = false;
-                speechMicrophonePermission = 'denied';
-                updateSpeechMicPanel('denied');
-                updateSpeechStatus("⚠️ Hãy cho phép quyền sử dụng micro và bấm Ghi âm lại nhé!", "text-red-600");
-            }
-        } else if (event.error === 'audio-capture') {
+          if (isMicrophoneGranted) {
+            updateSpeechMicPanel('granted');
+            updateSpeechStatus("⚠️ Micro đã được cấp quyền nhưng trình duyệt chưa bật nhận diện. Hãy bấm nút Ghi âm một lần nữa.", "text-red-600");
+          } else {
             speechMicrophoneReady = false;
-            speechMicrophonePermission = 'prompt';
-            updateSpeechMicPanel('prompt', '⚠️ Micro chưa sẵn sàng hoặc đang bị chặn. Hãy kiểm tra micro rồi thử lại.');
-            updateSpeechStatus("⚠️ Không nhận được tín hiệu từ micro. Hãy kiểm tra thiết bị rồi thử lại.", "text-red-600");
+            speechMicrophonePermission = 'denied';
+            updateSpeechMicPanel('denied');
+            updateSpeechStatus("⚠️ Hãy cho phép quyền sử dụng micro và bấm Ghi âm lại nhé!", "text-red-600");
+          }
+        } else if (event.error === 'audio-capture') {
+          speechMicrophoneReady = false;
+          speechMicrophonePermission = 'prompt';
+          updateSpeechMicPanel('prompt', '⚠️ Micro chưa sẵn sàng hoặc đang bị chặn. Hãy kiểm tra micro rồi thử lại.');
+          updateSpeechStatus("⚠️ Không nhận được tín hiệu từ micro. Hãy kiểm tra thiết bị rồi thử lại.", "text-red-600");
         } else if (event.error === 'no-speech') {
-            updateSpeechStatus("⚠️ Mình chưa nghe thấy tiếng nào. Hãy đọc to hơn rồi thử lại nhé!", "text-orange-600");
+          updateSpeechStatus("⚠️ Mình chưa nghe thấy tiếng nào. Hãy đọc to hơn rồi thử lại nhé!", "text-orange-600");
         } else {
-            updateSpeechStatus("⚠️ Lỗi không nghe rõ (" + event.error + "). Bé bấm nút ghi âm lại nhé!", "text-gray-600");
+          updateSpeechStatus("⚠️ Lỗi không nghe rõ (" + event.error + "). Bé bấm nút ghi âm lại nhé!", "text-gray-600");
         }
         console.error("Speech recognition error:", event.error);
-    };
+      };
 
-    rec.onend = () => {
+      rec.onend = () => {
         speechRecognitionActive = false;
         const btnRecord = document.getElementById('btn-record');
         if (btnRecord) {
-            btnRecord.classList.remove('animate-bounce');
-            btnRecord.classList.add('animate-pulse');
+          btnRecord.classList.remove('animate-bounce');
+          btnRecord.classList.add('animate-pulse');
         }
 
         if (!speechRecognitionHadResponse && !isQuestionLocked) {
-            updateSpeechStatus("⚠️ Mình chưa nghe thấy gì. Hãy đọc to hơn rồi bấm Ghi âm lại nhé!", "text-orange-600");
+          updateSpeechStatus("⚠️ Mình chưa nghe thấy gì. Hãy đọc to hơn rồi bấm Ghi âm lại nhé!", "text-orange-600");
         }
-    };
+      };
 
-    return rec;
-}
+      return rec;
+    }
 
-      async function startRecording() {
-    if (isQuestionLocked) return;
-        if (!speechRecognitionAvailable) {
-          updateSpeechMicPanel('unsupported');
-          updateSpeechStatus("Trình duyệt của bạn chưa hỗ trợ nhận diện giọng nói. Hãy dùng Google Chrome hoặc Edge.", "text-red-600");
-          return;
+    async function startRecording() {
+      if (isQuestionLocked) return;
+      if (!speechRecognitionAvailable) {
+        updateSpeechMicPanel('unsupported');
+        updateSpeechStatus("Trình duyệt của bạn chưa hỗ trợ nhận diện giọng nói. Hãy dùng Google Chrome hoặc Edge.", "text-red-600");
+        return;
+      }
+
+      if (speechRecognitionActive) {
+        updateSpeechStatus("Đang nghe rồi. Hãy đọc to câu hiện tại nhé.", "text-blue-700");
+        return;
+      }
+
+      try {
+        if (recognition) {
+          try { recognition.abort(); } catch (e) { }
         }
+        recognition = initSpeechRecognition();
+        if (!recognition) return;
 
-        if (speechRecognitionActive) {
+        speechRecognitionHadResponse = false;
+        recognition.start();
+      } catch (error) {
+        if (error && error.name === 'InvalidStateError') {
           updateSpeechStatus("Đang nghe rồi. Hãy đọc to câu hiện tại nhé.", "text-blue-700");
           return;
         }
+        console.error("Speech recognition start error:", error);
+        updateSpeechStatus("Không thể bật ghi âm. Hãy thử lại sau.", "text-red-600");
+      }
+    }
 
-        try {
-          if (recognition) {
-              try { recognition.abort(); } catch(e) {}
-          }
-          recognition = initSpeechRecognition();
-          if (!recognition) return;
-          
-          speechRecognitionHadResponse = false;
-          recognition.start();
-        } catch (error) {
-          if (error && error.name === 'InvalidStateError') {
-            updateSpeechStatus("Đang nghe rồi. Hãy đọc to câu hiện tại nhé.", "text-blue-700");
-            return;
-          }
-          console.error("Speech recognition start error:", error);
-          updateSpeechStatus("Không thể bật ghi âm. Hãy thử lại sau.", "text-red-600");
-        }
-}
+    function listenSample() {
+      const question = gameQuestions[currentQuestionIndex];
+      if (!question) return;
 
-function listenSample() {
-  const question = gameQuestions[currentQuestionIndex];
-  if (!question) return;
+      playPreferredAudio(question.audio, question.en);
+    }
 
-  playPreferredAudio(question.audio, question.en);
-}
+    function setPronunciationLoadingState(isLoading) {
+      const loadingEl = document.getElementById('speech-loading');
+      const contentEl = document.getElementById('speech-content');
 
-function setPronunciationLoadingState(isLoading) {
-  const loadingEl = document.getElementById('speech-loading');
-  const contentEl = document.getElementById('speech-content');
+      if (loadingEl) {
+        loadingEl.classList.toggle('hidden', !isLoading);
+      }
 
-  if (loadingEl) {
-    loadingEl.classList.toggle('hidden', !isLoading);
-  }
+      if (contentEl) {
+        contentEl.classList.toggle('hidden', isLoading);
+      }
+    }
 
-  if (contentEl) {
-    contentEl.classList.toggle('hidden', isLoading);
-  }
-}
+    function updateSpeechStatus(text, colorClass) {
+      const status = document.getElementById('speech-status');
+      if (!status) return;
+      status.innerText = text;
+      status.className = `p-4 text-center font-bold text-lg ${colorClass}`;
+    }
+    function switchView(viewId) {
+      clearGameTransitionTimers();
+      stopWordPlayback();
+      stopCatchGameLoop();
+      closeSidebarDrawer();
 
-function updateSpeechStatus(text, colorClass) {
-    const status = document.getElementById('speech-status');
-  if (!status) return;
-    status.innerText = text;
-    status.className = `p-4 text-center font-bold text-lg ${colorClass}`;
-}
-function switchView(viewId) {
-  clearGameTransitionTimers();
-  stopWordPlayback();
-  stopCatchGameLoop();
-  closeSidebarDrawer();
+      // Danh sách tất cả các ID màn hình lớn
+      const views = ['menu-game-view', 'game-play-view', 'pronunciation-game-view', 'catch-game-view', 'game-summary-view'];
 
-    // Danh sách tất cả các ID màn hình lớn
-    const views = ['menu-game-view', 'game-play-view', 'pronunciation-game-view', 'catch-game-view', 'game-summary-view'];
-    
-    views.forEach(id => {
+      views.forEach(id => {
         const el = document.getElementById(id);
         if (el) {
-            if (id === viewId) {
-                el.classList.remove('hidden');
-            } else {
-                el.classList.add('hidden');
-            }
+          if (id === viewId) {
+            el.classList.remove('hidden');
+          } else {
+            el.classList.add('hidden');
+          }
         }
-    });
-}
-
-function showGameSummary() {
-  const scoreEl = document.getElementById('summary-score');
-  const correctEl = document.getElementById('summary-correct');
-  const totalEl = document.getElementById('summary-total');
-
-  if (scoreEl) scoreEl.innerText = currentGameScore;
-  if (correctEl) correctEl.innerText = currentGameCorrectCount;
-  if (totalEl) totalEl.innerText = currentGameTotalQuestions || gameQuestions.length;
-
-  switchView('game-summary-view');
-}
-
-function playAgain() {
-  if (currentGameType === 'listenchoose') {
-    startListenChoose();
-  } else if (currentGameType === 'lookchoose') {
-    startLookChoose();
-  } else if (currentGameType === 'pronunciation') {
-    startPronunciationGame();
-  } else if (currentGameType === 'catch') {
-    startCatchGame();
-  } else {
-    backToMenu();
-  }
-}
-
-function logout() {
-  stopWordPlayback();
-  stopCatchGameLoop();
-
-  window.top.location.href = 'index.html';
-}
-
-// [1] Khởi chạy fetch ngay lập tức khi browser bắt đầu đọc JS (Không chờ tới lúc DOM load xong)
-const bootstrapGameKey = getSelectedGameKeyForRequests();
-const bootstrapCacheKey = getBootstrapCacheKey(bootstrapGameKey);
-const bootstrapPromise = fetch(SCRIPT_URL + '?api=app.bootstrap&game=' + encodeURIComponent(bootstrapGameKey)).then(res => res.json()).catch(() => null);
-
-document.addEventListener('DOMContentLoaded', function() {
-  applyGameBackground(GAME_BG_IMAGE_URL);
-  applyMenuBackgrounds();
-  syncSidebarCollapseUI();
-  syncResponsiveSidebarState();
-  window.addEventListener('resize', syncResponsiveSidebarState);
-
-  purgeStaleGameCaches();
-
-  currentWeekValue = getRequestedWeekValue() || '1';
-
-  const savedGameValue = loadSelectedGame();
-  if (savedGameValue) {
-    currentGameKey = savedGameValue;
-  } else {
-    window.location.replace('choosegame.html');
-    return;
-  }
-
-  try {
-    localStorage.setItem(GAME_STORAGE_KEY, currentGameKey);
-  } catch (error) {
-  }
-
-  const savedLevelKey = loadSelectedLevel();
-  const savedLevel = getLevelOption(savedLevelKey);
-  if (savedLevel) {
-    currentLevelKey = savedLevel.key;
-    currentLevelLabel = `${savedLevel.title}: ${savedLevel.ageLabel}`;
-  } else {
-    window.location.replace('chooselevel.html');
-    return;
-  }
-  const queryUnitValue = normalizeUnitKey(getSelectedUnitValue());
-  if (queryUnitValue) {
-    currentUnitOrder = queryUnitValue;
-  }
-  updateLevelBreadcrumb();
-
-  // Thử nạp giao diện từ Cache nếu có
-  try {
-    const localBoot = localStorage.getItem(bootstrapCacheKey);
-    if (localBoot) {
-       const cachedRes = JSON.parse(localBoot);
-       if (cachedRes.gameBgImageUrl) {
-         GAME_BG_IMAGE_URL = cachedRes.gameBgImageUrl;
-         applyGameBackground(GAME_BG_IMAGE_URL);
-       }
-       if (cachedRes.gameMenuBackgroundMap) {
-         GAME_MENU_BG_MAP = cachedRes.gameMenuBackgroundMap;
-         applyMenuBackgrounds();
-       }
-       if (cachedRes.units) {
-         allUnitsData = cachedRes.units || [];
-         renderSidebarForCurrentLevel();
-       }
+      });
     }
-  } catch(e) {}
 
-  // Lấy dữ liệu từ request đã bắn từ sớm
-  bootstrapPromise.then(function(response) {
-      if (response && response.success) {
-        try { localStorage.setItem(bootstrapCacheKey, JSON.stringify(response)); } catch(e) {}
-        
-        if (response.gameBgImageUrl && GAME_BG_IMAGE_URL !== response.gameBgImageUrl) {
-          GAME_BG_IMAGE_URL = response.gameBgImageUrl;
-          applyGameBackground(GAME_BG_IMAGE_URL);
-        }
-        if (response.gameMenuBackgroundMap) {
-          GAME_MENU_BG_MAP = response.gameMenuBackgroundMap;
-          applyMenuBackgrounds();
-        }
-        
-        allUnitsData = response.units || allUnitsData || [];
-        renderSidebarForCurrentLevel();
+    function showGameSummary() {
+      const scoreEl = document.getElementById('summary-score');
+      const correctEl = document.getElementById('summary-correct');
+      const totalEl = document.getElementById('summary-total');
+
+      if (scoreEl) scoreEl.innerText = currentGameScore;
+      if (correctEl) correctEl.innerText = currentGameCorrectCount;
+      if (totalEl) totalEl.innerText = currentGameTotalQuestions || gameQuestions.length;
+
+      switchView('game-summary-view');
+    }
+
+    function playAgain() {
+      if (currentGameType === 'listenchoose') {
+        startListenChoose();
+      } else if (currentGameType === 'lookchoose') {
+        startLookChoose();
+      } else if (currentGameType === 'pronunciation') {
+        startPronunciationGame();
+      } else if (currentGameType === 'catch') {
+        startCatchGame();
+      } else {
+        backToMenu();
       }
-  });
-});
+    }
+
+    function logout() {
+      stopWordPlayback();
+      stopCatchGameLoop();
+
+      window.top.location.href = 'index.html';
+    }
+
+    // [1] Khởi chạy fetch ngay lập tức khi browser bắt đầu đọc JS (Không chờ tới lúc DOM load xong)
+    const bootstrapGameKey = getSelectedGameKeyForRequests();
+    const bootstrapCacheKey = getBootstrapCacheKey(bootstrapGameKey);
+    const bootstrapPromise = fetch(SCRIPT_URL + '?api=app.bootstrap&game=' + encodeURIComponent(bootstrapGameKey)).then(res => res.json()).catch(() => null);
+
+    document.addEventListener('DOMContentLoaded', function () {
+      applyGameBackground(GAME_BG_IMAGE_URL);
+      applyMenuBackgrounds();
+      syncSidebarCollapseUI();
+      syncResponsiveSidebarState();
+      window.addEventListener('resize', syncResponsiveSidebarState);
+
+      purgeStaleGameCaches();
+
+      currentWeekValue = getRequestedWeekValue() || '1';
+
+      const savedGameValue = loadSelectedGame();
+      if (savedGameValue) {
+        currentGameKey = savedGameValue;
+      } else {
+        window.location.replace('choosegame.html');
+        return;
+      }
+
+      try {
+        localStorage.setItem(GAME_STORAGE_KEY, currentGameKey);
+      } catch (error) {
+      }
+
+      const savedLevelKey = loadSelectedLevel();
+      const savedLevel = getLevelOption(savedLevelKey);
+      if (savedLevel) {
+        currentLevelKey = savedLevel.key;
+        currentLevelLabel = `${savedLevel.title}: ${savedLevel.ageLabel}`;
+      } else {
+        window.location.replace('chooselevel.html');
+        return;
+      }
+      const queryUnitValue = normalizeUnitKey(getSelectedUnitValue());
+      if (queryUnitValue) {
+        currentUnitOrder = queryUnitValue;
+      }
+      updateLevelBreadcrumb();
+
+      // Thử nạp giao diện từ Cache nếu có
+      try {
+        const localBoot = localStorage.getItem(bootstrapCacheKey);
+        if (localBoot) {
+          const cachedRes = JSON.parse(localBoot);
+          if (cachedRes.gameBgImageUrl) {
+            GAME_BG_IMAGE_URL = cachedRes.gameBgImageUrl;
+            applyGameBackground(GAME_BG_IMAGE_URL);
+          }
+          if (cachedRes.gameMenuBackgroundMap) {
+            GAME_MENU_BG_MAP = cachedRes.gameMenuBackgroundMap;
+            applyMenuBackgrounds();
+          }
+          if (cachedRes.units) {
+            allUnitsData = cachedRes.units || [];
+            renderSidebarForCurrentLevel();
+          }
+        }
+      } catch (e) { }
+
+      // Lấy dữ liệu từ request đã bắn từ sớm
+      bootstrapPromise.then(function (response) {
+        if (response && response.success) {
+          try { localStorage.setItem(bootstrapCacheKey, JSON.stringify(response)); } catch (e) { }
+
+          if (response.gameBgImageUrl && GAME_BG_IMAGE_URL !== response.gameBgImageUrl) {
+            GAME_BG_IMAGE_URL = response.gameBgImageUrl;
+            applyGameBackground(GAME_BG_IMAGE_URL);
+          }
+          if (response.gameMenuBackgroundMap) {
+            GAME_MENU_BG_MAP = response.gameMenuBackgroundMap;
+            applyMenuBackgrounds();
+          }
+
+          allUnitsData = response.units || allUnitsData || [];
+          renderSidebarForCurrentLevel();
+        }
+      });
+    });
   </script>
 
 </body>
