@@ -481,7 +481,7 @@
 
       saveGame(normalizedKey);
       setActiveCard(normalizedKey);
-      window.location.href = 'chooseweek.html';
+      window.location.href = `chooseweek.html?game=${encodeURIComponent(normalizedKey)}`;
     }
 
     document.addEventListener('DOMContentLoaded', () => {
