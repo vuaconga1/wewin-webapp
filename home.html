@@ -1594,6 +1594,20 @@
       map[level.key] = level;
       return map;
     }, {});
+    const LEVEL_LABELS = {
+      kindergarten: {
+        pre11: 'Pre 1.1',
+        pre12: 'Pre 1.2',
+        pre2: 'Pre 2',
+        pre3: 'Pre 3'
+      },
+      starters: {
+        pre11: 'Lesson 1',
+        pre12: 'Lesson 2',
+        pre2: 'Lesson 3',
+        pre3: 'Lesson 4'
+      }
+    };
     let gameQuestions = [];
     let currentQuestionIndex = 0;
     let currentGameAudio = new Audio();
@@ -1749,11 +1763,19 @@
 
     function getLevelDisplayText(levelKey) {
       const level = getLevelOption(levelKey);
-      return level ? `${level.title}: ${level.ageLabel}` : '';
+      if (!level) return '';
+
+      const normalizedGameKey = normalizeGameKeyClient(currentGameKey || loadSelectedGame() || 'kindergarten') === 'starters'
+        ? 'starters'
+        : 'kindergarten';
+      const normalizedLevelKey = normalizeLevelKeyClient(levelKey);
+      const label = (LEVEL_LABELS[normalizedGameKey] && LEVEL_LABELS[normalizedGameKey][normalizedLevelKey]) || level.title;
+
+      return normalizedGameKey === 'starters' ? label : `${label}: ${level.ageLabel}`;
     }
 
     function getSelectedLevelText() {
-      return currentLevelLabel || getLevelDisplayText(currentLevelKey) || 'Chọn cấp bậc';
+      return currentLevelLabel || getLevelDisplayText(currentLevelKey, currentGameKey) || 'Chọn cấp bậc';
     }
 
     function normalizeUnitKey(value) {
@@ -3049,7 +3071,7 @@
       const savedLevel = getLevelOption(savedLevelKey);
       if (savedLevel) {
         currentLevelKey = savedLevel.key;
-        currentLevelLabel = `${savedLevel.title}: ${savedLevel.ageLabel}`;
+        currentLevelLabel = getLevelDisplayText(savedLevel.key, currentGameKey);
       } else {
         window.location.replace('chooselevel.html');
         return;
