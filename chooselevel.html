@@ -689,9 +689,13 @@
       const continueBtn = document.getElementById('continue-btn');
       if (!line || !continueBtn) return;
       const level = LEVELS[normalizeLevelKey(levelKey)];
+      const selectedGame = currentGameKey || getStoredGame();
 
       if (level) {
-        line.textContent = `Đã chọn: ${getLevelButtonLabel(levelKey, currentGameKey || getStoredGame())} - ${level.ageLabel}`;
+        const selectedLabel = getLevelButtonLabel(levelKey, selectedGame);
+        line.textContent = selectedGame === 'starters'
+          ? `Đã chọn: ${selectedLabel}`
+          : `Đã chọn: ${selectedLabel} - ${level.ageLabel}`;
         continueBtn.disabled = false;
       } else {
         line.textContent = 'Chưa chọn cấp bậc.';
