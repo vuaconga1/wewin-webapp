@@ -1623,6 +1623,8 @@
     let currentLevelKey = '';
     let currentLevelLabel = '';
     let allUnitsData = [];
+    let fixedKindergartenSidebarUnit = null;
+    let fixedKindergartenSidebarUnitPromise = null;
     let speechRecognitionActive = false;
     let speechRecognitionHadResponse = false;
     let speechMicrophoneReady = false;
@@ -1833,33 +1835,15 @@
       return normalizeWeekKey(currentWeekValue || loadSelectedWeek() || '1') || '1';
     }
 
-    function updateHomeUrlForUnit(unit, weekKey, unitValue) {
-      if (!unit) return;
+    function updateHomeUrlForUnit(unit, weekKey, unitValue, gameKey, levelKey) {
+      if (!unit) return window.location.href;
 
       try {
-        const url = new URL(window.location.href);
-        const selectedGameKey = getSelectedGameKeyForRequests();
-        if (selectedGameKey) {
-          url.searchParams.set('game', selectedGameKey);
-        }
-        if (currentLevelKey) {
-          url.searchParams.set('level', currentLevelKey);
-        }
-
-        const resolvedWeekKey = normalizeWeekKey(weekKey || currentWeekValue || loadSelectedWeek() || '1');
-        if (resolvedWeekKey) {
-          url.searchParams.set('week', resolvedWeekKey);
-        }
-
-        const resolvedUnitValue = String(unitValue || getUnitOrderValue(unit) || '').trim();
-        if (resolvedUnitValue) {
-          url.searchParams.set('unit', resolvedUnitValue);
-        } else {
-          url.searchParams.delete('unit');
-        }
-
+        const url = buildHomeUrlForUnit(unit, weekKey, unitValue, gameKey, levelKey);
         window.history.replaceState({}, '', url.toString());
+        return url;
       } catch (error) {
+        return window.location.href;
       }
     }
 
@@ -1884,44 +1868,247 @@
       return source.length > 0 ? source[0].slug : '';
     }
 
+    function buildHomeUrlForUnit(unit, weekKey, unitValue, gameKey, levelKey) {
+      if (!unit) return window.location.href;
+
+      const url = new URL(window.location.href);
+      const selectedGameKey = normalizeGameKeyClient(gameKey || unit.gameKey || currentGameKey || loadSelectedGame() || 'kindergarten');
+      if (selectedGameKey) {
+        url.searchParams.set('game', selectedGameKey === 'starters' ? 'starters' : 'kindergarten');
+      }
+
+      const resolvedLevelKey = normalizeLevelKeyClient(levelKey || unit.levelKey || currentLevelKey || (Array.isArray(unit.levels) && unit.levels.length ? unit.levels[0] : ''));
+      if (resolvedLevelKey) {
+        url.searchParams.set('level', resolvedLevelKey);
+      }
+
+      const resolvedWeekKey = normalizeWeekKey(weekKey || currentWeekValue || loadSelectedWeek() || '1');
+      if (resolvedWeekKey) {
+        url.searchParams.set('week', resolvedWeekKey);
+      }
+
+      const resolvedUnitValue = String(unitValue || getUnitOrderValue(unit) || '').trim();
+      if (resolvedUnitValue) {
+        url.searchParams.set('unit', resolvedUnitValue);
+      } else {
+        url.searchParams.delete('unit');
+      }
+
+      return url.toString();
+    }
+
+    function createSidebarUnitItem(unit, options) {
+      if (!unit) return null;
+
+      const normalizedOptions = options || {};
+      const gameKey = normalizeGameKeyClient(normalizedOptions.gameKey || unit.gameKey || currentGameKey || loadSelectedGame() || 'kindergarten') || 'kindergarten';
+      const levelKey = normalizeLevelKeyClient(normalizedOptions.levelKey || unit.levelKey || (Array.isArray(unit.levels) && unit.levels.length ? unit.levels[0] : ''));
+      const unitValue = String(normalizedOptions.unitValue || getUnitOrderValue(unit, normalizedOptions.fallbackIndex) || '').trim();
+      const weekKey = normalizeWeekKey(normalizedOptions.weekKey || unit.weekKey || (gameKey === 'starters' ? currentWeekValue : getPreferredWeekKeyForUnit(unitValue)) || '1') || '1';
+      const levels = Array.isArray(normalizedOptions.levels) ? normalizedOptions.levels : (Array.isArray(unit.levels) ? unit.levels : []);
+
+      return {
+        ...unit,
+        gameKey: gameKey,
+        levelKey: levelKey,
+        levels: levels.length ? levels : (levelKey ? [levelKey] : []),
+        unitValue: unitValue,
+        weekKey: weekKey,
+        weekLabel: normalizedOptions.weekLabel || ('Tuần ' + weekKey),
+        fixed: !!normalizedOptions.fixed,
+        sidebarKey: gameKey + '|' + normalizeUnitKey(unit.slug || unitValue) + '|' + unitValue + '|' + weekKey + '|' + levelKey
+      };
+    }
+
+    function createFixedKindergartenSidebarUnit(unit) {
+      return createSidebarUnitItem(unit, {
+        gameKey: 'kindergarten',
+        levelKey: 'pre3',
+        levels: ['pre3'],
+        unitValue: '1',
+        weekKey: '1',
+        weekLabel: 'Tuần 1',
+        fixed: true
+      });
+    }
+
+    function ensureStarterKindergartenSidebarUnit() {
+      if (getSelectedGameKeyForRequests() !== 'starters') {
+        return Promise.resolve(null);
+      }
+
+      if (fixedKindergartenSidebarUnit) {
+        return Promise.resolve(fixedKindergartenSidebarUnit);
+      }
+
+      if (fixedKindergartenSidebarUnitPromise) {
+        return fixedKindergartenSidebarUnitPromise;
+      }
+
+      fixedKindergartenSidebarUnitPromise = fetch(SCRIPT_URL + '?api=units&level=pre3&game=kindergarten')
+        .then(res => res.json())
+        .then(response => {
+          const units = response && response.success && Array.isArray(response.units) ? response.units : [];
+          const matchedUnit = units.find((unit, index) => normalizeUnitKey(getUnitOrderValue(unit, index)) === '1')
+            || units.find(unit => unit && normalizeUnitKey(unit.slug) === '1')
+            || units[0]
+            || null;
+
+          if (!matchedUnit) {
+            fixedKindergartenSidebarUnit = null;
+            return null;
+          }
+
+          fixedKindergartenSidebarUnit = createFixedKindergartenSidebarUnit(matchedUnit);
+
+          if (Array.isArray(allUnitsData) && allUnitsData.length > 0 && getSelectedGameKeyForRequests() === 'starters') {
+            renderSidebarForCurrentLevel();
+          }
+
+          return fixedKindergartenSidebarUnit;
+        })
+        .catch(() => {
+          fixedKindergartenSidebarUnit = null;
+          return null;
+        })
+        .finally(() => {
+          fixedKindergartenSidebarUnitPromise = null;
+        });
+
+      return fixedKindergartenSidebarUnitPromise;
+    }
+
+    function getStarterSidebarCurrentUnit(source, queryUnitValue) {
+      const items = Array.isArray(source) ? source : [];
+      const normalizedQueryUnit = normalizeUnitKey(queryUnitValue || '');
+
+      if (normalizedQueryUnit) {
+        const matched = items.find((unit, index) => {
+          if (!unit) return false;
+          return normalizeUnitKey(unit.slug) === normalizedQueryUnit
+            || normalizeUnitKey(getUnitOrderValue(unit, index)) === normalizedQueryUnit;
+        });
+        if (matched) return matched;
+      }
+
+      if (currentUnitSlug) {
+        const matchedBySlug = items.find(unit => unit && unit.slug === currentUnitSlug);
+        if (matchedBySlug) return matchedBySlug;
+      }
+
+      if (currentUnitOrder) {
+        const normalizedCurrentOrder = normalizeUnitKey(currentUnitOrder);
+        const matchedByOrder = items.find((unit, index) => {
+          if (!unit) return false;
+          return normalizeUnitKey(getUnitOrderValue(unit, index)) === normalizedCurrentOrder;
+        });
+        if (matchedByOrder) return matchedByOrder;
+      }
+
+      return items.length > 0 ? items[0] : null;
+    }
+
+    function findActiveSidebarItem(items, queryUnitValue, preferredWeekKey) {
+      const source = Array.isArray(items) ? items : [];
+      const selectedGameKey = getSelectedGameKeyForRequests();
+      const isStarters = selectedGameKey === 'starters';
+      const normalizedPreferredWeekKey = normalizeWeekKey(preferredWeekKey);
+      const normalizedCurrentUnitOrder = normalizeUnitKey(currentUnitOrder);
+
+      return source.find(item => item.unit && queryUnitValue && (
+        normalizeUnitKey(item.unitValue) === queryUnitValue || normalizeUnitKey(item.unit.slug) === queryUnitValue
+      ) && normalizeWeekKey(item.weekKey) === normalizedPreferredWeekKey)
+        || source.find(item => item.unit && currentUnitSlug && item.unit.slug === currentUnitSlug && normalizeWeekKey(item.weekKey) === normalizedPreferredWeekKey)
+        || source.find(item => item.unit && normalizedCurrentUnitOrder && normalizeUnitKey(item.unitValue) === normalizedCurrentUnitOrder && normalizeWeekKey(item.weekKey) === normalizedPreferredWeekKey)
+        || (isStarters
+          ? source.find(item => item && normalizeGameKeyClient(item.gameKey) === 'starters')
+          : source.find(item => item.unit && normalizeUnitKey(item.unitValue) === '1' && normalizeWeekKey(item.weekKey) === '1')
+            || source.find(item => item.unit && normalizeUnitKey(item.unitValue) === '5' && normalizeWeekKey(item.weekKey) === '2')
+            || source.find(item => item.unit)
+        );
+    }
+
     function buildSidebarUnitItems(units) {
       const source = Array.isArray(units) ? filterUnitsForCurrentLevel(units) : [];
       const queryUnitValue = normalizeUnitKey(getSelectedUnitValue());
       const queryWeekValue = getRequestedWeekValue();
-      const selectedUnitValue = normalizeUnitKey(queryUnitValue || currentUnitOrder);
-      const fixedUnitOne = source.find((unit, index) => getUnitOrderValue(unit, index) === '1') || null;
-      const fixedUnitFive = source.find((unit, index) => getUnitOrderValue(unit, index) === '5') || null;
-      const currentUnit = source.find((unit, index) => {
-        if (!unit) return false;
-        const unitOrderKey = normalizeUnitKey(getUnitOrderValue(unit, index));
-        return queryUnitValue && (normalizeUnitKey(unit.slug) === queryUnitValue || unitOrderKey === queryUnitValue);
-      }) || source.find(unit => unit && unit.slug === currentUnitSlug) || null;
-
-      const fixedUnitOneWeekKey = getDefaultWeekKeyForUnit('1');
-      const fixedUnitFiveWeekKey = getDefaultWeekKeyForUnit('5');
-      const currentUnitWeekKey = queryWeekValue || getPreferredWeekKeyForUnit(selectedUnitValue || getUnitOrderValue(currentUnit, source.indexOf(currentUnit)));
-
       const items = [];
-      if (fixedUnitOne) {
-        items.push({ unit: fixedUnitOne, unitValue: '1', weekKey: fixedUnitOneWeekKey, weekLabel: 'Tuần ' + fixedUnitOneWeekKey, fixed: true });
-      }
-      if (fixedUnitFive) {
-        items.push({ unit: fixedUnitFive, unitValue: '5', weekKey: fixedUnitFiveWeekKey, weekLabel: 'Tuần ' + fixedUnitFiveWeekKey, fixed: true });
-      }
-      if (currentUnit) {
-        items.push({
-          unit: currentUnit,
-          unitValue: queryUnitValue || getUnitOrderValue(currentUnit, source.indexOf(currentUnit)),
-          weekKey: currentUnitWeekKey,
-          weekLabel: 'Tuần ' + currentUnitWeekKey,
-          fixed: false
-        });
+      const selectedGameKey = getSelectedGameKeyForRequests();
+
+      if (selectedGameKey === 'starters') {
+        const currentUnit = getStarterSidebarCurrentUnit(source, queryUnitValue);
+        if (currentUnit) {
+          const currentUnitValue = queryUnitValue || getUnitOrderValue(currentUnit, source.indexOf(currentUnit));
+          const currentUnitWeekKey = normalizeWeekKey(queryWeekValue || currentWeekValue || loadSelectedWeek() || '1') || '1';
+          const currentItem = createSidebarUnitItem(currentUnit, {
+            gameKey: 'starters',
+            levelKey: currentLevelKey,
+            unitValue: currentUnitValue,
+            weekKey: currentUnitWeekKey,
+            weekLabel: 'Tuần ' + currentUnitWeekKey,
+            fixed: false
+          });
+          if (currentItem) {
+            items.push(currentItem);
+          }
+        }
+
+        if (fixedKindergartenSidebarUnit) {
+          items.push(fixedKindergartenSidebarUnit);
+        }
+      } else {
+        const fixedUnitOne = source.find((unit, index) => getUnitOrderValue(unit, index) === '1') || null;
+        const fixedUnitFive = source.find((unit, index) => getUnitOrderValue(unit, index) === '5') || null;
+        const currentUnit = source.find((unit, index) => {
+          if (!unit) return false;
+          const unitOrderKey = normalizeUnitKey(getUnitOrderValue(unit, index));
+          return queryUnitValue && (normalizeUnitKey(unit.slug) === queryUnitValue || unitOrderKey === queryUnitValue);
+        }) || source.find(unit => unit && unit.slug === currentUnitSlug) || source[0] || null;
+
+        const selectedUnitValue = normalizeUnitKey(queryUnitValue || currentUnitOrder);
+        const currentUnitWeekKey = queryWeekValue || getPreferredWeekKeyForUnit(selectedUnitValue || getUnitOrderValue(currentUnit, source.indexOf(currentUnit))) || '1';
+
+        if (fixedUnitOne) {
+          const unitItem = createSidebarUnitItem(fixedUnitOne, {
+            gameKey: selectedGameKey,
+            levelKey: currentLevelKey,
+            unitValue: '1',
+            weekKey: fixedUnitOneWeekKey,
+            weekLabel: 'Tuần ' + fixedUnitOneWeekKey,
+            fixed: true
+          });
+          if (unitItem) items.push(unitItem);
+        }
+
+        if (fixedUnitFive) {
+          const unitItem = createSidebarUnitItem(fixedUnitFive, {
+            gameKey: selectedGameKey,
+            levelKey: currentLevelKey,
+            unitValue: '5',
+            weekKey: fixedUnitFiveWeekKey,
+            weekLabel: 'Tuần ' + fixedUnitFiveWeekKey,
+            fixed: true
+          });
+          if (unitItem) items.push(unitItem);
+        }
+
+        if (currentUnit) {
+          const unitItem = createSidebarUnitItem(currentUnit, {
+            gameKey: selectedGameKey,
+            levelKey: currentLevelKey,
+            unitValue: queryUnitValue || getUnitOrderValue(currentUnit, source.indexOf(currentUnit)),
+            weekKey: currentUnitWeekKey,
+            weekLabel: 'Tuần ' + currentUnitWeekKey,
+            fixed: false
+          });
+          if (unitItem) items.push(unitItem);
+        }
       }
 
       const uniqueItems = [];
       const seen = {};
       items.forEach(item => {
-        const key = `${item.unit && item.unit.slug ? item.unit.slug : ''}|${item.unitValue}|${item.weekKey}`;
+        const key = item && item.sidebarKey ? item.sidebarKey : `${normalizeGameKeyClient(item.gameKey || selectedGameKey)}|${item.unit && item.unit.slug ? item.unit.slug : ''}|${item.unitValue}|${item.weekKey}|${normalizeLevelKeyClient(item.levelKey || '')}`;
         if (seen[key]) return;
         seen[key] = true;
         uniqueItems.push(item);
@@ -1930,18 +2117,38 @@
       return uniqueItems;
     }
 
-    function syncUnitSelection(unit, weekKey, unitValue, navigateAfterSync) {
+    function syncUnitSelection(unit, weekKey, unitValue, navigateAfterSync, gameKey, levelKey) {
       if (!ensureLevelSelected() || !unit) return null;
 
+      const resolvedGameKey = normalizeGameKeyClient(gameKey || unit.gameKey || currentGameKey || loadSelectedGame() || 'kindergarten') === 'starters'
+        ? 'starters'
+        : 'kindergarten';
       const resolvedUnitValue = String(unitValue || getUnitOrderValue(unit) || '').trim();
+      const resolvedLevelKey = normalizeLevelKeyClient(levelKey || unit.levelKey || currentLevelKey || (Array.isArray(unit.levels) && unit.levels.length ? unit.levels[0] : ''));
       const resolvedWeekKey = normalizeWeekKey(weekKey) || getPreferredWeekKeyForUnit(resolvedUnitValue || getUnitOrderValue(unit)) || '1';
 
+      currentGameKey = resolvedGameKey;
       currentUnitSlug = unit.slug || '';
       currentUnitOrder = resolvedUnitValue;
       currentWeekValue = resolvedWeekKey;
 
+      const unitLevels = Array.isArray(unit && unit.levels) ? unit.levels : [];
+      if (resolvedLevelKey) {
+        currentLevelKey = resolvedLevelKey;
+      } else if (unitLevels.length > 0 && !unitLevels.includes(currentLevelKey)) {
+        currentLevelKey = unitLevels[0];
+      }
+
+      if (currentLevelKey) {
+        currentLevelLabel = getLevelDisplayText(currentLevelKey, currentGameKey);
+      }
+
       try {
         saveWeek(resolvedWeekKey);
+        localStorage.setItem(GAME_STORAGE_KEY, currentGameKey);
+        if (currentLevelKey) {
+          localStorage.setItem(LEVEL_STORAGE_KEY, currentLevelKey);
+        }
       } catch (error) {
       }
 
@@ -1951,7 +2158,8 @@
       const mainTitle = document.getElementById('main-title');
       if (mainTitle) mainTitle.innerText = unit.name;
 
-      updateHomeUrlForUnit(unit, resolvedWeekKey, resolvedUnitValue);
+      updateLevelBreadcrumb();
+      updateHomeUrlForUnit(unit, resolvedWeekKey, resolvedUnitValue, resolvedGameKey, currentLevelKey);
 
       if (navigateAfterSync !== false) {
         warmUnitGameCache(unit.slug, currentLevelKey);
@@ -1967,11 +2175,7 @@
       const queryUnitValue = normalizeUnitKey(getSelectedUnitValue() || currentUnitOrder);
       const queryWeekValue = getRequestedWeekValue();
       const preferredWeekKey = queryWeekValue || getPreferredWeekKeyForUnit(queryUnitValue);
-      const activeItem = sidebarItems.find(item => item.unit && (
-        queryUnitValue &&
-        (normalizeUnitKey(item.unitValue) === queryUnitValue || normalizeUnitKey(item.unit.slug) === queryUnitValue) &&
-        normalizeWeekKey(item.weekKey) === normalizeWeekKey(preferredWeekKey)
-      )) || sidebarItems.find(item => item.unit && currentUnitSlug && item.unit.slug === currentUnitSlug && normalizeWeekKey(item.weekKey) === normalizeWeekKey(preferredWeekKey)) || (!queryUnitValue ? sidebarItems.find(item => item.unit && normalizeUnitKey(item.unitValue) === '1' && normalizeWeekKey(item.weekKey) === '1') || sidebarItems.find(item => item.unit && normalizeUnitKey(item.unitValue) === '5' && normalizeWeekKey(item.weekKey) === '2') || sidebarItems.find(item => item.unit) : null);
+      const activeItem = findActiveSidebarItem(sidebarItems, queryUnitValue, preferredWeekKey);
 
       if (!activeItem || !activeItem.unit) {
         currentUnitSlug = '';
@@ -1983,7 +2187,7 @@
         return null;
       }
 
-      syncUnitSelection(activeItem.unit, activeItem.weekKey, activeItem.unitValue, false);
+      syncUnitSelection(activeItem.unit, activeItem.weekKey, activeItem.unitValue, false, activeItem.gameKey, activeItem.levelKey);
       return activeItem.unit;
     }
 
@@ -2104,6 +2308,10 @@
       const source = Array.isArray(units) ? units : [];
       if (!currentLevelKey) return source;
 
+      if (getSelectedGameKeyForRequests() === 'starters') {
+        return source;
+      }
+
       return source.filter(unit => {
         const unitLevels = Array.isArray(unit && unit.levels) ? unit.levels : [];
         if (!unitLevels.length) return true;
@@ -2112,6 +2320,9 @@
     }
 
     function renderSidebarForCurrentLevel() {
+      if (getSelectedGameKeyForRequests() === 'starters') {
+        ensureStarterKindergartenSidebarUnit();
+      }
       loadSidebarWithUnits(allUnitsData);
     }
 
@@ -2123,6 +2334,10 @@
       if (!container) return;
       container.innerHTML = '';
       updateLevelBreadcrumb();
+
+      if (getSelectedGameKeyForRequests() === 'starters') {
+        ensureStarterKindergartenSidebarUnit();
+      }
 
       if (!currentLevelKey) {
         currentUnitSlug = '';
@@ -2139,9 +2354,7 @@
       const queryUnitValue = normalizeUnitKey(getSelectedUnitValue() || currentUnitOrder);
       const queryWeekValue = getRequestedWeekValue();
       const preferredWeekKey = queryWeekValue || getPreferredWeekKeyForUnit(queryUnitValue);
-      const activeItem = items.find(item => item.unit && queryUnitValue && (
-        normalizeUnitKey(item.unitValue) === queryUnitValue || normalizeUnitKey(item.unit.slug) === queryUnitValue
-      ) && normalizeWeekKey(item.weekKey) === normalizeWeekKey(preferredWeekKey)) || items.find(item => item.unit && currentUnitSlug && item.unit.slug === currentUnitSlug && normalizeWeekKey(item.weekKey) === normalizeWeekKey(preferredWeekKey)) || (!queryUnitValue ? items.find(item => item.unit && normalizeUnitKey(item.unitValue) === '1' && normalizeWeekKey(item.weekKey) === '1') || items.find(item => item.unit && normalizeUnitKey(item.unitValue) === '5' && normalizeWeekKey(item.weekKey) === '2') || items.find(item => item.unit) : null);
+      const activeItem = findActiveSidebarItem(items, queryUnitValue, preferredWeekKey);
 
       items.forEach((item) => {
         const unit = item.unit;
@@ -2149,32 +2362,35 @@
         a.href = "#";
         const baseClass = "sidebar-item flex items-center gap-3 p-3 rounded-xl transition-all border border-transparent";
         const inactiveClass = "hover:bg-white/40 text-green-700 text-sm";
-        const isActive = activeItem && unit.slug === activeItem.unit.slug && normalizeWeekKey(item.weekKey) === normalizeWeekKey(activeItem.weekKey) && String(item.unitValue || '') === String(activeItem.unitValue || '');
+        const isActive = activeItem && unit.slug === activeItem.unit.slug && normalizeWeekKey(item.weekKey) === normalizeWeekKey(activeItem.weekKey) && String(item.unitValue || '') === String(activeItem.unitValue || '') && normalizeGameKeyClient(item.gameKey || '') === normalizeGameKeyClient(activeItem.gameKey || '');
         a.className = baseClass + " " + (isActive ? "active-unit" : inactiveClass);
         a.innerHTML = `<span class="sidebar-unit-icon shrink-0">${unit.icon || '📘'}</span><div class="min-w-0 flex-1"><span class="sidebar-unit-label line-clamp-2 block">${unit.name}</span><span class="block text-[10px] font-bold text-green-500 mt-1 uppercase tracking-wide">${item.weekLabel || ''}</span></div>`;
 
         a.onclick = function (event) {
           if (event) event.preventDefault();
-          document.querySelectorAll('.sidebar-item').forEach(el => {
-            el.classList.remove('active-unit');
-            el.classList.add('hover:bg-white/40', 'text-green-700', 'text-sm');
-          });
-          this.classList.add('active-unit');
-          this.classList.remove('hover:bg-white/40', 'text-green-700', 'text-sm');
-          updateUIForUnit(unit, item.weekKey, item.unitValue);
+          const targetGameKey = normalizeGameKeyClient(item.gameKey || currentGameKey || loadSelectedGame() || 'kindergarten');
+          const currentSelectedGameKey = getSelectedGameKeyForRequests();
+
+          if (targetGameKey && targetGameKey !== currentSelectedGameKey) {
+            window.location.href = buildHomeUrlForUnit(unit, item.weekKey, item.unitValue, targetGameKey, item.levelKey);
+            return;
+          }
+
+          updateUIForUnit(unit, item.weekKey, item.unitValue, item.gameKey, item.levelKey);
         };
         container.appendChild(a);
       });
 
       if (activeItem && activeItem.unit) {
-        syncUnitSelection(activeItem.unit, activeItem.weekKey, activeItem.unitValue, false);
+        syncUnitSelection(activeItem.unit, activeItem.weekKey, activeItem.unitValue, false, activeItem.gameKey, activeItem.levelKey);
       }
     }
 
-    function updateUIForUnit(unit, weekKey, unitValue) {
-      const selectedUnit = syncUnitSelection(unit, weekKey, unitValue, false);
+    function updateUIForUnit(unit, weekKey, unitValue, gameKey, levelKey) {
+      const selectedUnit = syncUnitSelection(unit, weekKey, unitValue, false, gameKey, levelKey);
       if (!selectedUnit) return;
       warmUnitGameCache(selectedUnit.slug, currentLevelKey);
+      renderSidebarForCurrentLevel();
       backToMenu(); // Luôn quay về menu khi đổi Unit
     }
 
@@ -3042,6 +3258,9 @@
     const bootstrapGameKey = getSelectedGameKeyForRequests();
     const bootstrapCacheKey = getBootstrapCacheKey(bootstrapGameKey);
     const bootstrapPromise = fetch(SCRIPT_URL + '?api=app.bootstrap&game=' + encodeURIComponent(bootstrapGameKey)).then(res => res.json()).catch(() => null);
+    if (bootstrapGameKey === 'starters') {
+      ensureStarterKindergartenSidebarUnit();
+    }
 
     document.addEventListener('DOMContentLoaded', function () {
       applyGameBackground(GAME_BG_IMAGE_URL);
