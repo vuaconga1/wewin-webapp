@@ -1908,6 +1908,7 @@
       const levels = Array.isArray(normalizedOptions.levels) ? normalizedOptions.levels : (Array.isArray(unit.levels) ? unit.levels : []);
 
       return {
+        unit: unit,
         ...unit,
         gameKey: gameKey,
         levelKey: levelKey,
