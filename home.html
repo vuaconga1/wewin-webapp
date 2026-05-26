@@ -2059,6 +2059,8 @@
       } else {
         const fixedUnitOne = source.find((unit, index) => getUnitOrderValue(unit, index) === '1') || null;
         const fixedUnitFive = source.find((unit, index) => getUnitOrderValue(unit, index) === '5') || null;
+        const fixedUnitOneWeekKey = getDefaultWeekKeyForUnit('1');
+        const fixedUnitFiveWeekKey = getDefaultWeekKeyForUnit('5');
         const currentUnit = source.find((unit, index) => {
           if (!unit) return false;
           const unitOrderKey = normalizeUnitKey(getUnitOrderValue(unit, index));
