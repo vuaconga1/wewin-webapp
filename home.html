@@ -3757,6 +3757,8 @@
         const alternatives = speechCollectedAlternatives.slice();
         const hadResponse = speechRecognitionHadResponse;
         const shouldEvaluate = speechEvaluateOnEnd;
+        recognition = null;
+        speechEngineNeedsReset = false;
         speechEvaluateOnEnd = false;
         speechSessionClosing = false;
         speechRecognitionActive = false;
@@ -3784,7 +3786,7 @@
     }
 
     async function toggleRecording() {
-      if (isQuestionLocked || speechRecordButtonLocked || speechRecordingCooldown || speechRecognitionActive || speechSessionClosing) {
+      if (isQuestionLocked || speechRecordButtonLocked || speechRecordingCooldown || speechRecognitionActive || speechSessionClosing || speechStartRequestTimer) {
         return;
       }
 
@@ -3793,7 +3795,7 @@
 
     function beginSpeechRecognitionSession() {
       if (isQuestionLocked || speechRecordingCooldown || speechRecordButtonLocked) return;
-      if (speechRecognitionActive || speechSessionClosing) return;
+      if (speechRecognitionActive || speechSessionClosing || speechStartRequestTimer) return;
 
       try {
         const rec = getSpeechRecognitionEngine();
@@ -3835,7 +3837,7 @@
         updateSpeechStatus('⏳ Micro đang reset... thử lại sau vài giây.', 'text-blue-700');
         return;
       }
-      if (speechRecordButtonLocked || speechRecognitionActive || speechSessionClosing) return;
+      if (speechRecordButtonLocked || speechRecognitionActive || speechSessionClosing || speechStartRequestTimer) return;
       if (!speechRecognitionAvailable) {
         updateSpeechMicPanel('unsupported');
         updateSpeechStatus('Trình duyệt chưa hỗ trợ nhận diện phát âm. Hãy dùng Chrome hoặc Edge.', 'text-red-600');
@@ -3851,6 +3853,7 @@
       }
 
       clearSpeechStartRequestTimer();
+      updateSpeechStatus('🎙 Đang mở micro...', 'text-blue-700');
       speechStartRequestTimer = setTimeout(() => {
         speechStartRequestTimer = null;
         beginSpeechRecognitionSession();
