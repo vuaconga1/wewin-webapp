@@ -3030,8 +3030,17 @@
         backToMenu();
         return;
       }
-      stopSpeechRecording(true);
+
+      clearSpeechRecordingWatchdog();
+      disposeSpeechRecognitionInstance(recognition);
+      speechEvaluateOnEnd = false;
+      speechCollectedAlternatives = [];
+      speechRecognitionHadResponse = false;
+      speechRecognitionActive = false;
+      resetSpeechRecordControls();
+      resetSpeechRecordingState();
       setPronunciationLoadingState(false);
+
       const q = gameQuestions[currentQuestionIndex];
       preloadQuestionAssets(q);
       isQuestionLocked = false;
@@ -3214,6 +3223,23 @@
       return refreshSpeechMicState(true);
     }
 
+    function resetSpeechRecordControls() {
+      if (speechCooldownTimer) {
+        clearTimeout(speechCooldownTimer);
+        speechCooldownTimer = null;
+      }
+
+      if (speechRecordButtonLockTimer) {
+        clearTimeout(speechRecordButtonLockTimer);
+        speechRecordButtonLockTimer = null;
+      }
+
+      speechRecordingCooldown = false;
+      speechRecordButtonLocked = false;
+      speechMatchStopPending = false;
+      setRecordButtonLocked(false);
+    }
+
     function setRecordButtonLocked(locked) {
       speechRecordButtonLocked = locked;
       const btnRecord = document.getElementById('btn-record');
@@ -3247,15 +3273,18 @@
       if (!btnRecord) return;
 
       if (isRecording) {
-        setRecordButtonLocked(false);
-        btnRecord.innerHTML = '<span class="text-3xl sm:text-4xl group-hover:scale-110 transition-transform">⏹</span> Dừng';
+        btnRecord.disabled = true;
+        btnRecord.classList.add('opacity-80', 'cursor-not-allowed');
+        btnRecord.classList.remove('opacity-60');
+        btnRecord.setAttribute('aria-disabled', 'true');
+        btnRecord.innerHTML = '<span class="text-3xl sm:text-4xl">🎙</span> Đang nghe...';
         btnRecord.classList.remove('from-red-500', 'to-rose-500', 'animate-pulse');
         btnRecord.classList.add('from-orange-500', 'to-red-600', 'ring-4', 'ring-red-300', 'animate-pulse');
       } else {
         btnRecord.innerHTML = '<span class="text-3xl sm:text-4xl group-hover:scale-110 transition-transform">🎤</span> Ghi âm';
         btnRecord.classList.add('from-red-500', 'to-rose-500', 'animate-pulse');
-        btnRecord.classList.remove('from-orange-500', 'to-red-600', 'ring-4', 'ring-red-300');
-        if (!speechRecordButtonLocked && !isQuestionLocked) {
+        btnRecord.classList.remove('from-orange-500', 'to-red-600', 'ring-4', 'ring-red-300', 'opacity-80');
+        if (!speechRecordButtonLocked && !isQuestionLocked && !speechRecordingCooldown) {
           btnRecord.disabled = false;
           btnRecord.classList.remove('opacity-60', 'cursor-not-allowed');
           btnRecord.setAttribute('aria-disabled', 'false');
@@ -3516,7 +3545,6 @@
 
       if (matched) {
         isQuestionLocked = true;
-        setRecordButtonLocked(true);
         updateSpeechStatus(getSpeechSuccessMessage(), 'text-green-600');
         handleSuccessAction(document.getElementById('speech-en'), getGameSuccessText());
 
@@ -3653,10 +3681,7 @@
     }
 
     async function toggleRecording() {
-      if (isQuestionLocked || speechRecordButtonLocked || speechRecordingCooldown) return;
-
-      if (speechRecognitionActive) {
-        stopSpeechRecording(false);
+      if (isQuestionLocked || speechRecordButtonLocked || speechRecordingCooldown || speechRecognitionActive) {
         return;
       }
 
