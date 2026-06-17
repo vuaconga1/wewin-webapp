@@ -731,7 +731,7 @@
               <!-- Feedback Status -->
               <div id="speech-status" role="status" aria-live="polite"
                 class="px-4 py-5 sm:py-6 bg-gradient-to-r from-green-100 via-emerald-50 to-green-100 text-green-800 text-center font-black text-lg sm:text-xl md:text-2xl border-t border-green-100 relative z-20 shadow-inner">
-                Lắng nghe mẫu, bấm Ghi âm, đọc to từ tiếng Anh, rồi bấm Dừng! 👂
+                Lắng nghe mẫu, bấm Ghi âm và đọc to từ tiếng Anh — hệ thống tự kiểm tra! 👂
               </div>
             </div>
           </section>
@@ -1718,8 +1718,7 @@
     let speechCollectedAlternatives = [];
     let speechRecognitionHadResponse = false;
     let speechEvaluateOnEnd = false;
-    let speechNetworkRetryCount = 0;
-    let speechNetworkRetryTimer = null;
+    let speechMatchStopPending = false;
     let speechRecordingWatchdog = null;
     let speechRecordingCooldown = false;
     let speechCooldownTimer = null;
@@ -1727,11 +1726,9 @@
     let speechRecordButtonLockTimer = null;
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     const speechRecognitionAvailable = !!SpeechRecognition;
-    const SPEECH_MAX_RECORD_MS = 6000;
+    const SPEECH_MAX_RECORD_MS = 4000;
     const SPEECH_RESTART_COOLDOWN_MS = 2000;
     const SPEECH_RECORD_BUTTON_LOCK_MS = 1500;
-    const SPEECH_NETWORK_RETRY_DELAY_MS = 3000;
-    const SPEECH_NETWORK_MAX_RETRIES = 2;
 
     function isPronunciationSupported() {
       return speechRecognitionAvailable
@@ -2988,8 +2985,7 @@
       speechMicrophoneReady = false;
       speechMicrophonePermission = 'unknown';
       speechRecordingCooldown = false;
-      speechNetworkRetryCount = 0;
-      clearSpeechNetworkRetryTimer();
+      speechMatchStopPending = false;
       abortSpeechRecognition(true);
       setPronunciationLoadingState(true);
       switchView('pronunciation-game-view');
@@ -3050,7 +3046,7 @@
       document.getElementById('speech-vi').innerText = q.vi;
       document.getElementById('speech-progress').innerText = `${currentQuestionIndex + 1}/${gameQuestions.length}`;
 
-      updateSpeechStatus('🔊 Bấm Nghe → Ghi âm → đọc đúng từ tiếng Anh → Dừng.', 'text-blue-700');
+      updateSpeechStatus('🔊 Bấm Nghe → Ghi âm → đọc to từ tiếng Anh.', 'text-blue-700');
 
       scheduleQuestionPreload(gameQuestions[currentQuestionIndex + 1]);
     }
@@ -3154,7 +3150,7 @@
 
       if (speechMicrophoneReady) {
         updateSpeechMicPanel('granted');
-        updateSpeechStatus('✅ Micro sẵn sàng. Bấm Nghe → Ghi âm → đọc to → Dừng.', 'text-green-600');
+        updateSpeechStatus('✅ Micro sẵn sàng. Bấm Nghe → Ghi âm → đọc to.', 'text-green-600');
         return true;
       }
 
@@ -3172,7 +3168,7 @@
 
           if (speechMicrophoneReady) {
             updateSpeechMicPanel('granted');
-            updateSpeechStatus('✅ Micro sẵn sàng. Bấm Nghe → Ghi âm → đọc to → Dừng.', 'text-green-600');
+            updateSpeechStatus('✅ Micro sẵn sàng. Bấm Nghe → Ghi âm → đọc to.', 'text-green-600');
             return true;
           }
           speechMicrophonePermission = speechMicrophonePermission || 'prompt';
@@ -3193,7 +3189,7 @@
         speechMicrophoneReady = true;
         speechMicrophonePermission = 'granted';
         updateSpeechMicPanel('granted');
-        updateSpeechStatus('✅ Micro sẵn sàng. Bấm Nghe → Ghi âm → đọc to → Dừng.', 'text-green-600');
+        updateSpeechStatus('✅ Micro sẵn sàng. Bấm Nghe → Ghi âm → đọc to.', 'text-green-600');
         return true;
       } catch (error) {
         speechMicrophoneReady = false;
@@ -3274,13 +3270,6 @@
       }
     }
 
-    function clearSpeechNetworkRetryTimer() {
-      if (speechNetworkRetryTimer) {
-        clearTimeout(speechNetworkRetryTimer);
-        speechNetworkRetryTimer = null;
-      }
-    }
-
     function scheduleSpeechRecordingCooldown() {
       speechRecordingCooldown = true;
       lockRecordButtonFor(SPEECH_RESTART_COOLDOWN_MS);
@@ -3317,8 +3306,6 @@
     }
 
     function abortSpeechRecognition(silent) {
-      clearSpeechNetworkRetryTimer();
-
       if (speechCooldownTimer) {
         clearTimeout(speechCooldownTimer);
         speechCooldownTimer = null;
@@ -3331,6 +3318,7 @@
 
       speechRecordingCooldown = false;
       speechEvaluateOnEnd = false;
+      speechMatchStopPending = false;
       speechCollectedAlternatives = [];
       speechRecognitionHadResponse = false;
       disposeSpeechRecognitionInstance(recognition);
@@ -3465,10 +3453,7 @@
       const results = event && event.results;
       if (!results) return collected;
 
-      const acceptInterim = isSafariBrowser();
-
       for (let i = 0; i < results.length; i++) {
-        if (!acceptInterim && !results[i].isFinal) continue;
         for (let j = 0; j < results[i].length; j++) {
           const transcript = String(results[i][j].transcript || '').trim();
           if (transcript) collected.push(transcript);
@@ -3476,6 +3461,32 @@
       }
 
       return collected;
+    }
+
+    function tryAutoStopOnSpeechMatch(rec, event) {
+      if (speechMatchStopPending || recognition !== rec || isQuestionLocked || !speechRecognitionActive) {
+        return false;
+      }
+
+      const target = getCurrentSpeechTarget();
+      if (!target) return false;
+
+      const collected = collectSpeechAlternatives(event);
+      if (!collected.length) return false;
+
+      speechRecognitionHadResponse = true;
+      speechCollectedAlternatives = mergeSpeechAlternatives(speechCollectedAlternatives, collected);
+
+      for (let i = 0; i < collected.length; i++) {
+        if (speechWordsLooselyMatch(collected[i], target)) {
+          speechMatchStopPending = true;
+          updateSpeechStatus('✅ Nghe đúng rồi — đang kiểm tra...', 'text-green-600');
+          stopSpeechRecording(false);
+          return true;
+        }
+      }
+
+      return false;
     }
 
     function mergeSpeechAlternatives(existing, incoming) {
@@ -3498,7 +3509,7 @@
       }
 
       if (!uniqueAlternatives.length) {
-        updateSpeechStatus('⚠️ Chưa nghe rõ từ nào. Bấm Ghi âm, đọc to rồi bấm Dừng nhé!', 'text-orange-600');
+        updateSpeechStatus('⚠️ Chưa nghe rõ từ nào. Bấm Ghi âm và đọc to lại nhé!', 'text-orange-600');
         handleErrorAction(document.getElementById('speech-en'));
         return;
       }
@@ -3531,9 +3542,9 @@
       if (!SpeechRecognition) return null;
 
       const rec = new SpeechRecognition();
-      rec.continuous = isSafariBrowser();
+      rec.continuous = true;
       rec.lang = 'en-US';
-      rec.interimResults = isSafariBrowser();
+      rec.interimResults = true;
       rec.maxAlternatives = isSafariBrowser() ? 1 : 5;
 
       rec.onstart = () => {
@@ -3549,27 +3560,26 @@
         speechRecognitionActive = true;
         speechRecognitionHadResponse = false;
         speechCollectedAlternatives = [];
-        speechNetworkRetryCount = 0;
-        clearSpeechNetworkRetryTimer();
+        speechMatchStopPending = false;
         updateRecordButton(true);
-        updateSpeechStatus('🔴 Đang ghi âm... Đọc to từ tiếng Anh rồi bấm Dừng.', 'text-red-600');
+        updateSpeechStatus('🔴 Đang ghi âm... Đọc to từ tiếng Anh trong 4 giây.', 'text-red-600');
       };
 
       rec.onspeechstart = () => {
         if (recognition !== rec || isQuestionLocked) return;
         speechRecognitionHadResponse = true;
-        updateSpeechStatus('👂 Đã nghe thấy giọng nói — đọc hết rồi bấm Dừng.', 'text-blue-700');
+        updateSpeechStatus('👂 Đã nghe thấy giọng nói — tiếp tục đọc nhé!', 'text-blue-700');
       };
 
       rec.onresult = (event) => {
         if (recognition !== rec || isQuestionLocked) return;
 
+        if (tryAutoStopOnSpeechMatch(rec, event)) return;
+
         const collected = collectSpeechAlternatives(event);
         if (collected.length) {
           speechRecognitionHadResponse = true;
-          speechCollectedAlternatives = isSafariBrowser()
-            ? mergeSpeechAlternatives(speechCollectedAlternatives, collected)
-            : collected;
+          speechCollectedAlternatives = mergeSpeechAlternatives(speechCollectedAlternatives, collected);
         }
       };
 
@@ -3584,25 +3594,10 @@
 
         if (event.error === 'network') {
           speechEvaluateOnEnd = false;
+          speechMatchStopPending = false;
           disposeSpeechRecognitionInstance(rec);
           resetSpeechRecordingState();
           scheduleSpeechRecordingCooldown();
-
-          if (speechNetworkRetryCount < SPEECH_NETWORK_MAX_RETRIES) {
-            speechNetworkRetryCount += 1;
-            updateSpeechStatus(
-              `⏳ Máy chủ nhận dạng tạm lỗi — thử lại lần ${speechNetworkRetryCount}/${SPEECH_NETWORK_MAX_RETRIES}...`,
-              'text-blue-700'
-            );
-            clearSpeechNetworkRetryTimer();
-            speechNetworkRetryTimer = setTimeout(() => {
-              speechNetworkRetryTimer = null;
-              startSpeechRecording({ autoRetry: true });
-            }, SPEECH_NETWORK_RETRY_DELAY_MS);
-            return;
-          }
-
-          speechNetworkRetryCount = 0;
           updateSpeechStatus(
             '⚠️ Không kiểm tra được phát âm lúc này. Thử Chrome/Edge, tắt VPN rồi bấm Ghi âm lại.',
             'text-orange-600'
@@ -3622,7 +3617,7 @@
           updateSpeechMicPanel('denied');
           updateSpeechStatus('⚠️ Hãy cho phép quyền micro rồi bấm Ghi âm lại nhé!', 'text-red-600');
         } else if (event.error === 'no-speech') {
-          updateSpeechStatus('⚠️ Chưa nghe thấy tiếng nào. Bấm Ghi âm, đọc to rồi bấm Dừng.', 'text-orange-600');
+          updateSpeechStatus('⚠️ Chưa nghe thấy tiếng nào. Bấm Ghi âm và đọc to lại nhé!', 'text-orange-600');
         } else if (event.error === 'service-not-allowed') {
           updateSpeechStatus('⚠️ Trình duyệt chưa bật nhận diện giọng nói. Hãy dùng Chrome hoặc Edge.', 'text-red-600');
         } else {
@@ -3646,7 +3641,7 @@
 
         if (!hadResponse || !alternatives.length) {
           const safariHint = isSafariBrowser() ? (' ' + getSafariSpeechHint()) : '';
-          updateSpeechStatus('⚠️ Chưa nghe rõ từ nào. Bấm Ghi âm, đọc to rồi bấm Dừng nhé!' + safariHint, 'text-orange-600');
+          updateSpeechStatus('⚠️ Chưa nghe rõ từ nào. Bấm Ghi âm và đọc to lại nhé!' + safariHint, 'text-orange-600');
           handleErrorAction(document.getElementById('speech-en'));
           return;
         }
@@ -3668,19 +3663,13 @@
       await startSpeechRecording();
     }
 
-    async function startSpeechRecording(options) {
-      const autoRetry = Boolean(options && options.autoRetry);
-
+    async function startSpeechRecording() {
       if (isQuestionLocked) return;
       if (speechRecordingCooldown) {
         updateSpeechStatus('⏳ Micro đang reset... thử lại sau 2 giây.', 'text-blue-700');
         return;
       }
-      if (speechRecordButtonLocked && !autoRetry) return;
-      if (!autoRetry) {
-        clearSpeechNetworkRetryTimer();
-        speechNetworkRetryCount = 0;
-      }
+      if (speechRecordButtonLocked) return;
       if (!speechRecognitionAvailable) {
         updateSpeechMicPanel('unsupported');
         updateSpeechStatus('Trình duyệt chưa hỗ trợ nhận diện phát âm. Hãy dùng Chrome hoặc Edge.', 'text-red-600');
@@ -3707,12 +3696,13 @@
         speechRecognitionHadResponse = false;
         speechCollectedAlternatives = [];
         speechEvaluateOnEnd = false;
+        speechMatchStopPending = false;
         recognition.start();
 
         clearSpeechRecordingWatchdog();
         speechRecordingWatchdog = setTimeout(() => {
           if (!speechRecognitionActive) return;
-          updateSpeechStatus('⏱ Quá 6 giây — tự dừng ghi âm. Bấm Ghi âm thử lại nhé!', 'text-orange-600');
+          updateSpeechStatus('⏱ Hết 4 giây — đang kiểm tra...', 'text-orange-600');
           stopSpeechRecording(false);
         }, SPEECH_MAX_RECORD_MS);
       } catch (error) {
