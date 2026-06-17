@@ -1720,7 +1720,11 @@
     let speechCollectedAlternatives = [];
     let speechMicWarmStream = null;
     let speechRecordingWatchdog = null;
+    let speechMicSessionActive = false;
+    let speechEvaluateOnEnd = false;
+    let speechRecordingCooldown = false;
     const SPEECH_MAX_RECORD_MS = 15000;
+    const SPEECH_RESTART_COOLDOWN_MS = 500;
 
     const GAME_SUCCESS_MESSAGES = [
       'Excellent!',
@@ -2963,6 +2967,14 @@
       speechRecognitionHadResponse = false;
       speechMicrophoneReady = false;
       speechMicrophonePermission = 'unknown';
+      speechMicSessionActive = false;
+      speechRecordingCooldown = false;
+      speechEvaluateOnEnd = false;
+      releaseSpeechMicStream();
+      if (recognition) {
+        try { recognition.abort(); } catch (error) { }
+        recognition = null;
+      }
       setPronunciationLoadingState(true);
       // 1. Sử dụng hàm switchView (đã hướng dẫn ở trên) để ẩn hết các màn hình khác
       switchView('pronunciation-game-view');
@@ -2977,7 +2989,7 @@
       updateSpeechStatus("Đang chuẩn bị câu hỏi...", "text-blue-500 animate-pulse");
 
       // 4. Gọi dữ liệu từ Google Sheets
-      fetchGameDataset('pronunciation', 'getPronunciationData', currentUnitSlug, currentLevelKey).then(function (questions) {
+      fetchGameDataset('pronunciation', 'getPronunciationData', currentUnitSlug, currentLevelKey).then(async function (questions) {
         if (!questions || questions.length === 0) {
           alert("Unit này chưa có dữ liệu cho Game phát âm!");
           backToMenu();
@@ -2992,7 +3004,18 @@
         const speechCorrect = document.getElementById('speech-correct-count');
         if (speechCorrect) speechCorrect.innerText = '0';
 
-        // 5. Vẽ câu hỏi đầu tiên
+        try {
+          speechMicSessionActive = true;
+          await ensureSpeechMicStream();
+          speechMicrophoneReady = true;
+          speechMicrophonePermission = 'granted';
+          updateSpeechMicPanel('granted');
+        } catch (error) {
+          speechMicSessionActive = false;
+          speechMicrophoneReady = false;
+          updateSpeechMicPanel('prompt', '⚠️ Không mở được micro. Hãy cấp quyền rồi thử lại.');
+        }
+
         renderSpeechQuestion();
       });
     }
@@ -3002,6 +3025,11 @@
         alert("Chưa có dữ liệu cho game này!");
         backToMenu();
         return;
+      }
+      stopSpeechRecording(true);
+      if (recognition) {
+        try { recognition.abort(); } catch (error) { }
+        recognition = null;
       }
       setPronunciationLoadingState(false);
       const q = gameQuestions[currentQuestionIndex];
@@ -3309,11 +3337,43 @@
       speechMicWarmStream = null;
     }
 
+    function releaseSpeechMicSession() {
+      speechMicSessionActive = false;
+      speechEvaluateOnEnd = false;
+      releaseSpeechMicStream();
+    }
+
+    function isSpeechMicStreamLive() {
+      if (!speechMicWarmStream || typeof speechMicWarmStream.getTracks !== 'function') return false;
+      return speechMicWarmStream.getTracks().some(track => track.readyState === 'live');
+    }
+
+    async function ensureSpeechMicStream() {
+      if (isSpeechMicStreamLive()) return true;
+
+      releaseSpeechMicStream();
+      speechMicWarmStream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true
+        }
+      });
+      return true;
+    }
+
+    function scheduleSpeechRecordingCooldown() {
+      speechRecordingCooldown = true;
+      setTimeout(() => {
+        speechRecordingCooldown = false;
+      }, SPEECH_RESTART_COOLDOWN_MS);
+    }
+
     function resetSpeechRecordingState() {
       speechRecognitionActive = false;
       speechCollectedAlternatives = [];
+      speechEvaluateOnEnd = false;
       clearSpeechRecordingWatchdog();
-      releaseSpeechMicStream();
       updateRecordButton(false);
     }
 
@@ -3322,24 +3382,32 @@
 
       if (recognition && speechRecognitionActive) {
         if (silentAbort) {
+          speechEvaluateOnEnd = false;
           speechCollectedAlternatives = [];
           speechRecognitionHadResponse = false;
           try {
             recognition.abort();
           } catch (error) {
           }
+          recognition = null;
           resetSpeechRecordingState();
+          scheduleSpeechRecordingCooldown();
           return;
         }
 
+        speechEvaluateOnEnd = true;
         try {
           recognition.stop();
         } catch (error) {
+          speechEvaluateOnEnd = false;
+          recognition = null;
           resetSpeechRecordingState();
+          scheduleSpeechRecordingCooldown();
         }
         return;
       }
 
+      speechEvaluateOnEnd = false;
       resetSpeechRecordingState();
     }
 
@@ -3355,7 +3423,7 @@
       const results = event && event.results;
       if (!results) return collected;
 
-      for (let i = event.resultIndex; i < results.length; i++) {
+      for (let i = 0; i < results.length; i++) {
         if (!results[i].isFinal) continue;
         for (let j = 0; j < results[i].length; j++) {
           const transcript = String(results[i][j].transcript || '').trim();
@@ -3366,28 +3434,30 @@
       return collected;
     }
 
+    function getSpeechSuccessMessage() {
+      return '🎉 Bé phát âm rất tốt! ' + getGameSuccessText();
+    }
+
     function evaluateSpeechTranscripts(alternatives, target) {
       const uniqueAlternatives = [...new Set((alternatives || []).filter(Boolean))];
-      let matchedTranscript = '';
+      let matched = false;
 
       for (let i = 0; i < uniqueAlternatives.length; i++) {
         if (speechWordsLooselyMatch(uniqueAlternatives[i], target)) {
-          matchedTranscript = uniqueAlternatives[i];
+          matched = true;
           break;
         }
       }
 
-      const heardTranscript = matchedTranscript || uniqueAlternatives[0] || '';
-
-      if (!heardTranscript) {
+      if (!uniqueAlternatives.length) {
         updateSpeechStatus("⚠️ Chưa nghe rõ từ nào. Bấm Ghi âm, đọc to rồi bấm Dừng nhé!", "text-orange-600");
         handleErrorAction(document.getElementById('speech-en'));
         return;
       }
 
-      if (matchedTranscript) {
+      if (matched) {
         isQuestionLocked = true;
-        updateSpeechStatus(`🎉 Mình nghe được "${matchedTranscript}" — bé phát âm tốt lắm!`, "text-green-600");
+        updateSpeechStatus(getSpeechSuccessMessage(), "text-green-600");
         handleSuccessAction(document.getElementById('speech-en'), getGameSuccessText());
 
         currentGameScore += 100;
@@ -3403,7 +3473,8 @@
         return;
       }
 
-      updateSpeechStatus(`👂 Mình nghe "${heardTranscript}", chưa khớp lắm — thử đọc rõ hơn nhé!`, "text-orange-600");
+      const displayTarget = String(target || '').trim() || 'từ mẫu';
+      updateSpeechStatus(`👂 Chưa khớp với "${displayTarget}" — thử đọc lại nhé!`, "text-orange-600");
       handleErrorAction(document.getElementById('speech-en'));
     }
 
@@ -3411,9 +3482,9 @@
       if (typeof SpeechRecognition === "undefined") return null;
 
       const rec = new SpeechRecognition();
-      rec.continuous = true;
+      rec.continuous = false;
       rec.lang = 'en-US';
-      rec.interimResults = true;
+      rec.interimResults = false;
       rec.maxAlternatives = 5;
 
       rec.onstart = () => {
@@ -3439,7 +3510,7 @@
         const collected = collectSpeechAlternatives(event);
         if (collected.length) {
           speechRecognitionHadResponse = true;
-          speechCollectedAlternatives.push(...collected);
+          speechCollectedAlternatives = collected;
         }
       };
 
@@ -3452,12 +3523,18 @@
         if (event.error === 'aborted') return;
 
         speechRecognitionHadResponse = true;
+        speechEvaluateOnEnd = false;
+        recognition = null;
         resetSpeechRecordingState();
+        scheduleSpeechRecordingCooldown();
 
         const isMicrophoneGranted = speechMicrophoneReady || speechMicrophonePermission === 'granted';
 
         if (event.error === 'network') {
-          updateSpeechStatus("⚠️ Mạng chập chờn, STT tạm lỗi. Bấm Ghi âm thử lại sau vài giây.", "text-orange-600");
+          if (speechMicSessionActive) {
+            releaseSpeechMicStream();
+          }
+          updateSpeechStatus("⚠️ Mạng chập chờn. Đợi 2–3 giây rồi bấm Ghi âm lại.", "text-orange-600");
         } else if (event.error === 'service-not-allowed') {
           updateSpeechMicPanel('granted');
           updateSpeechStatus("⚠️ Trình duyệt chưa bật nhận diện giọng nói. Hãy dùng Chrome hoặc Edge.", "text-red-600");
@@ -3488,9 +3565,18 @@
         const target = getCurrentSpeechTarget();
         const alternatives = speechCollectedAlternatives.slice();
         const hadResponse = speechRecognitionHadResponse;
+        const shouldEvaluate = speechEvaluateOnEnd;
+        speechEvaluateOnEnd = false;
+        recognition = null;
         resetSpeechRecordingState();
+        scheduleSpeechRecordingCooldown();
 
-        if (isQuestionLocked) return;
+        if (isQuestionLocked || !shouldEvaluate) {
+          if (!shouldEvaluate && hadResponse && alternatives.length) {
+            evaluateSpeechTranscripts(alternatives, target);
+          }
+          return;
+        }
 
         if (!hadResponse) {
           updateSpeechStatus("⚠️ Chưa nghe thấy gì. Bấm Ghi âm, đọc to rồi bấm Dừng nhé!", "text-orange-600");
@@ -3516,6 +3602,10 @@
 
     async function startRecording() {
       if (isQuestionLocked) return;
+      if (speechRecordingCooldown) {
+        updateSpeechStatus("⏳ Micro đang reset... thử lại sau 1 giây.", "text-blue-700");
+        return;
+      }
       if (!speechRecognitionAvailable) {
         updateSpeechMicPanel('unsupported');
         updateSpeechStatus("Trình duyệt của bạn chưa hỗ trợ nhận diện giọng nói. Hãy dùng Google Chrome hoặc Edge.", "text-red-600");
@@ -3524,22 +3614,20 @@
 
       if (speechRecognitionActive) return;
 
-      const micReady = await refreshSpeechMicState(true);
-      if (!micReady) {
-        updateSpeechStatus("⚠️ Cần cấp quyền micro trước khi ghi âm.", "text-orange-600");
-        return;
+      if (!speechMicrophoneReady) {
+        const micReady = await refreshSpeechMicState(true);
+        if (!micReady) {
+          updateSpeechStatus("⚠️ Cần cấp quyền micro trước khi ghi âm.", "text-orange-600");
+          return;
+        }
       }
 
       try {
-        releaseSpeechMicStream();
-        speechMicWarmStream = await navigator.mediaDevices.getUserMedia({
-          audio: {
-            echoCancellation: true,
-            noiseSuppression: true
-          }
-        });
+        speechMicSessionActive = true;
+        await ensureSpeechMicStream();
       } catch (error) {
         speechMicrophoneReady = false;
+        speechMicSessionActive = false;
         updateSpeechMicPanel('prompt', '⚠️ Không mở được micro. Hãy kiểm tra quyền trình duyệt.');
         updateSpeechStatus("⚠️ Không mở được micro. Hãy kiểm tra quyền và thiết bị.", "text-red-600");
         return;
@@ -3548,15 +3636,16 @@
       try {
         if (recognition) {
           try { recognition.abort(); } catch (e) { }
+          recognition = null;
         }
         recognition = initSpeechRecognition();
         if (!recognition) {
-          releaseSpeechMicStream();
           return;
         }
 
         speechRecognitionHadResponse = false;
         speechCollectedAlternatives = [];
+        speechEvaluateOnEnd = false;
         recognition.start();
 
         clearSpeechRecordingWatchdog();
@@ -3566,8 +3655,9 @@
           stopSpeechRecording();
         }, SPEECH_MAX_RECORD_MS);
       } catch (error) {
-        releaseSpeechMicStream();
+        recognition = null;
         resetSpeechRecordingState();
+        scheduleSpeechRecordingCooldown();
         if (error && error.name === 'InvalidStateError') {
           updateSpeechStatus("⚠️ Micro đang bận. Đợi 1 giây rồi bấm Ghi âm lại.", "text-orange-600");
           return;
@@ -3608,6 +3698,14 @@
       stopWordPlayback();
       stopCatchGameLoop();
       closeSidebarDrawer();
+
+      if (viewId !== 'pronunciation-game-view') {
+        releaseSpeechMicSession();
+        if (recognition) {
+          try { recognition.abort(); } catch (error) { }
+          recognition = null;
+        }
+      }
 
       // Danh sách tất cả các ID màn hình lớn
       const views = ['menu-game-view', 'game-play-view', 'pronunciation-game-view', 'catch-game-view', 'game-summary-view'];
@@ -3653,6 +3751,11 @@
     function logout() {
       stopWordPlayback();
       stopCatchGameLoop();
+      releaseSpeechMicSession();
+      if (recognition) {
+        try { recognition.abort(); } catch (error) { }
+        recognition = null;
+      }
 
       window.top.location.replace('choosegame.html');
     }
