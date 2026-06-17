@@ -1726,6 +1726,34 @@
     const SPEECH_MAX_RECORD_MS = 15000;
     const SPEECH_RESTART_COOLDOWN_MS = 500;
 
+    function isSafariBrowser() {
+      const ua = String(navigator.userAgent || '');
+      const isAppleVendor = String(navigator.vendor || '').indexOf('Apple') > -1;
+      const isChromeBasedOnApple = /CriOS|FxiOS|EdgiOS|Chrome|Chromium/i.test(ua);
+      return (isAppleVendor && !isChromeBasedOnApple)
+        || (/Safari/i.test(ua) && !/Chrome|Chromium|CriOS|Edg|OPR/i.test(ua));
+    }
+
+    function isInstalledPwa() {
+      return window.matchMedia('(display-mode: standalone)').matches
+        || window.navigator.standalone === true;
+    }
+
+    function isSpeechRecognitionUsable() {
+      const SpeechRecognitionCtor = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (typeof SpeechRecognitionCtor === 'undefined') return false;
+      if (isSafariBrowser() && isInstalledPwa()) return false;
+      return true;
+    }
+
+    function getSafariSpeechHint() {
+      if (!isSafariBrowser()) return '';
+      if (isInstalledPwa()) {
+        return 'Safari khi cài lên màn hình chính không hỗ trợ nhận diện giọng nói. Hãy mở bằng Safari bình thường hoặc dùng Chrome.';
+      }
+      return 'Trên Safari: vào Cài đặt hệ thống → Quyền riêng tư → Nhận dạng giọng nói, bật cho Safari. Nên dùng Chrome/Edge nếu vẫn lỗi.';
+    }
+
     const GAME_SUCCESS_MESSAGES = [
       'Excellent!',
       'Great job!',
@@ -3005,8 +3033,12 @@
         if (speechCorrect) speechCorrect.innerText = '0';
 
         try {
-          speechMicSessionActive = true;
-          await ensureSpeechMicStream();
+          if (isSafariBrowser()) {
+            await refreshSpeechMicState(true);
+          } else {
+            speechMicSessionActive = true;
+            await ensureSpeechMicStream();
+          }
           speechMicrophoneReady = true;
           speechMicrophonePermission = 'granted';
           updateSpeechMicPanel('granted');
@@ -3062,7 +3094,7 @@
     }
     let recognition;
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    speechRecognitionAvailable = typeof SpeechRecognition !== "undefined";
+    speechRecognitionAvailable = isSpeechRecognitionUsable();
 
     function getSpeechMicPanelElements() {
       return {
@@ -3134,8 +3166,8 @@
       if (!speechRecognitionAvailable) {
         speechMicrophoneReady = false;
         speechMicrophonePermission = 'unsupported';
-        updateSpeechMicPanel('unsupported');
-        updateSpeechStatus('Trình duyệt này chưa hỗ trợ game phát âm. Hãy dùng Chrome hoặc Edge.', 'text-red-600');
+        updateSpeechMicPanel('unsupported', getSafariSpeechHint() || undefined);
+        updateSpeechStatus(getSafariSpeechHint() || 'Trình duyệt này chưa hỗ trợ game phát âm. Hãy dùng Chrome hoặc Edge.', 'text-red-600');
         return false;
       }
 
@@ -3423,8 +3455,10 @@
       const results = event && event.results;
       if (!results) return collected;
 
+      const acceptInterim = isSafariBrowser();
+
       for (let i = 0; i < results.length; i++) {
-        if (!results[i].isFinal) continue;
+        if (!acceptInterim && !results[i].isFinal) continue;
         for (let j = 0; j < results[i].length; j++) {
           const transcript = String(results[i][j].transcript || '').trim();
           if (transcript) collected.push(transcript);
@@ -3432,6 +3466,10 @@
       }
 
       return collected;
+    }
+
+    function mergeSpeechAlternatives(existing, incoming) {
+      return [...new Set((existing || []).concat(incoming || []).filter(Boolean))];
     }
 
     function getSpeechSuccessMessage() {
@@ -3482,10 +3520,10 @@
       if (typeof SpeechRecognition === "undefined") return null;
 
       const rec = new SpeechRecognition();
-      rec.continuous = false;
+      rec.continuous = isSafariBrowser();
       rec.lang = 'en-US';
-      rec.interimResults = false;
-      rec.maxAlternatives = 5;
+      rec.interimResults = isSafariBrowser();
+      rec.maxAlternatives = isSafariBrowser() ? 1 : 5;
 
       rec.onstart = () => {
         if (isQuestionLocked) {
@@ -3510,7 +3548,9 @@
         const collected = collectSpeechAlternatives(event);
         if (collected.length) {
           speechRecognitionHadResponse = true;
-          speechCollectedAlternatives = collected;
+          speechCollectedAlternatives = isSafariBrowser()
+            ? mergeSpeechAlternatives(speechCollectedAlternatives, collected)
+            : collected;
         }
       };
 
@@ -3539,7 +3579,9 @@
           updateSpeechMicPanel('granted');
           updateSpeechStatus("⚠️ Trình duyệt chưa bật nhận diện giọng nói. Hãy dùng Chrome hoặc Edge.", "text-red-600");
         } else if (event.error === 'not-allowed') {
-          if (isMicrophoneGranted) {
+          if (isSafariBrowser()) {
+            updateSpeechStatus("⚠️ Safari chưa cho phép Nhận dạng giọng nói. " + getSafariSpeechHint(), "text-red-600");
+          } else if (isMicrophoneGranted) {
             updateSpeechMicPanel('granted');
             updateSpeechStatus("⚠️ Micro đã cấp quyền nhưng chưa ghi được. Bấm Ghi âm thử lại.", "text-red-600");
           } else {
@@ -3554,6 +3596,9 @@
           updateSpeechMicPanel('prompt', '⚠️ Micro chưa sẵn sàng. Hãy kiểm tra micro rồi thử lại.');
           updateSpeechStatus("⚠️ Không nhận được tín hiệu từ micro. Kiểm tra thiết bị rồi thử lại.", "text-red-600");
         } else if (event.error === 'no-speech') {
+          if (isSafariBrowser()) {
+            speechRecognitionHadResponse = false;
+          }
           updateSpeechStatus("⚠️ Chưa nghe thấy tiếng nào. Bấm Ghi âm, đọc to rồi bấm Dừng.", "text-orange-600");
         } else {
           updateSpeechStatus("⚠️ Không ghi âm được (" + event.error + "). Bấm Ghi âm thử lại nhé!", "text-gray-600");
@@ -3579,7 +3624,8 @@
         }
 
         if (!hadResponse) {
-          updateSpeechStatus("⚠️ Chưa nghe thấy gì. Bấm Ghi âm, đọc to rồi bấm Dừng nhé!", "text-orange-600");
+          const safariHint = isSafariBrowser() ? (' ' + getSafariSpeechHint()) : '';
+          updateSpeechStatus("⚠️ Chưa nghe thấy gì. Bấm Ghi âm, đọc to rồi bấm Dừng nhé!" + safariHint, "text-orange-600");
           return;
         }
 
@@ -3623,8 +3669,12 @@
       }
 
       try {
-        speechMicSessionActive = true;
-        await ensureSpeechMicStream();
+        if (isSafariBrowser()) {
+          releaseSpeechMicStream();
+        } else {
+          speechMicSessionActive = true;
+          await ensureSpeechMicStream();
+        }
       } catch (error) {
         speechMicrophoneReady = false;
         speechMicSessionActive = false;
