@@ -701,7 +701,7 @@
                   class="flex items-center justify-center gap-2 sm:gap-3 px-6 sm:px-8 py-3 sm:py-4 bg-white text-green-600 rounded-[24px] text-lg sm:text-xl font-black border-4 border-green-100 shadow-md hover:bg-green-50 hover:border-green-300 transition-all active:scale-95 group">
                   <span class="text-2xl sm:text-3xl group-hover:scale-110 transition-transform">🔊</span> Nghe
                 </button>
-                <button id="btn-record" onclick="startRecording()"
+                <button id="btn-record" onclick="toggleRecording()"
                   class="flex items-center justify-center gap-3 sm:gap-4 px-8 sm:px-12 py-4 sm:py-5 bg-gradient-to-r from-red-500 to-rose-500 text-white rounded-[28px] sm:rounded-[32px] text-xl sm:text-2xl font-black shadow-[0_15px_30px_rgba(225,29,72,0.3)] hover:-translate-y-1 hover:shadow-xl transition-all animate-pulse active:scale-95 group">
                   <span class="text-3xl sm:text-4xl group-hover:scale-110 transition-transform">🎤</span> Ghi âm
                 </button>
@@ -732,7 +732,7 @@
               <!-- Feedback Status -->
               <div id="speech-status" role="status" aria-live="polite"
                 class="px-4 py-5 sm:py-6 bg-gradient-to-r from-green-100 via-emerald-50 to-green-100 text-green-800 text-center font-black text-lg sm:text-xl md:text-2xl border-t border-green-100 relative z-20 shadow-inner">
-                Lắng nghe thật kỹ và đọc to nhé! 👂
+                Lắng nghe thật kỹ — bấm Ghi âm, đọc to, rồi bấm Dừng! 👂
               </div>
             </div>
           </section>
@@ -1717,6 +1717,10 @@
     let speechMicrophoneReady = false;
     let speechMicrophonePermission = 'unknown';
     let speechRecognitionAvailable = false;
+    let speechCollectedAlternatives = [];
+    let speechMicWarmStream = null;
+    let speechRecordingWatchdog = null;
+    const SPEECH_MAX_RECORD_MS = 15000;
 
     const GAME_SUCCESS_MESSAGES = [
       'Excellent!',
@@ -2723,6 +2727,7 @@
     }
 
     function stopWordPlayback() {
+      stopSpeechRecording(true);
       if (currentGameAudio) {
         currentGameAudio.pause();
         try {
@@ -3013,7 +3018,7 @@
       document.getElementById('speech-vi').innerText = q.vi;
       document.getElementById('speech-progress').innerText = `${currentQuestionIndex + 1}/${gameQuestions.length}`;
 
-      updateSpeechStatus("Bấm Ghi âm để kiểm tra xem bé có nghe được không.", "text-blue-700");
+      updateSpeechStatus("Bấm Ghi âm → đọc to → bấm Dừng.", "text-blue-700");
 
       scheduleQuestionPreload(gameQuestions[currentQuestionIndex + 1]);
     }
@@ -3116,7 +3121,7 @@
 
       if (speechMicrophoneReady) {
         updateSpeechMicPanel('granted');
-        updateSpeechStatus('✅ Micro đã sẵn sàng. Bấm Ghi âm để kiểm tra xem bé có nghe được không.', 'text-green-600');
+        updateSpeechStatus('✅ Micro sẵn sàng. Bấm Ghi âm → đọc to → bấm Dừng.', 'text-green-600');
         return true;
       }
 
@@ -3134,7 +3139,7 @@
 
           if (speechMicrophoneReady) {
             updateSpeechMicPanel('granted');
-            updateSpeechStatus('✅ Micro đã sẵn sàng. Bấm Ghi âm để kiểm tra xem bé có nghe được không.', 'text-green-600');
+            updateSpeechStatus('✅ Micro sẵn sàng. Bấm Ghi âm → đọc to → bấm Dừng.', 'text-green-600');
             return true;
           }
           speechMicrophonePermission = speechMicrophonePermission || 'prompt';
@@ -3155,7 +3160,7 @@
         speechMicrophoneReady = true;
         speechMicrophonePermission = 'granted';
         updateSpeechMicPanel('granted');
-        updateSpeechStatus('✅ Micro đã sẵn sàng. Bấm Ghi âm để kiểm tra xem bé có nghe được không.', 'text-green-600');
+        updateSpeechStatus('✅ Micro sẵn sàng. Bấm Ghi âm → đọc to → bấm Dừng.', 'text-green-600');
         return true;
       } catch (error) {
         speechMicrophoneReady = false;
@@ -3212,9 +3217,24 @@
     }
 
     function getSpeechDistanceThreshold(wordLength) {
-      if (wordLength <= 3) return 1;
-      if (wordLength <= 6) return 2;
-      return 3;
+      if (wordLength <= 4) return 1;
+      return 1;
+    }
+
+    function singleSpeechWordMatch(heardWord, targetWord) {
+      if (!heardWord || !targetWord) return false;
+      if (heardWord === targetWord) return true;
+
+      const distance = levenshteinDistance(heardWord, targetWord);
+      if (distance > getSpeechDistanceThreshold(targetWord.length)) return false;
+
+      if (heardWord.length < targetWord.length) return false;
+
+      if (heardWord.length > targetWord.length) {
+        return heardWord.indexOf(targetWord) === 0 && distance <= 1;
+      }
+
+      return distance <= getSpeechDistanceThreshold(targetWord.length);
     }
 
     function speechWordsLooselyMatch(transcript, target) {
@@ -3224,72 +3244,176 @@
       if (!cleanTarget) return false;
       if (!cleanTranscript) return false;
       if (cleanTranscript === cleanTarget) return true;
-      if (cleanTranscript.includes(cleanTarget)) return true;
 
       const targetWords = cleanTarget.split(' ').filter(Boolean);
       const heardWords = cleanTranscript.split(' ').filter(Boolean);
 
       if (targetWords.length === 1) {
         const targetWord = targetWords[0];
-        const threshold = getSpeechDistanceThreshold(targetWord.length);
+        if (cleanTranscript.includes(cleanTarget)) return true;
 
         for (let i = 0; i < heardWords.length; i++) {
-          const heardWord = heardWords[i];
-          if (levenshteinDistance(heardWord, targetWord) <= threshold) return true;
-
-          if (targetWord.length >= 4 && heardWord.length >= 3) {
-            const sharedPrefix = Math.min(targetWord.length, heardWord.length, targetWord.length - 1);
-            if (sharedPrefix >= 3 && targetWord.slice(0, sharedPrefix) === heardWord.slice(0, sharedPrefix)) {
-              return true;
-            }
-          }
+          if (singleSpeechWordMatch(heardWords[i], targetWord)) return true;
         }
-      } else {
-        let matchedWords = 0;
-        targetWords.forEach(targetWord => {
-          const threshold = getSpeechDistanceThreshold(targetWord.length);
-          const found = heardWords.some(heardWord => levenshteinDistance(heardWord, targetWord) <= threshold);
-          if (found) matchedWords += 1;
-        });
 
-        if (matchedWords / targetWords.length >= 0.6) return true;
+        return false;
       }
+
+      if (cleanTranscript.includes(cleanTarget)) return true;
+
+      let matchedWords = 0;
+      targetWords.forEach(targetWord => {
+        const found = heardWords.some(heardWord => singleSpeechWordMatch(heardWord, targetWord));
+        if (found) matchedWords += 1;
+      });
+
+      if (matchedWords / targetWords.length >= 0.75) return true;
 
       const compactTarget = cleanTarget.replace(/\s+/g, '');
       const compactTranscript = cleanTranscript.replace(/\s+/g, '');
+      if (compactTranscript.length < compactTarget.length) return false;
+
       const maxLength = Math.max(compactTarget.length, compactTranscript.length, 1);
       const distance = levenshteinDistance(compactTranscript, compactTarget);
       const similarity = 1 - (distance / maxLength);
 
-      return similarity >= 0.62;
+      return similarity >= 0.82;
     }
 
-    function pickSpeechMatchTranscript(resultEvent, target) {
-      const result = resultEvent.results && resultEvent.results[0];
-      if (!result) return '';
+    function updateRecordButton(isRecording) {
+      const btnRecord = document.getElementById('btn-record');
+      if (!btnRecord) return;
 
-      const alternatives = [];
-      for (let i = 0; i < result.length; i++) {
-        const transcript = String(result[i].transcript || '').trim();
-        if (transcript) alternatives.push(transcript);
+      if (isRecording) {
+        btnRecord.innerHTML = '<span class="text-3xl sm:text-4xl group-hover:scale-110 transition-transform">⏹</span> Dừng';
+        btnRecord.classList.remove('from-red-500', 'to-rose-500', 'animate-pulse');
+        btnRecord.classList.add('from-orange-500', 'to-red-600', 'ring-4', 'ring-red-300', 'animate-pulse');
+      } else {
+        btnRecord.innerHTML = '<span class="text-3xl sm:text-4xl group-hover:scale-110 transition-transform">🎤</span> Ghi âm';
+        btnRecord.classList.add('from-red-500', 'to-rose-500', 'animate-pulse');
+        btnRecord.classList.remove('from-orange-500', 'to-red-600', 'ring-4', 'ring-red-300');
+      }
+    }
+
+    function clearSpeechRecordingWatchdog() {
+      if (speechRecordingWatchdog) {
+        clearTimeout(speechRecordingWatchdog);
+        speechRecordingWatchdog = null;
+      }
+    }
+
+    function releaseSpeechMicStream() {
+      if (speechMicWarmStream && typeof speechMicWarmStream.getTracks === 'function') {
+        speechMicWarmStream.getTracks().forEach(track => track.stop());
+      }
+      speechMicWarmStream = null;
+    }
+
+    function resetSpeechRecordingState() {
+      speechRecognitionActive = false;
+      speechCollectedAlternatives = [];
+      clearSpeechRecordingWatchdog();
+      releaseSpeechMicStream();
+      updateRecordButton(false);
+    }
+
+    function stopSpeechRecording(silentAbort) {
+      clearSpeechRecordingWatchdog();
+
+      if (recognition && speechRecognitionActive) {
+        if (silentAbort) {
+          speechCollectedAlternatives = [];
+          speechRecognitionHadResponse = false;
+          try {
+            recognition.abort();
+          } catch (error) {
+          }
+          resetSpeechRecordingState();
+          return;
+        }
+
+        try {
+          recognition.stop();
+        } catch (error) {
+          resetSpeechRecordingState();
+        }
+        return;
       }
 
-      for (let i = 0; i < alternatives.length; i++) {
-        if (speechWordsLooselyMatch(alternatives[i], target)) {
-          return alternatives[i];
+      resetSpeechRecordingState();
+    }
+
+    function getCurrentSpeechTarget() {
+      if (gameQuestions && gameQuestions[currentQuestionIndex] && gameQuestions[currentQuestionIndex].en) {
+        return String(gameQuestions[currentQuestionIndex].en).trim();
+      }
+      return '';
+    }
+
+    function collectSpeechAlternatives(event) {
+      const collected = [];
+      const results = event && event.results;
+      if (!results) return collected;
+
+      for (let i = event.resultIndex; i < results.length; i++) {
+        if (!results[i].isFinal) continue;
+        for (let j = 0; j < results[i].length; j++) {
+          const transcript = String(results[i][j].transcript || '').trim();
+          if (transcript) collected.push(transcript);
         }
       }
 
-      return alternatives[0] || '';
+      return collected;
+    }
+
+    function evaluateSpeechTranscripts(alternatives, target) {
+      const uniqueAlternatives = [...new Set((alternatives || []).filter(Boolean))];
+      let matchedTranscript = '';
+
+      for (let i = 0; i < uniqueAlternatives.length; i++) {
+        if (speechWordsLooselyMatch(uniqueAlternatives[i], target)) {
+          matchedTranscript = uniqueAlternatives[i];
+          break;
+        }
+      }
+
+      const heardTranscript = matchedTranscript || uniqueAlternatives[0] || '';
+
+      if (!heardTranscript) {
+        updateSpeechStatus("⚠️ Chưa nghe rõ từ nào. Bấm Ghi âm, đọc to rồi bấm Dừng nhé!", "text-orange-600");
+        handleErrorAction(document.getElementById('speech-en'));
+        return;
+      }
+
+      if (matchedTranscript) {
+        isQuestionLocked = true;
+        updateSpeechStatus(`🎉 Mình nghe được "${matchedTranscript}" — bé phát âm tốt lắm!`, "text-green-600");
+        handleSuccessAction(document.getElementById('speech-en'), getGameSuccessText());
+
+        currentGameScore += 100;
+        currentGameCorrectCount += 1;
+
+        const speechScoreEl = document.getElementById('speech-score');
+        if (speechScoreEl) speechScoreEl.innerText = currentGameScore;
+
+        const speechCorrectEl = document.getElementById('speech-correct-count');
+        if (speechCorrectEl) speechCorrectEl.innerText = currentGameCorrectCount;
+
+        advanceGameQuestion(renderSpeechQuestion, 2000);
+        return;
+      }
+
+      updateSpeechStatus(`👂 Mình nghe "${heardTranscript}", chưa khớp lắm — thử đọc rõ hơn nhé!`, "text-orange-600");
+      handleErrorAction(document.getElementById('speech-en'));
     }
 
     function initSpeechRecognition() {
       if (typeof SpeechRecognition === "undefined") return null;
 
       const rec = new SpeechRecognition();
-      rec.continuous = false;
+      rec.continuous = true;
       rec.lang = 'en-US';
-      rec.interimResults = false;
+      rec.interimResults = true;
       rec.maxAlternatives = 5;
 
       rec.onstart = () => {
@@ -3299,110 +3423,95 @@
         }
         speechRecognitionActive = true;
         speechRecognitionHadResponse = false;
-        updateSpeechStatus("🔴 Đang lắng nghe... Bé đọc đi!", "text-red-600");
-        const btnRecord = document.getElementById('btn-record');
-        if (btnRecord) {
-          btnRecord.classList.remove('animate-pulse');
-          btnRecord.classList.add('animate-bounce');
-        }
+        speechCollectedAlternatives = [];
+        updateRecordButton(true);
+        updateSpeechStatus("🔴 Đang ghi âm... Đọc to rồi bấm Dừng.", "text-red-600");
       };
 
       rec.onspeechstart = () => {
         if (isQuestionLocked) return;
-        updateSpeechStatus("👂 Mình đã nghe thấy giọng nói, đang xử lý...", "text-blue-700");
+        updateSpeechStatus("👂 Đã nghe thấy giọng nói — cứ đọc hết rồi bấm Dừng.", "text-blue-700");
       };
 
       rec.onresult = (event) => {
         if (isQuestionLocked) return;
-        speechRecognitionHadResponse = true;
 
-        let target = '';
-        if (gameQuestions && gameQuestions[currentQuestionIndex] && gameQuestions[currentQuestionIndex].en) {
-          target = gameQuestions[currentQuestionIndex].en.toLowerCase().trim();
-        }
-
-        const transcript = pickSpeechMatchTranscript(event, target);
-
-        if (!transcript) {
-          updateSpeechStatus("⚠️ Mình nghe được âm thanh nhưng chưa nhận ra từ nào. Thử đọc lại nhé!", "text-orange-600");
-          handleErrorAction(document.getElementById('speech-en'));
-          return;
-        }
-
-        if (speechWordsLooselyMatch(transcript, target)) {
-          isQuestionLocked = true;
-          updateSpeechStatus(`🎉 Mình nghe được "${transcript}" — bé phát âm tốt lắm!`, "text-green-600");
-          handleSuccessAction(document.getElementById('speech-en'), getGameSuccessText());
-
-          currentGameScore += 100;
-          currentGameCorrectCount += 1;
-
-          const speechScoreEl = document.getElementById('speech-score');
-          if (speechScoreEl) speechScoreEl.innerText = currentGameScore;
-
-          const speechCorrectEl = document.getElementById('speech-correct-count');
-          if (speechCorrectEl) speechCorrectEl.innerText = currentGameCorrectCount;
-
-          advanceGameQuestion(renderSpeechQuestion, 2000);
-        } else {
-          updateSpeechStatus(`👂 Mình nghe "${transcript}", gần đúng rồi — thử đọc rõ hơn một chút nhé!`, "text-orange-600");
-          handleErrorAction(document.getElementById('speech-en'));
+        const collected = collectSpeechAlternatives(event);
+        if (collected.length) {
+          speechRecognitionHadResponse = true;
+          speechCollectedAlternatives.push(...collected);
         }
       };
 
       rec.onnomatch = () => {
         if (isQuestionLocked) return;
         speechRecognitionHadResponse = true;
-        updateSpeechStatus("⚠️ Mình có nghe âm thanh nhưng chưa nhận ra từ nào. Thử đọc lại nhé!", "text-orange-600");
-        handleErrorAction(document.getElementById('speech-en'));
       };
 
       rec.onerror = (event) => {
-        speechRecognitionHadResponse = true;
         if (event.error === 'aborted') return;
+
+        speechRecognitionHadResponse = true;
+        resetSpeechRecordingState();
 
         const isMicrophoneGranted = speechMicrophoneReady || speechMicrophonePermission === 'granted';
 
-        if (event.error === 'service-not-allowed') {
+        if (event.error === 'network') {
+          updateSpeechStatus("⚠️ Mạng chập chờn, STT tạm lỗi. Bấm Ghi âm thử lại sau vài giây.", "text-orange-600");
+        } else if (event.error === 'service-not-allowed') {
           updateSpeechMicPanel('granted');
-          updateSpeechStatus("⚠️ Trình duyệt đang chặn dịch vụ nhận diện giọng nói, không phải quyền micro. Hãy thử lại bằng Chrome hoặc Edge.", "text-red-600");
+          updateSpeechStatus("⚠️ Trình duyệt chưa bật nhận diện giọng nói. Hãy dùng Chrome hoặc Edge.", "text-red-600");
         } else if (event.error === 'not-allowed') {
           if (isMicrophoneGranted) {
             updateSpeechMicPanel('granted');
-            updateSpeechStatus("⚠️ Micro đã được cấp quyền nhưng trình duyệt chưa bật nhận diện. Hãy bấm nút Ghi âm một lần nữa.", "text-red-600");
+            updateSpeechStatus("⚠️ Micro đã cấp quyền nhưng chưa ghi được. Bấm Ghi âm thử lại.", "text-red-600");
           } else {
             speechMicrophoneReady = false;
             speechMicrophonePermission = 'denied';
             updateSpeechMicPanel('denied');
-            updateSpeechStatus("⚠️ Hãy cho phép quyền sử dụng micro và bấm Ghi âm lại nhé!", "text-red-600");
+            updateSpeechStatus("⚠️ Hãy cho phép quyền micro rồi bấm Ghi âm lại nhé!", "text-red-600");
           }
         } else if (event.error === 'audio-capture') {
           speechMicrophoneReady = false;
           speechMicrophonePermission = 'prompt';
-          updateSpeechMicPanel('prompt', '⚠️ Micro chưa sẵn sàng hoặc đang bị chặn. Hãy kiểm tra micro rồi thử lại.');
-          updateSpeechStatus("⚠️ Không nhận được tín hiệu từ micro. Hãy kiểm tra thiết bị rồi thử lại.", "text-red-600");
+          updateSpeechMicPanel('prompt', '⚠️ Micro chưa sẵn sàng. Hãy kiểm tra micro rồi thử lại.');
+          updateSpeechStatus("⚠️ Không nhận được tín hiệu từ micro. Kiểm tra thiết bị rồi thử lại.", "text-red-600");
         } else if (event.error === 'no-speech') {
-          updateSpeechStatus("⚠️ Mình chưa nghe thấy tiếng nào. Hãy đọc to hơn rồi thử lại nhé!", "text-orange-600");
+          updateSpeechStatus("⚠️ Chưa nghe thấy tiếng nào. Bấm Ghi âm, đọc to rồi bấm Dừng.", "text-orange-600");
         } else {
-          updateSpeechStatus("⚠️ Lỗi không nghe rõ (" + event.error + "). Bé bấm nút ghi âm lại nhé!", "text-gray-600");
+          updateSpeechStatus("⚠️ Không ghi âm được (" + event.error + "). Bấm Ghi âm thử lại nhé!", "text-gray-600");
         }
         console.error("Speech recognition error:", event.error);
       };
 
       rec.onend = () => {
-        speechRecognitionActive = false;
-        const btnRecord = document.getElementById('btn-record');
-        if (btnRecord) {
-          btnRecord.classList.remove('animate-bounce');
-          btnRecord.classList.add('animate-pulse');
+        const target = getCurrentSpeechTarget();
+        const alternatives = speechCollectedAlternatives.slice();
+        const hadResponse = speechRecognitionHadResponse;
+        resetSpeechRecordingState();
+
+        if (isQuestionLocked) return;
+
+        if (!hadResponse) {
+          updateSpeechStatus("⚠️ Chưa nghe thấy gì. Bấm Ghi âm, đọc to rồi bấm Dừng nhé!", "text-orange-600");
+          return;
         }
 
-        if (!speechRecognitionHadResponse && !isQuestionLocked) {
-          updateSpeechStatus("⚠️ Mình chưa nghe thấy gì. Hãy đọc to hơn rồi bấm Ghi âm lại nhé!", "text-orange-600");
-        }
+        evaluateSpeechTranscripts(alternatives, target);
       };
 
       return rec;
+    }
+
+    async function toggleRecording() {
+      if (isQuestionLocked) return;
+
+      if (speechRecognitionActive) {
+        stopSpeechRecording();
+        return;
+      }
+
+      await startRecording();
     }
 
     async function startRecording() {
@@ -3413,8 +3522,26 @@
         return;
       }
 
-      if (speechRecognitionActive) {
-        updateSpeechStatus("Đang nghe rồi. Hãy đọc to câu hiện tại nhé.", "text-blue-700");
+      if (speechRecognitionActive) return;
+
+      const micReady = await refreshSpeechMicState(true);
+      if (!micReady) {
+        updateSpeechStatus("⚠️ Cần cấp quyền micro trước khi ghi âm.", "text-orange-600");
+        return;
+      }
+
+      try {
+        releaseSpeechMicStream();
+        speechMicWarmStream = await navigator.mediaDevices.getUserMedia({
+          audio: {
+            echoCancellation: true,
+            noiseSuppression: true
+          }
+        });
+      } catch (error) {
+        speechMicrophoneReady = false;
+        updateSpeechMicPanel('prompt', '⚠️ Không mở được micro. Hãy kiểm tra quyền trình duyệt.');
+        updateSpeechStatus("⚠️ Không mở được micro. Hãy kiểm tra quyền và thiết bị.", "text-red-600");
         return;
       }
 
@@ -3423,13 +3550,26 @@
           try { recognition.abort(); } catch (e) { }
         }
         recognition = initSpeechRecognition();
-        if (!recognition) return;
+        if (!recognition) {
+          releaseSpeechMicStream();
+          return;
+        }
 
         speechRecognitionHadResponse = false;
+        speechCollectedAlternatives = [];
         recognition.start();
+
+        clearSpeechRecordingWatchdog();
+        speechRecordingWatchdog = setTimeout(() => {
+          if (!speechRecognitionActive) return;
+          updateSpeechStatus("⏱ Quá 15 giây — tự dừng ghi âm. Bấm Ghi âm thử lại nhé!", "text-orange-600");
+          stopSpeechRecording();
+        }, SPEECH_MAX_RECORD_MS);
       } catch (error) {
+        releaseSpeechMicStream();
+        resetSpeechRecordingState();
         if (error && error.name === 'InvalidStateError') {
-          updateSpeechStatus("Đang nghe rồi. Hãy đọc to câu hiện tại nhé.", "text-blue-700");
+          updateSpeechStatus("⚠️ Micro đang bận. Đợi 1 giây rồi bấm Ghi âm lại.", "text-orange-600");
           return;
         }
         console.error("Speech recognition start error:", error);
