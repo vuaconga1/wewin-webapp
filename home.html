@@ -966,7 +966,7 @@
       });
     }
 
-    const GAME_DATA_CACHE_VERSION = 'class-week-game-v2';
+    const GAME_DATA_CACHE_VERSION = 'class-week-game-v3-audio';
     const GAME_DATA_CACHE_TTL_MS = 6 * 60 * 60 * 1000;
 
     function buildLevelScopedCacheKey(gameKey, slug, levelKey) {
@@ -1178,6 +1178,11 @@
       if (!url) return;
       const normalizedUrl = String(url).trim();
       if (!normalizedUrl || normalizedUrl.indexOf('data:') === 0) return;
+
+      if (isGasHostedAudioUrl(normalizedUrl)) {
+        resolvePlayableAudioUrl(normalizedUrl).catch(() => undefined);
+        return;
+      }
 
       const warmAudio = new Audio();
       warmAudio.preload = 'auto';
@@ -1693,6 +1698,8 @@
     let currentGameAudio = new Audio();
     currentGameAudio.preload = 'auto';
     currentGameAudio.playsInline = true;
+    const gameAudioDataCache = new Map();
+    const gameAudioPendingCache = new Map();
     let currentGameTotalQuestions = 0;
     let currentGameScore = 0;
     let currentGameCorrectCount = 0;
@@ -2729,15 +2736,60 @@
       }
     }
 
-    function playPreferredAudio(audioUrl, fallbackText) {
-      stopWordPlayback();
+    function isGasHostedAudioUrl(url) {
+      const value = String(url || '').trim();
+      if (!value) return false;
+      return /[?&]api=audio\.(data|stream)/i.test(value);
+    }
 
-      const resolvedUrl = String(audioUrl || '').trim();
-      if (!resolvedUrl) {
-        speakTargetText(fallbackText);
-        return;
+    function buildGasAudioDataUrl(url) {
+      const value = String(url || '').trim();
+      if (!value) return '';
+      if (/[?&]api=audio\.data/i.test(value)) return value;
+      if (/[?&]api=audio\.stream/i.test(value)) {
+        return value.replace(/api=audio\.stream/i, 'api=audio.data');
+      }
+      return value;
+    }
+
+    function resolvePlayableAudioUrl(audioUrl) {
+      const normalizedUrl = String(audioUrl || '').trim();
+      if (!normalizedUrl) return Promise.resolve('');
+      if (normalizedUrl.indexOf('data:') === 0) return Promise.resolve(normalizedUrl);
+      if (!isGasHostedAudioUrl(normalizedUrl)) return Promise.resolve(normalizedUrl);
+
+      if (gameAudioDataCache.has(normalizedUrl)) {
+        return Promise.resolve(gameAudioDataCache.get(normalizedUrl));
       }
 
+      if (gameAudioPendingCache.has(normalizedUrl)) {
+        return gameAudioPendingCache.get(normalizedUrl);
+      }
+
+      const request = fetch(buildGasAudioDataUrl(normalizedUrl))
+        .then(response => response.json())
+        .then(payload => {
+          const dataUrl = payload && payload.success && payload.dataUrl
+            ? String(payload.dataUrl).trim()
+            : '';
+          if (dataUrl) {
+            gameAudioDataCache.set(normalizedUrl, dataUrl);
+          }
+          return dataUrl;
+        })
+        .catch(error => {
+          console.error('Failed loading hosted audio', error);
+          return '';
+        })
+        .finally(() => {
+          gameAudioPendingCache.delete(normalizedUrl);
+        });
+
+      gameAudioPendingCache.set(normalizedUrl, request);
+      return request;
+    }
+
+    function playAudioSrc(src, fallbackText) {
       const audio = currentGameAudio;
       audio.onended = () => {
         try {
@@ -2753,7 +2805,7 @@
         speakTargetText(fallbackText);
       };
 
-      audio.src = resolvedUrl;
+      audio.src = src;
       audio.load();
 
       const playResult = audio.play();
@@ -2766,6 +2818,31 @@
           speakTargetText(fallbackText);
         });
       }
+    }
+
+    function playPreferredAudio(audioUrl, fallbackText) {
+      stopWordPlayback();
+
+      const resolvedUrl = String(audioUrl || '').trim();
+      if (!resolvedUrl) {
+        speakTargetText(fallbackText);
+        return;
+      }
+
+      if (isGasHostedAudioUrl(resolvedUrl)) {
+        resolvePlayableAudioUrl(resolvedUrl)
+          .then(dataUrl => {
+            if (dataUrl) {
+              playAudioSrc(dataUrl, fallbackText);
+            } else {
+              speakTargetText(fallbackText);
+            }
+          })
+          .catch(() => speakTargetText(fallbackText));
+        return;
+      }
+
+      playAudioSrc(resolvedUrl, fallbackText);
     }
 
     function playTargetAudio() {
@@ -3103,12 +3180,117 @@
       return refreshSpeechMicState(true);
     }
 
+    function normalizeSpeechText(value) {
+      return String(value || '')
+        .toLowerCase()
+        .trim()
+        .replace(/[.,!?;:'"]/g, '')
+        .replace(/\s+/g, ' ');
+    }
+
+    function levenshteinDistance(left, right) {
+      if (left === right) return 0;
+      if (!left.length) return right.length;
+      if (!right.length) return left.length;
+
+      const matrix = [];
+      for (let i = 0; i <= right.length; i++) matrix[i] = [i];
+      for (let j = 0; j <= left.length; j++) matrix[0][j] = j;
+
+      for (let i = 1; i <= right.length; i++) {
+        for (let j = 1; j <= left.length; j++) {
+          const cost = right.charAt(i - 1) === left.charAt(j - 1) ? 0 : 1;
+          matrix[i][j] = Math.min(
+            matrix[i - 1][j] + 1,
+            matrix[i][j - 1] + 1,
+            matrix[i - 1][j - 1] + cost
+          );
+        }
+      }
+
+      return matrix[right.length][left.length];
+    }
+
+    function getSpeechDistanceThreshold(wordLength) {
+      if (wordLength <= 3) return 1;
+      if (wordLength <= 6) return 2;
+      return 3;
+    }
+
+    function speechWordsLooselyMatch(transcript, target) {
+      const cleanTarget = normalizeSpeechText(target);
+      const cleanTranscript = normalizeSpeechText(transcript);
+
+      if (!cleanTarget) return false;
+      if (!cleanTranscript) return false;
+      if (cleanTranscript === cleanTarget) return true;
+      if (cleanTranscript.includes(cleanTarget)) return true;
+
+      const targetWords = cleanTarget.split(' ').filter(Boolean);
+      const heardWords = cleanTranscript.split(' ').filter(Boolean);
+
+      if (targetWords.length === 1) {
+        const targetWord = targetWords[0];
+        const threshold = getSpeechDistanceThreshold(targetWord.length);
+
+        for (let i = 0; i < heardWords.length; i++) {
+          const heardWord = heardWords[i];
+          if (levenshteinDistance(heardWord, targetWord) <= threshold) return true;
+
+          if (targetWord.length >= 4 && heardWord.length >= 3) {
+            const sharedPrefix = Math.min(targetWord.length, heardWord.length, targetWord.length - 1);
+            if (sharedPrefix >= 3 && targetWord.slice(0, sharedPrefix) === heardWord.slice(0, sharedPrefix)) {
+              return true;
+            }
+          }
+        }
+      } else {
+        let matchedWords = 0;
+        targetWords.forEach(targetWord => {
+          const threshold = getSpeechDistanceThreshold(targetWord.length);
+          const found = heardWords.some(heardWord => levenshteinDistance(heardWord, targetWord) <= threshold);
+          if (found) matchedWords += 1;
+        });
+
+        if (matchedWords / targetWords.length >= 0.6) return true;
+      }
+
+      const compactTarget = cleanTarget.replace(/\s+/g, '');
+      const compactTranscript = cleanTranscript.replace(/\s+/g, '');
+      const maxLength = Math.max(compactTarget.length, compactTranscript.length, 1);
+      const distance = levenshteinDistance(compactTranscript, compactTarget);
+      const similarity = 1 - (distance / maxLength);
+
+      return similarity >= 0.62;
+    }
+
+    function pickSpeechMatchTranscript(resultEvent, target) {
+      const result = resultEvent.results && resultEvent.results[0];
+      if (!result) return '';
+
+      const alternatives = [];
+      for (let i = 0; i < result.length; i++) {
+        const transcript = String(result[i].transcript || '').trim();
+        if (transcript) alternatives.push(transcript);
+      }
+
+      for (let i = 0; i < alternatives.length; i++) {
+        if (speechWordsLooselyMatch(alternatives[i], target)) {
+          return alternatives[i];
+        }
+      }
+
+      return alternatives[0] || '';
+    }
+
     function initSpeechRecognition() {
       if (typeof SpeechRecognition === "undefined") return null;
 
       const rec = new SpeechRecognition();
       rec.continuous = false;
       rec.lang = 'en-US';
+      rec.interimResults = false;
+      rec.maxAlternatives = 5;
 
       rec.onstart = () => {
         if (isQuestionLocked) {
@@ -3139,9 +3321,7 @@
           target = gameQuestions[currentQuestionIndex].en.toLowerCase().trim();
         }
 
-        const transcript = String(event.results[0][0].transcript || '').trim();
-        const cleanResult = transcript.toLowerCase().trim().replace(/[.,!?]/g, "");
-        const cleanTarget = target.replace(/[.,!?]/g, "");
+        const transcript = pickSpeechMatchTranscript(event, target);
 
         if (!transcript) {
           updateSpeechStatus("⚠️ Mình nghe được âm thanh nhưng chưa nhận ra từ nào. Thử đọc lại nhé!", "text-orange-600");
@@ -3149,9 +3329,9 @@
           return;
         }
 
-        if (cleanResult.includes(cleanTarget) || cleanTarget.includes(cleanResult) || cleanResult === cleanTarget) {
+        if (speechWordsLooselyMatch(transcript, target)) {
           isQuestionLocked = true;
-          updateSpeechStatus(`🎉 Mình nghe được "${transcript}" và bé phát âm rất chuẩn!`, "text-green-600");
+          updateSpeechStatus(`🎉 Mình nghe được "${transcript}" — bé phát âm tốt lắm!`, "text-green-600");
           handleSuccessAction(document.getElementById('speech-en'), getGameSuccessText());
 
           currentGameScore += 100;
@@ -3165,7 +3345,7 @@
 
           advanceGameQuestion(renderSpeechQuestion, 2000);
         } else {
-          updateSpeechStatus(`👂 Mình nghe được "${transcript}", nhưng chưa khớp với từ mẫu. Thử lại nhé!`, "text-orange-600");
+          updateSpeechStatus(`👂 Mình nghe "${transcript}", gần đúng rồi — thử đọc rõ hơn một chút nhé!`, "text-orange-600");
           handleErrorAction(document.getElementById('speech-en'));
         }
       };
