@@ -718,8 +718,7 @@
                   <div class="text-left">
                     <p id="speech-mic-title" class="text-amber-900 font-black text-lg sm:text-xl">Cần quyền micro để
                       chơi game phát âm</p>
-                    <p id="speech-mic-detail" class="text-amber-800 text-sm sm:text-base font-semibold">Bấm Cấp quyền
-                      micro để trình duyệt cho phép dùng micro. Sau đó đọc to để kiểm tra xem máy có nghe được không.
+                    <p id="speech-mic-detail" class="text-amber-800 text-sm sm:text-base font-semibold">Bấm Cấp quyền micro để ghi âm giọng nói trên máy (không cần internet).
                     </p>
                   </div>
                   <button id="btn-enable-mic" onclick="requestPronunciationMicrophoneAccess()"
@@ -732,7 +731,7 @@
               <!-- Feedback Status -->
               <div id="speech-status" role="status" aria-live="polite"
                 class="px-4 py-5 sm:py-6 bg-gradient-to-r from-green-100 via-emerald-50 to-green-100 text-green-800 text-center font-black text-lg sm:text-xl md:text-2xl border-t border-green-100 relative z-20 shadow-inner">
-                Lắng nghe thật kỹ — bấm Ghi âm, đọc to, rồi bấm Dừng! 👂
+                Lắng nghe mẫu, bấm Ghi âm, đọc to từ tiếng Anh, rồi bấm Dừng! 👂
               </div>
             </div>
           </section>
@@ -1712,49 +1711,23 @@
     let allUnitsData = [];
     let fixedKindergartenSidebarUnit = null;
     let fixedKindergartenSidebarUnitPromise = null;
-    let speechRecognitionActive = false;
-    let speechRecognitionHadResponse = false;
+    let localRecordingActive = false;
     let speechMicrophoneReady = false;
     let speechMicrophonePermission = 'unknown';
-    let speechRecognitionAvailable = false;
-    let speechCollectedAlternatives = [];
-    let speechMicWarmStream = null;
+    let localMediaRecorder = null;
+    let localRecordingStream = null;
+    let localRecordingChunks = [];
+    let localRecordingSkipEvaluate = false;
     let speechRecordingWatchdog = null;
-    let speechMicSessionActive = false;
-    let speechEvaluateOnEnd = false;
     let speechRecordingCooldown = false;
-    let speechNetworkRetryCount = 0;
-    let speechNetworkRetryTimer = null;
     const SPEECH_MAX_RECORD_MS = 15000;
-    const SPEECH_RESTART_COOLDOWN_MS = 500;
-    const SPEECH_NETWORK_MAX_RETRIES = 2;
+    const SPEECH_RESTART_COOLDOWN_MS = 400;
+    const LOCAL_VOICE_MIN_DURATION_SEC = 0.3;
+    const LOCAL_VOICE_RMS_THRESHOLD = 0.012;
+    const LOCAL_VOICE_FRAME_RATIO = 0.1;
 
-    function isSafariBrowser() {
-      const ua = String(navigator.userAgent || '');
-      const isAppleVendor = String(navigator.vendor || '').indexOf('Apple') > -1;
-      const isChromeBasedOnApple = /CriOS|FxiOS|EdgiOS|Chrome|Chromium/i.test(ua);
-      return (isAppleVendor && !isChromeBasedOnApple)
-        || (/Safari/i.test(ua) && !/Chrome|Chromium|CriOS|Edg|OPR/i.test(ua));
-    }
-
-    function isInstalledPwa() {
-      return window.matchMedia('(display-mode: standalone)').matches
-        || window.navigator.standalone === true;
-    }
-
-    function isSpeechRecognitionUsable() {
-      const SpeechRecognitionCtor = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if (typeof SpeechRecognitionCtor === 'undefined') return false;
-      if (isSafariBrowser() && isInstalledPwa()) return false;
-      return true;
-    }
-
-    function getSafariSpeechHint() {
-      if (!isSafariBrowser()) return '';
-      if (isInstalledPwa()) {
-        return 'Safari khi cài lên màn hình chính không hỗ trợ nhận diện giọng nói. Hãy mở bằng Safari bình thường hoặc dùng Chrome.';
-      }
-      return 'Trên Safari: vào Cài đặt hệ thống → Quyền riêng tư → Nhận dạng giọng nói, bật cho Safari. Nên dùng Chrome/Edge nếu vẫn lỗi.';
+    function isLocalRecordingSupported() {
+      return !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && window.MediaRecorder);
     }
 
     const GAME_SUCCESS_MESSAGES = [
@@ -2762,7 +2735,7 @@
     }
 
     function stopWordPlayback() {
-      stopSpeechRecording(true);
+      stopLocalRecording(true);
       if (currentGameAudio) {
         currentGameAudio.pause();
         try {
@@ -2994,32 +2967,22 @@
     function startPronunciationGame() {
       if (!ensureLevelSelected()) return;
       currentGameType = 'pronunciation';
-      speechRecognitionActive = false;
-      speechRecognitionHadResponse = false;
+      localRecordingActive = false;
       speechMicrophoneReady = false;
       speechMicrophonePermission = 'unknown';
-      speechMicSessionActive = false;
       speechRecordingCooldown = false;
-      speechEvaluateOnEnd = false;
-      releaseSpeechMicStream();
-      if (recognition) {
-        try { recognition.abort(); } catch (error) { }
-        recognition = null;
-      }
+      releaseLocalRecordingStream();
       setPronunciationLoadingState(true);
-      // 1. Sử dụng hàm switchView (đã hướng dẫn ở trên) để ẩn hết các màn hình khác
       switchView('pronunciation-game-view');
 
-      if (speechRecognitionAvailable) {
+      if (isLocalRecordingSupported()) {
         updateSpeechMicPanel('granted');
       } else {
         updateSpeechMicPanel('unsupported');
       }
 
-      // 3. Hiển thị trạng thái đang tải dữ liệu (tùy chọn: bạn có thể tạo 1 div loading riêng trong Game 3)
       updateSpeechStatus("Đang chuẩn bị câu hỏi...", "text-blue-500 animate-pulse");
 
-      // 4. Gọi dữ liệu từ Google Sheets
       fetchGameDataset('pronunciation', 'getPronunciationData', currentUnitSlug, currentLevelKey).then(async function (questions) {
         if (!questions || questions.length === 0) {
           alert("Unit này chưa có dữ liệu cho Game phát âm!");
@@ -3037,11 +3000,7 @@
 
         try {
           await refreshSpeechMicState(true);
-          speechMicrophoneReady = true;
-          speechMicrophonePermission = 'granted';
-          updateSpeechMicPanel('granted');
         } catch (error) {
-          speechMicSessionActive = false;
           speechMicrophoneReady = false;
           updateSpeechMicPanel('prompt', '⚠️ Không mở được micro. Hãy cấp quyền rồi thử lại.');
         }
@@ -3056,11 +3015,7 @@
         backToMenu();
         return;
       }
-      stopSpeechRecording(true);
-      if (recognition) {
-        try { recognition.abort(); } catch (error) { }
-        recognition = null;
-      }
+      stopLocalRecording(true);
       setPronunciationLoadingState(false);
       const q = gameQuestions[currentQuestionIndex];
       preloadQuestionAssets(q);
@@ -3076,7 +3031,7 @@
       document.getElementById('speech-vi').innerText = q.vi;
       document.getElementById('speech-progress').innerText = `${currentQuestionIndex + 1}/${gameQuestions.length}`;
 
-      updateSpeechStatus("Bấm Ghi âm → đọc to → bấm Dừng.", "text-blue-700");
+      updateSpeechStatus("🔊 Bấm Nghe → Ghi âm → đọc to từ tiếng Anh → Dừng.", "text-blue-700");
 
       scheduleQuestionPreload(gameQuestions[currentQuestionIndex + 1]);
     }
@@ -3090,10 +3045,6 @@
         showGameSummary();
       }
     }
-    let recognition;
-    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-    speechRecognitionAvailable = isSpeechRecognitionUsable();
-
     function getSpeechMicPanelElements() {
       return {
         panel: document.getElementById('speech-mic-panel'),
@@ -3132,7 +3083,7 @@
       panel.classList.remove('hidden');
 
       let titleText = 'Cần quyền micro để chơi game phát âm';
-      let detailValue = detailText || 'Bấm Cấp quyền micro để trình duyệt cho phép dùng micro. Sau đó đọc to để kiểm tra xem máy có nghe được không.';
+      let detailValue = detailText || 'Bấm Cấp quyền micro để ghi âm trên máy (hoạt động offline, không cần server).';
       let buttonText = 'Cấp quyền micro';
       let buttonDisabled = false;
 
@@ -3142,7 +3093,7 @@
         buttonText = 'Mở quyền micro';
       } else if (state === 'unsupported') {
         titleText = 'Trình duyệt chưa hỗ trợ game phát âm';
-        detailValue = detailText || 'Hãy mở game bằng Chrome hoặc Edge trên máy có micro để kiểm tra phát âm.';
+        detailValue = detailText || 'Trình duyệt này chưa hỗ trợ ghi âm. Hãy dùng Chrome, Safari hoặc Edge phiên bản mới.';
         buttonText = 'Không hỗ trợ';
         buttonDisabled = true;
       } else if (state === 'checking') {
@@ -3161,11 +3112,11 @@
     }
 
     async function refreshSpeechMicState(requestAccess) {
-      if (!speechRecognitionAvailable) {
+      if (!isLocalRecordingSupported()) {
         speechMicrophoneReady = false;
         speechMicrophonePermission = 'unsupported';
-        updateSpeechMicPanel('unsupported', getSafariSpeechHint() || undefined);
-        updateSpeechStatus(getSafariSpeechHint() || 'Trình duyệt này chưa hỗ trợ game phát âm. Hãy dùng Chrome hoặc Edge.', 'text-red-600');
+        updateSpeechMicPanel('unsupported');
+        updateSpeechStatus('Trình duyệt này chưa hỗ trợ ghi âm. Hãy dùng Chrome, Safari hoặc Edge.', 'text-red-600');
         return false;
       }
 
@@ -3179,7 +3130,7 @@
 
       if (speechMicrophoneReady) {
         updateSpeechMicPanel('granted');
-        updateSpeechStatus('✅ Micro sẵn sàng. Bấm Ghi âm → đọc to → bấm Dừng.', 'text-green-600');
+        updateSpeechStatus('✅ Micro sẵn sàng. Bấm Nghe → Ghi âm → đọc to → Dừng.', 'text-green-600');
         return true;
       }
 
@@ -3197,7 +3148,7 @@
 
           if (speechMicrophoneReady) {
             updateSpeechMicPanel('granted');
-            updateSpeechStatus('✅ Micro sẵn sàng. Bấm Ghi âm → đọc to → bấm Dừng.', 'text-green-600');
+            updateSpeechStatus('✅ Micro sẵn sàng. Bấm Nghe → Ghi âm → đọc to → Dừng.', 'text-green-600');
             return true;
           }
           speechMicrophonePermission = speechMicrophonePermission || 'prompt';
@@ -3218,7 +3169,7 @@
         speechMicrophoneReady = true;
         speechMicrophonePermission = 'granted';
         updateSpeechMicPanel('granted');
-        updateSpeechStatus('✅ Micro sẵn sàng. Bấm Ghi âm → đọc to → bấm Dừng.', 'text-green-600');
+        updateSpeechStatus('✅ Micro sẵn sàng. Bấm Nghe → Ghi âm → đọc to → Dừng.', 'text-green-600');
         return true;
       } catch (error) {
         speechMicrophoneReady = false;
@@ -3243,101 +3194,6 @@
       return refreshSpeechMicState(true);
     }
 
-    function normalizeSpeechText(value) {
-      return String(value || '')
-        .toLowerCase()
-        .trim()
-        .replace(/[.,!?;:'"]/g, '')
-        .replace(/\s+/g, ' ');
-    }
-
-    function levenshteinDistance(left, right) {
-      if (left === right) return 0;
-      if (!left.length) return right.length;
-      if (!right.length) return left.length;
-
-      const matrix = [];
-      for (let i = 0; i <= right.length; i++) matrix[i] = [i];
-      for (let j = 0; j <= left.length; j++) matrix[0][j] = j;
-
-      for (let i = 1; i <= right.length; i++) {
-        for (let j = 1; j <= left.length; j++) {
-          const cost = right.charAt(i - 1) === left.charAt(j - 1) ? 0 : 1;
-          matrix[i][j] = Math.min(
-            matrix[i - 1][j] + 1,
-            matrix[i][j - 1] + 1,
-            matrix[i - 1][j - 1] + cost
-          );
-        }
-      }
-
-      return matrix[right.length][left.length];
-    }
-
-    function getSpeechDistanceThreshold(wordLength) {
-      if (wordLength <= 4) return 1;
-      return 1;
-    }
-
-    function singleSpeechWordMatch(heardWord, targetWord) {
-      if (!heardWord || !targetWord) return false;
-      if (heardWord === targetWord) return true;
-
-      const distance = levenshteinDistance(heardWord, targetWord);
-      if (distance > getSpeechDistanceThreshold(targetWord.length)) return false;
-
-      if (heardWord.length < targetWord.length) return false;
-
-      if (heardWord.length > targetWord.length) {
-        return heardWord.indexOf(targetWord) === 0 && distance <= 1;
-      }
-
-      return distance <= getSpeechDistanceThreshold(targetWord.length);
-    }
-
-    function speechWordsLooselyMatch(transcript, target) {
-      const cleanTarget = normalizeSpeechText(target);
-      const cleanTranscript = normalizeSpeechText(transcript);
-
-      if (!cleanTarget) return false;
-      if (!cleanTranscript) return false;
-      if (cleanTranscript === cleanTarget) return true;
-
-      const targetWords = cleanTarget.split(' ').filter(Boolean);
-      const heardWords = cleanTranscript.split(' ').filter(Boolean);
-
-      if (targetWords.length === 1) {
-        const targetWord = targetWords[0];
-        if (cleanTranscript.includes(cleanTarget)) return true;
-
-        for (let i = 0; i < heardWords.length; i++) {
-          if (singleSpeechWordMatch(heardWords[i], targetWord)) return true;
-        }
-
-        return false;
-      }
-
-      if (cleanTranscript.includes(cleanTarget)) return true;
-
-      let matchedWords = 0;
-      targetWords.forEach(targetWord => {
-        const found = heardWords.some(heardWord => singleSpeechWordMatch(heardWord, targetWord));
-        if (found) matchedWords += 1;
-      });
-
-      if (matchedWords / targetWords.length >= 0.75) return true;
-
-      const compactTarget = cleanTarget.replace(/\s+/g, '');
-      const compactTranscript = cleanTranscript.replace(/\s+/g, '');
-      if (compactTranscript.length < compactTarget.length) return false;
-
-      const maxLength = Math.max(compactTarget.length, compactTranscript.length, 1);
-      const distance = levenshteinDistance(compactTranscript, compactTarget);
-      const similarity = 1 - (distance / maxLength);
-
-      return similarity >= 0.82;
-    }
-
     function updateRecordButton(isRecording) {
       const btnRecord = document.getElementById('btn-record');
       if (!btnRecord) return;
@@ -3353,13 +3209,6 @@
       }
     }
 
-    function clearSpeechNetworkRetryTimer() {
-      if (speechNetworkRetryTimer) {
-        clearTimeout(speechNetworkRetryTimer);
-        speechNetworkRetryTimer = null;
-      }
-    }
-
     function clearSpeechRecordingWatchdog() {
       if (speechRecordingWatchdog) {
         clearTimeout(speechRecordingWatchdog);
@@ -3367,38 +3216,13 @@
       }
     }
 
-    function releaseSpeechMicStream() {
-      if (speechMicWarmStream && typeof speechMicWarmStream.getTracks === 'function') {
-        speechMicWarmStream.getTracks().forEach(track => track.stop());
+    function releaseLocalRecordingStream() {
+      if (localRecordingStream && typeof localRecordingStream.getTracks === 'function') {
+        localRecordingStream.getTracks().forEach(track => track.stop());
       }
-      speechMicWarmStream = null;
-    }
-
-    function releaseSpeechMicSession() {
-      speechMicSessionActive = false;
-      speechEvaluateOnEnd = false;
-      speechNetworkRetryCount = 0;
-      clearSpeechNetworkRetryTimer();
-      releaseSpeechMicStream();
-    }
-
-    function isSpeechMicStreamLive() {
-      if (!speechMicWarmStream || typeof speechMicWarmStream.getTracks !== 'function') return false;
-      return speechMicWarmStream.getTracks().some(track => track.readyState === 'live');
-    }
-
-    async function ensureSpeechMicStream() {
-      if (isSpeechMicStreamLive()) return true;
-
-      releaseSpeechMicStream();
-      speechMicWarmStream = await navigator.mediaDevices.getUserMedia({
-        audio: {
-          echoCancellation: true,
-          noiseSuppression: true,
-          autoGainControl: true
-        }
-      });
-      return true;
+      localRecordingStream = null;
+      localMediaRecorder = null;
+      localRecordingChunks = [];
     }
 
     function scheduleSpeechRecordingCooldown() {
@@ -3408,101 +3232,96 @@
       }, SPEECH_RESTART_COOLDOWN_MS);
     }
 
-    function resetSpeechRecordingState() {
-      speechRecognitionActive = false;
-      speechCollectedAlternatives = [];
-      speechEvaluateOnEnd = false;
+    function resetLocalRecordingState() {
+      localRecordingActive = false;
       clearSpeechRecordingWatchdog();
       updateRecordButton(false);
     }
 
-    function stopSpeechRecording(silentAbort) {
-      clearSpeechRecordingWatchdog();
+    function getLocalRecorderMimeType() {
+      const candidates = [
+        'audio/webm;codecs=opus',
+        'audio/webm',
+        'audio/mp4',
+        'audio/ogg;codecs=opus',
+        ''
+      ];
+      for (let i = 0; i < candidates.length; i++) {
+        const mime = candidates[i];
+        if (!mime || (window.MediaRecorder && MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(mime))) {
+          return mime || undefined;
+        }
+      }
+      return undefined;
+    }
 
-      if (recognition && speechRecognitionActive) {
-        if (silentAbort) {
-          speechEvaluateOnEnd = false;
-          speechCollectedAlternatives = [];
-          speechRecognitionHadResponse = false;
-          try {
-            recognition.abort();
-          } catch (error) {
-          }
-          recognition = null;
-          resetSpeechRecordingState();
-          scheduleSpeechRecordingCooldown();
-          return;
+    async function analyzeRecordingForVoice(blob) {
+      if (!blob || !blob.size) {
+        return { hasVoice: false, durationSec: 0, voiceRatio: 0 };
+      }
+
+      try {
+        const arrayBuffer = await blob.arrayBuffer();
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) {
+          return { hasVoice: blob.size > 2000, durationSec: 1, voiceRatio: 0.5, fallback: true };
         }
 
-        speechEvaluateOnEnd = true;
+        const audioContext = new AudioCtx();
+        let audioBuffer;
         try {
-          recognition.stop();
-        } catch (error) {
-          speechEvaluateOnEnd = false;
-          recognition = null;
-          resetSpeechRecordingState();
-          scheduleSpeechRecordingCooldown();
+          audioBuffer = await audioContext.decodeAudioData(arrayBuffer.slice(0));
+        } finally {
+          if (audioContext && audioContext.state !== 'closed') {
+            await audioContext.close();
+          }
         }
-        return;
-      }
 
-      speechEvaluateOnEnd = false;
-      resetSpeechRecordingState();
-    }
-
-    function getCurrentSpeechTarget() {
-      if (gameQuestions && gameQuestions[currentQuestionIndex] && gameQuestions[currentQuestionIndex].en) {
-        return String(gameQuestions[currentQuestionIndex].en).trim();
-      }
-      return '';
-    }
-
-    function collectSpeechAlternatives(event) {
-      const collected = [];
-      const results = event && event.results;
-      if (!results) return collected;
-
-      const acceptInterim = isSafariBrowser();
-
-      for (let i = 0; i < results.length; i++) {
-        if (!acceptInterim && !results[i].isFinal) continue;
-        for (let j = 0; j < results[i].length; j++) {
-          const transcript = String(results[i][j].transcript || '').trim();
-          if (transcript) collected.push(transcript);
+        if (!audioBuffer || !audioBuffer.length) {
+          return { hasVoice: false, durationSec: 0, voiceRatio: 0 };
         }
+
+        const channelData = audioBuffer.getChannelData(0);
+        const sampleRate = audioBuffer.sampleRate || 44100;
+        const frameSize = Math.max(512, Math.floor(sampleRate * 0.02));
+        const durationSec = audioBuffer.duration || (channelData.length / sampleRate);
+        let voiceFrames = 0;
+        let totalFrames = 0;
+
+        for (let i = 0; i + frameSize <= channelData.length; i += frameSize) {
+          let sumSquares = 0;
+          for (let j = 0; j < frameSize; j++) {
+            const sample = channelData[i + j];
+            sumSquares += sample * sample;
+          }
+          const rms = Math.sqrt(sumSquares / frameSize);
+          totalFrames += 1;
+          if (rms >= LOCAL_VOICE_RMS_THRESHOLD) voiceFrames += 1;
+        }
+
+        const voiceRatio = totalFrames > 0 ? voiceFrames / totalFrames : 0;
+        const hasVoice = durationSec >= LOCAL_VOICE_MIN_DURATION_SEC
+          && voiceRatio >= LOCAL_VOICE_FRAME_RATIO;
+
+        return { hasVoice, durationSec, voiceRatio };
+      } catch (error) {
+        console.warn('Voice analysis fallback:', error);
+        return { hasVoice: blob.size > 3000, durationSec: 0.5, voiceRatio: 0.2, fallback: true };
       }
-
-      return collected;
-    }
-
-    function mergeSpeechAlternatives(existing, incoming) {
-      return [...new Set((existing || []).concat(incoming || []).filter(Boolean))];
     }
 
     function getSpeechSuccessMessage() {
       return '🎉 Bé phát âm rất tốt! ' + getGameSuccessText();
     }
 
-    function evaluateSpeechTranscripts(alternatives, target) {
-      const uniqueAlternatives = [...new Set((alternatives || []).filter(Boolean))];
-      let matched = false;
+    async function evaluateLocalRecording(blob) {
+      updateSpeechStatus('🔍 Đang kiểm tra giọng nói trên máy...', 'text-blue-700');
 
-      for (let i = 0; i < uniqueAlternatives.length; i++) {
-        if (speechWordsLooselyMatch(uniqueAlternatives[i], target)) {
-          matched = true;
-          break;
-        }
-      }
+      const analysis = await analyzeRecordingForVoice(blob);
 
-      if (!uniqueAlternatives.length) {
-        updateSpeechStatus("⚠️ Chưa nghe rõ từ nào. Bấm Ghi âm, đọc to rồi bấm Dừng nhé!", "text-orange-600");
-        handleErrorAction(document.getElementById('speech-en'));
-        return;
-      }
-
-      if (matched) {
+      if (analysis.hasVoice) {
         isQuestionLocked = true;
-        updateSpeechStatus(getSpeechSuccessMessage(), "text-green-600");
+        updateSpeechStatus(getSpeechSuccessMessage(), 'text-green-600');
         handleSuccessAction(document.getElementById('speech-en'), getGameSuccessText());
 
         currentGameScore += 100;
@@ -3518,227 +3337,154 @@
         return;
       }
 
-      const displayTarget = String(target || '').trim() || 'từ mẫu';
-      updateSpeechStatus(`👂 Chưa khớp với "${displayTarget}" — thử đọc lại nhé!`, "text-orange-600");
+      if (analysis.durationSec > 0 && analysis.durationSec < LOCAL_VOICE_MIN_DURATION_SEC) {
+        updateSpeechStatus('⚠️ Ghi quá ngắn! Bấm Ghi âm, đọc to rõ ràng rồi bấm Dừng nhé.', 'text-orange-600');
+      } else {
+        updateSpeechStatus('⚠️ Chưa nghe rõ giọng nói. Đọc to hơn gần micro rồi thử lại nhé!', 'text-orange-600');
+      }
       handleErrorAction(document.getElementById('speech-en'));
     }
 
-    function initSpeechRecognition() {
-      if (typeof SpeechRecognition === "undefined") return null;
+    async function startLocalRecording() {
+      if (isQuestionLocked) return;
+      if (speechRecordingCooldown) {
+        updateSpeechStatus('⏳ Micro đang reset... thử lại sau 1 giây.', 'text-blue-700');
+        return;
+      }
+      if (!isLocalRecordingSupported()) {
+        updateSpeechMicPanel('unsupported');
+        updateSpeechStatus('Trình duyệt chưa hỗ trợ ghi âm. Hãy dùng Chrome, Safari hoặc Edge.', 'text-red-600');
+        return;
+      }
+      if (localRecordingActive) return;
 
-      const rec = new SpeechRecognition();
-      rec.continuous = isSafariBrowser();
-      rec.lang = 'en-US';
-      rec.interimResults = isSafariBrowser();
-      rec.maxAlternatives = isSafariBrowser() ? 1 : 5;
-
-      rec.onstart = () => {
-        if (isQuestionLocked) {
-          rec.stop();
+      if (!speechMicrophoneReady) {
+        const micReady = await refreshSpeechMicState(true);
+        if (!micReady) {
+          updateSpeechStatus('⚠️ Cần cấp quyền micro trước khi ghi âm.', 'text-orange-600');
           return;
         }
-        speechRecognitionActive = true;
-        speechRecognitionHadResponse = false;
-        speechCollectedAlternatives = [];
-        speechNetworkRetryCount = 0;
-        clearSpeechNetworkRetryTimer();
-        updateRecordButton(true);
-        updateSpeechStatus("🔴 Đang ghi âm... Đọc to rồi bấm Dừng.", "text-red-600");
-      };
+      }
 
-      rec.onspeechstart = () => {
-        if (isQuestionLocked) return;
-        updateSpeechStatus("👂 Đã nghe thấy giọng nói — cứ đọc hết rồi bấm Dừng.", "text-blue-700");
-      };
+      releaseLocalRecordingStream();
 
-      rec.onresult = (event) => {
-        if (isQuestionLocked) return;
+      try {
+        localRecordingStream = await navigator.mediaDevices.getUserMedia({
+          audio: {
+            echoCancellation: true,
+            noiseSuppression: true,
+            autoGainControl: true
+          }
+        });
 
-        const collected = collectSpeechAlternatives(event);
-        if (collected.length) {
-          speechRecognitionHadResponse = true;
-          speechCollectedAlternatives = isSafariBrowser()
-            ? mergeSpeechAlternatives(speechCollectedAlternatives, collected)
-            : collected;
-        }
-      };
+        localRecordingChunks = [];
+        const mimeType = getLocalRecorderMimeType();
+        localMediaRecorder = mimeType
+          ? new MediaRecorder(localRecordingStream, { mimeType })
+          : new MediaRecorder(localRecordingStream);
 
-      rec.onnomatch = () => {
-        if (isQuestionLocked) return;
-        speechRecognitionHadResponse = true;
-      };
+        localMediaRecorder.ondataavailable = (event) => {
+          if (event.data && event.data.size > 0) {
+            localRecordingChunks.push(event.data);
+          }
+        };
 
-      rec.onerror = (event) => {
-        if (event.error === 'aborted') return;
+        localMediaRecorder.onstart = () => {
+          localRecordingActive = true;
+          updateRecordButton(true);
+          updateSpeechStatus('🔴 Đang ghi âm... Đọc to rồi bấm Dừng.', 'text-red-600');
+        };
 
-        if (event.error === 'network') {
-          speechEvaluateOnEnd = false;
-          recognition = null;
-          resetSpeechRecordingState();
-          releaseSpeechMicStream();
+        localMediaRecorder.onerror = (event) => {
+          console.error('MediaRecorder error:', event.error || event);
+          resetLocalRecordingState();
+          releaseLocalRecordingStream();
+          scheduleSpeechRecordingCooldown();
+          updateSpeechStatus('⚠️ Lỗi ghi âm. Bấm Ghi âm thử lại nhé!', 'text-orange-600');
+        };
 
-          if (speechNetworkRetryCount < SPEECH_NETWORK_MAX_RETRIES) {
-            speechNetworkRetryCount += 1;
-            updateSpeechStatus(
-              `⏳ Máy chủ nhận dạng giọng nói tạm lỗi — tự thử lại lần ${speechNetworkRetryCount}/${SPEECH_NETWORK_MAX_RETRIES}...`,
-              "text-blue-700"
-            );
-            clearSpeechNetworkRetryTimer();
-            speechNetworkRetryTimer = setTimeout(() => {
-              speechNetworkRetryTimer = null;
-              startRecording({ autoRetry: true });
-            }, 2000);
+        localMediaRecorder.onstop = async () => {
+          const chunks = localRecordingChunks.slice();
+          const recorderMime = (localMediaRecorder && localMediaRecorder.mimeType) || mimeType || 'audio/webm';
+          const skipEvaluate = localRecordingSkipEvaluate;
+          localRecordingSkipEvaluate = false;
+          resetLocalRecordingState();
+          releaseLocalRecordingStream();
+          scheduleSpeechRecordingCooldown();
+
+          if (isQuestionLocked || skipEvaluate) return;
+
+          const blob = chunks.length ? new Blob(chunks, { type: recorderMime }) : null;
+          if (!blob || !blob.size) {
+            updateSpeechStatus('⚠️ Chưa ghi được âm thanh. Bấm Ghi âm, đọc to rồi bấm Dừng nhé!', 'text-orange-600');
+            handleErrorAction(document.getElementById('speech-en'));
             return;
           }
 
-          speechNetworkRetryCount = 0;
-          scheduleSpeechRecordingCooldown();
-          updateSpeechStatus(
-            "⚠️ Dịch vụ nhận dạng giọng nói của trình duyệt không phản hồi (không phải lỗi Wi‑Fi). Thử Chrome/Edge, tắt VPN hoặc adblock rồi bấm Ghi âm lại.",
-            "text-orange-600"
-          );
-          console.error("Speech recognition error: network (browser STT server unreachable)");
-          return;
-        }
+          await evaluateLocalRecording(blob);
+        };
 
-        speechRecognitionHadResponse = true;
-        speechEvaluateOnEnd = false;
-        recognition = null;
-        resetSpeechRecordingState();
+        localMediaRecorder.start(250);
+        clearSpeechRecordingWatchdog();
+        speechRecordingWatchdog = setTimeout(() => {
+          if (!localRecordingActive) return;
+          updateSpeechStatus('⏱ Quá 15 giây — tự dừng ghi âm. Bấm Ghi âm thử lại nhé!', 'text-orange-600');
+          stopLocalRecording(false);
+        }, SPEECH_MAX_RECORD_MS);
+      } catch (error) {
+        releaseLocalRecordingStream();
+        resetLocalRecordingState();
         scheduleSpeechRecordingCooldown();
-
-        const isMicrophoneGranted = speechMicrophoneReady || speechMicrophonePermission === 'granted';
-
-        if (event.error === 'service-not-allowed') {
-          updateSpeechMicPanel('granted');
-          updateSpeechStatus("⚠️ Trình duyệt chưa bật nhận diện giọng nói. Hãy dùng Chrome hoặc Edge.", "text-red-600");
-        } else if (event.error === 'not-allowed') {
-          if (isSafariBrowser()) {
-            updateSpeechStatus("⚠️ Safari chưa cho phép Nhận dạng giọng nói. " + getSafariSpeechHint(), "text-red-600");
-          } else if (isMicrophoneGranted) {
-            updateSpeechMicPanel('granted');
-            updateSpeechStatus("⚠️ Micro đã cấp quyền nhưng chưa ghi được. Bấm Ghi âm thử lại.", "text-red-600");
-          } else {
-            speechMicrophoneReady = false;
-            speechMicrophonePermission = 'denied';
-            updateSpeechMicPanel('denied');
-            updateSpeechStatus("⚠️ Hãy cho phép quyền micro rồi bấm Ghi âm lại nhé!", "text-red-600");
-          }
-        } else if (event.error === 'audio-capture') {
+        if (error && (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError')) {
           speechMicrophoneReady = false;
-          speechMicrophonePermission = 'prompt';
-          updateSpeechMicPanel('prompt', '⚠️ Micro chưa sẵn sàng. Hãy kiểm tra micro rồi thử lại.');
-          updateSpeechStatus("⚠️ Không nhận được tín hiệu từ micro. Kiểm tra thiết bị rồi thử lại.", "text-red-600");
-        } else if (event.error === 'no-speech') {
-          if (isSafariBrowser()) {
-            speechRecognitionHadResponse = false;
-          }
-          updateSpeechStatus("⚠️ Chưa nghe thấy tiếng nào. Bấm Ghi âm, đọc to rồi bấm Dừng.", "text-orange-600");
+          speechMicrophonePermission = 'denied';
+          updateSpeechMicPanel('denied');
+          updateSpeechStatus('⚠️ Hãy cho phép quyền micro rồi bấm Ghi âm lại nhé!', 'text-red-600');
         } else {
-          updateSpeechStatus("⚠️ Không ghi âm được (" + event.error + "). Bấm Ghi âm thử lại nhé!", "text-gray-600");
+          console.error('Local recording start error:', error);
+          updateSpeechStatus('Không thể bật ghi âm. Hãy thử lại sau.', 'text-red-600');
         }
-        console.error("Speech recognition error:", event.error);
-      };
+      }
+    }
 
-      rec.onend = () => {
-        const target = getCurrentSpeechTarget();
-        const alternatives = speechCollectedAlternatives.slice();
-        const hadResponse = speechRecognitionHadResponse;
-        const shouldEvaluate = speechEvaluateOnEnd;
-        speechEvaluateOnEnd = false;
-        recognition = null;
-        resetSpeechRecordingState();
+    function stopLocalRecording(silentAbort) {
+      clearSpeechRecordingWatchdog();
+
+      if (!localMediaRecorder || !localRecordingActive) {
+        resetLocalRecordingState();
+        if (silentAbort) releaseLocalRecordingStream();
+        return;
+      }
+
+      if (silentAbort) {
+        localRecordingSkipEvaluate = true;
+      }
+
+      try {
+        if (localMediaRecorder.state === 'recording') {
+          localMediaRecorder.stop();
+        } else {
+          localRecordingSkipEvaluate = false;
+          resetLocalRecordingState();
+          releaseLocalRecordingStream();
+        }
+      } catch (error) {
+        localRecordingSkipEvaluate = false;
+        resetLocalRecordingState();
+        releaseLocalRecordingStream();
         scheduleSpeechRecordingCooldown();
-
-        if (isQuestionLocked || !shouldEvaluate) {
-          if (!shouldEvaluate && hadResponse && alternatives.length) {
-            evaluateSpeechTranscripts(alternatives, target);
-          }
-          return;
-        }
-
-        if (!hadResponse) {
-          const safariHint = isSafariBrowser() ? (' ' + getSafariSpeechHint()) : '';
-          updateSpeechStatus("⚠️ Chưa nghe thấy gì. Bấm Ghi âm, đọc to rồi bấm Dừng nhé!" + safariHint, "text-orange-600");
-          return;
-        }
-
-        evaluateSpeechTranscripts(alternatives, target);
-      };
-
-      return rec;
+      }
     }
 
     async function toggleRecording() {
       if (isQuestionLocked) return;
 
-      if (speechRecognitionActive) {
-        stopSpeechRecording();
+      if (localRecordingActive) {
+        stopLocalRecording(false);
         return;
       }
 
-      await startRecording();
-    }
-
-    async function startRecording(options) {
-      const autoRetry = Boolean(options && options.autoRetry);
-
-      if (isQuestionLocked) return;
-      if (!autoRetry && speechRecordingCooldown) {
-        updateSpeechStatus("⏳ Micro đang reset... thử lại sau 1 giây.", "text-blue-700");
-        return;
-      }
-      if (!speechRecognitionAvailable) {
-        updateSpeechMicPanel('unsupported');
-        updateSpeechStatus("Trình duyệt của bạn chưa hỗ trợ nhận diện giọng nói. Hãy dùng Google Chrome hoặc Edge.", "text-red-600");
-        return;
-      }
-
-      if (speechRecognitionActive) return;
-
-      if (!speechMicrophoneReady) {
-        const micReady = await refreshSpeechMicState(true);
-        if (!micReady) {
-          updateSpeechStatus("⚠️ Cần cấp quyền micro trước khi ghi âm.", "text-orange-600");
-          return;
-        }
-      }
-
-      // STT cần quyền micro riêng — không giữ getUserMedia mở khi recognition.start()
-      releaseSpeechMicStream();
-
-      try {
-        if (recognition) {
-          try { recognition.abort(); } catch (e) { }
-          recognition = null;
-        }
-        recognition = initSpeechRecognition();
-        if (!recognition) {
-          return;
-        }
-
-        speechRecognitionHadResponse = false;
-        speechCollectedAlternatives = [];
-        speechEvaluateOnEnd = false;
-        recognition.start();
-
-        clearSpeechRecordingWatchdog();
-        speechRecordingWatchdog = setTimeout(() => {
-          if (!speechRecognitionActive) return;
-          updateSpeechStatus("⏱ Quá 15 giây — tự dừng ghi âm. Bấm Ghi âm thử lại nhé!", "text-orange-600");
-          stopSpeechRecording();
-        }, SPEECH_MAX_RECORD_MS);
-      } catch (error) {
-        recognition = null;
-        resetSpeechRecordingState();
-        scheduleSpeechRecordingCooldown();
-        if (error && error.name === 'InvalidStateError') {
-          updateSpeechStatus("⚠️ Micro đang bận. Đợi 1 giây rồi bấm Ghi âm lại.", "text-orange-600");
-          return;
-        }
-        console.error("Speech recognition start error:", error);
-        updateSpeechStatus("Không thể bật ghi âm. Hãy thử lại sau.", "text-red-600");
-      }
+      await startLocalRecording();
     }
 
     function listenSample() {
@@ -3774,11 +3520,8 @@
       closeSidebarDrawer();
 
       if (viewId !== 'pronunciation-game-view') {
-        releaseSpeechMicSession();
-        if (recognition) {
-          try { recognition.abort(); } catch (error) { }
-          recognition = null;
-        }
+        stopLocalRecording(true);
+        releaseLocalRecordingStream();
       }
 
       // Danh sách tất cả các ID màn hình lớn
@@ -3825,11 +3568,8 @@
     function logout() {
       stopWordPlayback();
       stopCatchGameLoop();
-      releaseSpeechMicSession();
-      if (recognition) {
-        try { recognition.abort(); } catch (error) { }
-        recognition = null;
-      }
+      stopLocalRecording(true);
+      releaseLocalRecordingStream();
 
       window.top.location.replace('choosegame.html');
     }
