@@ -967,6 +967,7 @@
     }
 
     const GAME_DATA_CACHE_VERSION = 'class-week-game-v2';
+    const GAME_DATA_CACHE_TTL_MS = 6 * 60 * 60 * 1000;
 
     function buildLevelScopedCacheKey(gameKey, slug, levelKey) {
       const normalizedLevelKey = normalizeLevelKeyClient(levelKey) || 'all';
@@ -998,6 +999,44 @@
       });
     }
 
+    function readLocalGameCache(localKey) {
+      try {
+        const localStr = localStorage.getItem(localKey);
+        if (!localStr) return null;
+
+        const parsed = JSON.parse(localStr);
+        if (Array.isArray(parsed.data)) {
+          return { data: parsed.data, t: parsed.t || 0 };
+        }
+        if (Array.isArray(parsed)) {
+          return { data: parsed, t: 0 };
+        }
+      } catch (error) {
+      }
+
+      return null;
+    }
+
+    function readCombinedLocalGameCache(cacheKey, gameKey) {
+      const direct = readLocalGameCache('WW_CACHE_' + gameKey + '_' + cacheKey);
+      if (direct && direct.data.length) return direct;
+
+      try {
+        const allStr = localStorage.getItem('WW_CACHE_ALL_' + cacheKey);
+        if (!allStr) return null;
+
+        const allParsed = JSON.parse(allStr);
+        const nested = allParsed[gameKey]
+          || (allParsed.data && allParsed.data[gameKey]);
+        if (Array.isArray(nested) && nested.length) {
+          return { data: nested, t: allParsed.t || 0 };
+        }
+      } catch (error) {
+      }
+
+      return null;
+    }
+
     function fetchGameDataset(gameKey, methodName, slug, levelKey) {
       if (!slug) return Promise.resolve([]);
 
@@ -1009,7 +1048,39 @@
         return pendingBucket[cacheKey];
       }
 
+      if (Array.isArray(cacheBucket[cacheKey])) {
+        return Promise.resolve(cacheBucket[cacheKey]);
+      }
+
       const localKey = 'WW_CACHE_' + gameKey + '_' + cacheKey;
+      const localCached = readCombinedLocalGameCache(cacheKey, gameKey);
+
+      if (localCached && localCached.data.length) {
+        cacheBucket[cacheKey] = localCached.data;
+        const isFresh = (Date.now() - localCached.t) < GAME_DATA_CACHE_TTL_MS;
+
+        if (isFresh) {
+          return Promise.resolve(localCached.data);
+        }
+
+        const refreshPromise = runServerMethod(methodName, slug, levelKey)
+          .then(data => {
+            const normalized = Array.isArray(data) ? data : [];
+            cacheBucket[cacheKey] = normalized;
+            try { localStorage.setItem(localKey, JSON.stringify({ t: Date.now(), data: normalized })); } catch (e) { }
+            return normalized;
+          })
+          .catch(error => {
+            console.error(`Failed refreshing ${methodName} for ${slug}`, error);
+            return localCached.data;
+          })
+          .finally(() => {
+            delete pendingBucket[cacheKey];
+          });
+
+        pendingBucket[cacheKey] = refreshPromise;
+        return Promise.resolve(localCached.data);
+      }
 
       const request = runServerMethod(methodName, slug, levelKey)
         .then(data => {
@@ -1047,16 +1118,24 @@
 
       const cacheKey = buildLevelScopedCacheKey('all', unitSlug, levelKey);
       const localKey = 'WW_CACHE_ALL_' + cacheKey;
-      // Tránh fetch nếu đang fetch hoặc đã fetch
-      if (gameDataCache['listenchoose'][cacheKey]) return;
+
+      if (Array.isArray(gameDataCache['listenchoose'][cacheKey])
+        && gameDataCache['listenchoose'][cacheKey].length) {
+        return;
+      }
 
       try {
         const localData = localStorage.getItem(localKey);
         if (localData) {
           const parsed = JSON.parse(localData);
+          const isFresh = parsed.t && (Date.now() - parsed.t) < GAME_DATA_CACHE_TTL_MS;
           gameDataCache['listenchoose'][cacheKey] = parsed.listenchoose || [];
           gameDataCache['lookchoose'][cacheKey] = parsed.lookchoose || [];
           gameDataCache['pronunciation'][cacheKey] = parsed.pronunciation || [];
+
+          if (isFresh && gameDataCache['listenchoose'][cacheKey].length) {
+            return;
+          }
         }
       } catch (e) { }
 
@@ -1068,16 +1147,23 @@
               gameDataCache['listenchoose'][cacheKey] = response.data.listenchoose || [];
               gameDataCache['lookchoose'][cacheKey] = response.data.lookchoose || [];
               gameDataCache['pronunciation'][cacheKey] = response.data.pronunciation || [];
-              try { localStorage.setItem(localKey, JSON.stringify(response.data)); } catch (e) { }
+              try {
+                localStorage.setItem(localKey, JSON.stringify({
+                  t: Date.now(),
+                  listenchoose: response.data.listenchoose || [],
+                  lookchoose: response.data.lookchoose || [],
+                  pronunciation: response.data.pronunciation || []
+                }));
+              } catch (e) { }
             }
           })
           .catch(console.error);
       };
 
       if ('requestIdleCallback' in window) {
-        requestIdleCallback(warm, { timeout: 1200 });
+        requestIdleCallback(warm, { timeout: 3000 });
       } else {
-        setTimeout(warm, 300);
+        setTimeout(warm, 800);
       }
     }
 
@@ -1091,14 +1177,39 @@
     function preloadAudio(url) {
       if (!url) return;
       const normalizedUrl = String(url).trim();
-      if (!normalizedUrl) return;
-      if (normalizedUrl.indexOf('data:') === 0) return;
+      if (!normalizedUrl || normalizedUrl.indexOf('data:') === 0) return;
 
-      const link = document.createElement('link');
-      link.rel = 'preload';
-      link.as = 'audio';
-      link.href = normalizedUrl;
-      document.head.appendChild(link);
+      const warmAudio = new Audio();
+      warmAudio.preload = 'auto';
+      warmAudio.playsInline = true;
+      warmAudio.src = normalizedUrl;
+      warmAudio.load();
+    }
+
+    function preloadQuestionAssets(question) {
+      if (!question) return;
+
+      const urls = [];
+      if (Array.isArray(question.options)) {
+        urls.push(...question.options);
+      }
+      if (question.image) {
+        urls.push(question.image);
+      }
+
+      [...new Set(urls)].forEach(preloadImage);
+      preloadAudio(question.audio);
+    }
+
+    function preloadCatchGameAssets(questions) {
+      const items = Array.isArray(questions) ? questions : [];
+      const imageUrls = [...new Set(items
+        .map(question => question && question.image)
+        .filter(Boolean))];
+
+      if (imageUrls.length === 0) return Promise.resolve();
+
+      return Promise.all(imageUrls.map(preloadImageAsync)).then(() => undefined);
     }
 
     function preloadImageAsync(url) {
@@ -1126,37 +1237,6 @@
           image.decode().then(finish).catch(finish);
         }
       });
-    }
-
-    function preloadCatchGameAssets(questions) {
-      const items = Array.isArray(questions) ? questions : [];
-      const imageUrls = [...new Set(items
-        .map(question => question && question.image)
-        .filter(Boolean))];
-      const audioUrls = [...new Set(items
-        .map(question => question && question.audio)
-        .filter(Boolean))];
-
-      audioUrls.forEach(preloadAudio);
-
-      if (imageUrls.length === 0) return Promise.resolve();
-
-      return Promise.all(imageUrls.map(preloadImageAsync)).then(() => undefined);
-    }
-
-    function preloadQuestionAssets(question) {
-      if (!question) return;
-
-      const urls = [];
-      if (Array.isArray(question.options)) {
-        urls.push(...question.options);
-      }
-      if (question.image) {
-        urls.push(question.image);
-      }
-
-      [...new Set(urls)].forEach(preloadImage);
-      preloadAudio(question.audio);
     }
 
     function scheduleQuestionPreload(question) {
