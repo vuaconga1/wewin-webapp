@@ -1,0 +1,6 @@
+bin/
+obj/
+wwwroot/media/
+*.user
+.env
+.env.*

@@ -1,0 +1,4 @@
+# Thay api.yourdomain.com bằng domain thật (DuckDNS, Cloudflare, tên miền riêng)
+api.yourdomain.com {
+    reverse_proxy 127.0.0.1:8080
+}
