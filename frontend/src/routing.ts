@@ -1,5 +1,6 @@
 import type { Unit } from './api'
 import type { GameType } from './legacyUi'
+import { publicPath } from './publicPath'
 
 export type AppRoute = 'chooseGame' | 'chooseWeek' | 'chooseLevel' | 'home' | 'play' | 'summary'
 
@@ -13,12 +14,12 @@ export type AppLocationState = {
 }
 
 const PAGE_PATHS: Record<AppRoute, string> = {
-  chooseGame: '/choosegame.html',
-  chooseWeek: '/chooseweek.html',
-  chooseLevel: '/chooselevel.html',
-  home: '/home.html',
-  play: '/home.html',
-  summary: '/home.html',
+  chooseGame: publicPath('/choosegame.html'),
+  chooseWeek: publicPath('/chooseweek.html'),
+  chooseLevel: publicPath('/chooselevel.html'),
+  home: publicPath('/home.html'),
+  play: publicPath('/home.html'),
+  summary: publicPath('/home.html'),
 }
 
 export function parseAppLocation(): AppLocationState {
