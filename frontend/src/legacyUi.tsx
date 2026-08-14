@@ -53,6 +53,7 @@ export function LegacyHomeLayout({
   unitSlug,
   unitName,
   unitParam,
+  fixedKindergartenSidebarUnits,
   onBack,
   onChooseSidebarItem,
   children,
@@ -65,6 +66,7 @@ export function LegacyHomeLayout({
   unitSlug: string
   unitName: string
   unitParam: string
+  fixedKindergartenSidebarUnits?: SidebarUnitItem[]
   onBack: () => void
   onChooseSidebarItem: (item: SidebarUnitItem) => void
   children: React.ReactNode
@@ -79,7 +81,8 @@ export function LegacyHomeLayout({
     week,
     unitSlug,
     unitParam,
-  }), [units, game, level, week, unitSlug, unitParam])
+    fixedKindergartenSidebarUnits,
+  }), [units, game, level, week, unitSlug, unitParam, fixedKindergartenSidebarUnits])
 
   return (
     <div className="home-shell bg-pink-50 text-gray-900 flex flex-col min-h-screen">
