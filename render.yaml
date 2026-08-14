@@ -1,0 +1,26 @@
+# Render Blueprint — WeWIN API (.NET + Neon)
+# Dashboard: New > Blueprint > connect repo, or create Web Service manually (see DEPLOY_RENDER.md)
+
+services:
+  - type: web
+    name: wewin-api
+    runtime: docker
+    plan: free
+    region: singapore
+    branch: tin
+    rootDir: backend
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/health
+    envVars:
+      - key: ASPNETCORE_ENVIRONMENT
+        value: Production
+      - key: ASPNETCORE_URLS
+        value: http://+:8080
+      - key: Cors__Origins__0
+        value: https://vuaconga1.github.io
+      - key: AzureSpeech__Region
+        value: southeastasia
+      - key: ConnectionStrings__DefaultConnection
+        sync: false
+      - key: AzureSpeech__Key
+        sync: false
