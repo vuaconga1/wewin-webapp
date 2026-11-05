@@ -16,8 +16,16 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("Frontend", policy =>
     {
-        var origins = builder.Configuration.GetSection("Cors:Origins").Get<string[]>()
-            ?? ["http://localhost:5173", "https://localhost:5173"];
+        var configured = builder.Configuration.GetSection("Cors:Origins").Get<string[]>() ?? [];
+        var extra = (builder.Configuration["CORS_ORIGINS"] ?? string.Empty)
+            .Split(',', StringSplitOptions.RemoveEmptyEntries);
+        // Browsers send Origin without a trailing slash; a stray "/" or space in env vars silently breaks CORS.
+        var origins = configured.Concat(extra)
+            .Select(x => x.Trim().TrimEnd('/'))
+            .Where(x => x.Length > 0)
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .ToArray();
+        if (origins.Length == 0) origins = ["http://localhost:5173", "https://localhost:5173"];
         policy.WithOrigins(origins)
             .AllowAnyHeader()
             .AllowAnyMethod();
