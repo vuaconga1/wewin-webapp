@@ -134,7 +134,9 @@ export function LegacyHomeLayout({
 
           <nav id="sidebar-menu" className="sidebar-menu flex-1 space-y-2 overflow-y-auto pr-1">
             {units.length === 0 && (
-              <div className="p-4 text-center text-green-500 text-xs italic animate-pulse">Đang tải danh sách...</div>
+              <div className="p-4 text-center text-amber-600 text-xs font-semibold">
+                Chưa có unit trong database. Cần import file GameWewin.xlsx qua API.
+              </div>
             )}
             {sidebarItems.length === 0 && units.length > 0 && (
               <div className="p-4 text-center text-amber-600 text-xs font-semibold">Chưa có unit phù hợp với cấp bậc này.</div>

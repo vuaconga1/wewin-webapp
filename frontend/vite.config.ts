@@ -7,6 +7,14 @@ export default defineConfig({
   plugins: [react()],
   server: {
     port: 5173,
+    proxy: {
+      // Bypass production CORS when viewing Neon data from local Vite
+      '/api': {
+        target: 'https://wewin-webapp-1.onrender.com',
+        changeOrigin: true,
+        secure: true,
+      },
+    },
   },
   build: {
     rollupOptions: {
