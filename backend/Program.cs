@@ -10,6 +10,7 @@ using WeWin.Api.Features.Media;
 using WeWin.Api.Features.Speech;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Configuration.AddJsonFile("appsettings.Local.json", optional: true, reloadOnChange: true);
 
 builder.Services.AddOpenApi();
 builder.Services.AddCors(options =>
@@ -34,8 +35,9 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddDbContext<WeWinDbContext>(options =>
 {
-    var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
-        ?? "Host=localhost;Port=5432;Database=wewin;Username=postgres;Password=postgres";
+    var connectionString = NormalizePostgresConnectionString(
+        builder.Configuration.GetConnectionString("DefaultConnection")
+        ?? "Host=localhost;Port=5432;Database=wewin;Username=postgres;Password=postgres");
     options.UseNpgsql(connectionString);
 });
 
@@ -65,7 +67,16 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<WeWinDbContext>();
-    await db.Database.MigrateAsync();
+    try
+    {
+        await db.Database.MigrateAsync();
+    }
+    catch (Exception ex)
+    {
+        var logger = scope.ServiceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("Startup");
+        logger.LogCritical(ex, "Database migrate failed. Check ConnectionStrings__DefaultConnection format (use Host=...; not postgresql://).");
+        throw;
+    }
 }
 
 if (app.Environment.IsDevelopment())
@@ -112,3 +123,39 @@ app.MapMediaEndpoints();
 app.MapSpeechEndpoints();
 
 app.Run();
+
+static string NormalizePostgresConnectionString(string raw)
+{
+    var value = (raw ?? string.Empty).Trim().Trim('"').Trim('\'');
+    if (value.Length == 0)
+    {
+        return "Host=localhost;Port=5432;Database=wewin;Username=postgres;Password=postgres";
+    }
+
+    // Neon dashboard copies postgresql://... — convert to Npgsql key=value form.
+    if (value.StartsWith("postgres://", StringComparison.OrdinalIgnoreCase)
+        || value.StartsWith("postgresql://", StringComparison.OrdinalIgnoreCase))
+    {
+        var uri = new Uri(value);
+        var userInfo = uri.UserInfo.Split(':', 2);
+        var user = Uri.UnescapeDataString(userInfo.ElementAtOrDefault(0) ?? string.Empty);
+        var password = Uri.UnescapeDataString(userInfo.ElementAtOrDefault(1) ?? string.Empty);
+        var database = uri.AbsolutePath.Trim('/');
+        return string.Join(';',
+            $"Host={uri.Host}",
+            $"Port={(uri.Port > 0 ? uri.Port : 5432)}",
+            $"Database={database}",
+            $"Username={user}",
+            $"Password={password}",
+            "SSL Mode=Require",
+            "Trust Server Certificate=true");
+    }
+
+    // Strip libpq-only options that can break Npgsql on some hosts.
+    return value
+        .Replace("channel_binding=require", string.Empty, StringComparison.OrdinalIgnoreCase)
+        .Replace("Channel Binding=Require", string.Empty, StringComparison.OrdinalIgnoreCase)
+        .Replace(";;", ";")
+        .Trim(';')
+        .Trim();
+}
